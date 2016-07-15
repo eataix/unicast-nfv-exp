@@ -29,6 +29,7 @@ public class NetworkGenerator {
     return new Network(servers, links);
   }
   
+  // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
   public Network generateRealNetworks(int n, String networkIndexPostFix) {
 	  ArrayList<Server> servers = new ArrayList<Server>();
 	  ArrayList<Link> links = new ArrayList<Link>();
