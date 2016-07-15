@@ -98,5 +98,10 @@ public class Network {
       s.addVM(nfv);
     }
   }
+  
+  @Override
+  public String toString() { 
+	    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
+  }
 }
 

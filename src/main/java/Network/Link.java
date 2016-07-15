@@ -45,6 +45,11 @@ public class Link {
   void wipe() {
     b = 0;
   }
+  
+  @Override
+  public String toString() {
+	    return this.s1.getId() + "<->" + this.s2.getId();
+  }
 
   public int getResidualBandwidth() {
     return B - b;

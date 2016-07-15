@@ -155,6 +155,11 @@ public class Server {
       return Parameters.NFVreq[serviceType];
     }
   }
+  
+  @Override
+  public String toString() { 
+	    return "Server: " + this.id + " Capacity: " + this.capacity;
+  }
 
 /*
 	private class VM { //service rate must exceed arrival rate.
