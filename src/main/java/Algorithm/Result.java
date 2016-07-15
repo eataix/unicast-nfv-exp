@@ -6,7 +6,7 @@ import Network.Server;
 
 public class Result {
   private ArrayList<Server> path;
-  private final double pathCost;
+  public final double pathCost;
   public boolean admit;
 
   Result(ArrayList<Server> p, double pc, boolean a) {

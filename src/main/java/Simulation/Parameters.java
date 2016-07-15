@@ -14,9 +14,9 @@ public class Parameters { //singleton class
   static final double serverRatio = 0.2;
   public static int L; //maximum chain length
 
-  static void importParameters(String filename) {
+  public static void importParameters(String filename) {
     try {
-      String filepath = "src/resources/Parameters/";
+      String filepath = "src/main/resources/Parameters/";
       FileReader fr = new FileReader(filepath + filename);
       BufferedReader br = new BufferedReader(fr);
       String[] nfvreq = br.readLine().split(" ");

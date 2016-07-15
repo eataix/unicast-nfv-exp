@@ -1,18 +1,16 @@
-package tests.java;
-
 import java.util.ArrayList;
 
-import main.java.Algorithm.Algorithm;
-import main.java.Algorithm.Result;
-import main.java.Network.Link;
-import main.java.Network.Network;
-import main.java.Network.Request;
-import main.java.Network.Server;
-import main.java.NetworkGenerator.NetworkValueSetter;
-import main.java.Simulation.Parameters;
+import Algorithm.Algorithm;
+import Algorithm.Result;
+import Network.Link;
+import Network.Network;
+import Network.Request;
+import Network.Server;
+import NetworkGenerator.NetworkValueSetter;
+import Simulation.Parameters;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class AlgorithmTest {
 

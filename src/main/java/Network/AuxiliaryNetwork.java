@@ -81,7 +81,7 @@ public class AuxiliaryNetwork extends Network {
     return clones;
   }
 
-  private ArrayList<Link> getLinkPath(Server s1, Server s2) {
+  public ArrayList<Link> getLinkPath(Server s1, Server s2) {
     if (s1.getId() == s2.getId()) {
       return new ArrayList<Link>();
     }
