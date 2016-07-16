@@ -133,6 +133,6 @@ public class Algorithm {
   }
 
   private boolean admitRequest(double pathCost) {
-    return pathCost < auxiliaryNetwork.size() * Parameters.threshold + 1;
+    return pathCost < auxiliaryNetwork.size() * Parameters.threshold - 1;
   }
 }

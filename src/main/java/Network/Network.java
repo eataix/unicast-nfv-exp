@@ -82,8 +82,9 @@ public class Network {
   }
 
   public void wipeLinks() {//this returns all servers and bandwidth to 0% utilization
-    for (Link l : links)
+    for (Link l : links) {
       l.wipe();
+    }
   }
 
   void allocateBandwidthOnPath(ArrayList<Link> path, int b) {
@@ -98,10 +99,10 @@ public class Network {
       s.addVM(nfv);
     }
   }
-  
+
   @Override
-  public String toString() { 
-	    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
+  public String toString() {
+    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
   }
 }
 
