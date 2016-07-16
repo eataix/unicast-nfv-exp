@@ -1,0 +1,48 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+version = '0.1'
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testCompile 'junit:junit:4.12'
+}
+
+idea {
+  project {
+    languageLevel = '1.7'
+  }
+  module {
+    downloadJavadoc = true
+    downloadSources = true
+  }
+}
+
+allprojects {
+  gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+      options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked" << "-Xlint:all"
+    }
+  }
+}
+
+mainClassName = 'Simulation.Simulation'
+
+task fatJar(type: Jar) {
+  manifest {
+    attributes 'Main-Class': mainClassName
+  }
+  baseName = project.name + '-all'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  with jar
+}
+
+buildDir = '/tmp/u4700480/sdn'
