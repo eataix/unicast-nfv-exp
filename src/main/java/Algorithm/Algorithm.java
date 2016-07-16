@@ -18,12 +18,15 @@ import Simulation.Parameters;
 
 public class Algorithm {
   private final Network originalNetwork;
-  private AuxiliaryNetwork auxiliaryNetwork;
   private final Request request;
+  private final Parameters parameters;
 
-  public Algorithm(Network n, Request r) {
-    originalNetwork = n;
-    request = r;
+  private AuxiliaryNetwork auxiliaryNetwork;
+
+  public Algorithm(Network originalNetwork, Request request, Parameters parameters) {
+    this.originalNetwork = originalNetwork;
+    this.request = request;
+    this.parameters = parameters;
   }
 
   public Result minOpCostWithoutDelay() {
@@ -33,19 +36,19 @@ public class Algorithm {
       return new Result(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateNetwork(true);
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(cf);
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, cf);
     return new Result(path, finalPathCost);
   }
 
-  public Result maxThroughputWithoutDelay(CostFunction cf) { //s is source, t is sink
-    createAuxiliaryNetwork(cf);
+  public Result maxThroughputWithoutDelay() { //s is source, t is sink
+    createAuxiliaryNetwork(parameters.costFunc);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateNetwork(false);
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(cf);
-    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, cf);
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
+    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
     return new Result(path, finalPathCost, admitRequest(finalPathCost));
   }
 
@@ -71,7 +74,7 @@ public class Algorithm {
   }
 
   private void createAuxiliaryNetwork(CostFunction cf) {
-    auxiliaryNetwork = new NetworkPathFinder().shortestPathsByCost(originalNetwork, request, cf);
+    auxiliaryNetwork = new NetworkPathFinder().shortestPathsByCost(originalNetwork, request, cf, this.parameters);
   }
 
   private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server dst) {
@@ -86,7 +89,7 @@ public class Algorithm {
     return path;
   }
 
-  private ArrayList<Server> shortestPathInAuxiliaryNetwork(CostFunction cf) {
+  private ArrayList<Server> shortestPathInAuxiliaryNetwork() {
     HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
     HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
     HashSet<Server> prevLayer = new HashSet<Server>();
@@ -104,7 +107,7 @@ public class Algorithm {
         Server minPrev = null;
         for (Server prev : prevLayer) {
           Link link = (prev.getId() == curr.getId()) ? new Link(curr) : prev.getLink(curr);
-          double cost = link.getPathCost() + cf.getCost(curr, nfv) + pathCost.get(prev);
+          double cost = link.getPathCost() + parameters.costFunc.getCost(curr, nfv, parameters) + pathCost.get(prev);
           if (cost < minCost) {
             minCost = cost;
             minPrev = prev;
@@ -133,6 +136,6 @@ public class Algorithm {
   }
 
   private boolean admitRequest(double pathCost) {
-    return pathCost < auxiliaryNetwork.size() * Parameters.threshold - 1;
+    return pathCost < auxiliaryNetwork.size() * parameters.threshold - 1;
   }
 }

@@ -11,13 +11,14 @@ import Network.Link;
 import Network.Network;
 import Network.Request;
 import Network.Server;
+import Simulation.Parameters;
 
 public class NetworkPathFinder { //gets shortest path from network to network
 
   /**
    * Use djikstra to get shortest paths by @costFn. New Link takes the minimum bandwidth in shortest path.
    */
-  public AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn) {
+  public AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths = new HashMap<>();
     final double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
@@ -48,8 +49,8 @@ public class NetworkPathFinder { //gets shortest path from network to network
           }
           Double cost = pathCost.get(neighbour);
           cost = (cost == null) ? Double.MAX_VALUE : cost;
-          if (pathCost.get(curr) + costFn.getCost(l, request.bandwidth) < cost) {
-            pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.bandwidth));
+          if (pathCost.get(curr) + costFn.getCost(l, request.bandwidth, parameters) < cost) {
+            pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.bandwidth, parameters));
             prevNode.put(neighbour, curr);
           }
           //add to priority queue using insertion sort
@@ -84,6 +85,6 @@ public class NetworkPathFinder { //gets shortest path from network to network
         pathDelays[src.getId()][dest.getId()] = delay;
       }
     }
-    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request);
+    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request, parameters);
   }
 }

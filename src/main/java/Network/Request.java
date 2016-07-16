@@ -10,11 +10,13 @@ public class Request {
   public final int bandwidth;
   final Server src;
   final Server dst;
+  final Parameters parameters;
 
-  public Request(int b, Server s, Server t) {
+  public Request(int b, Server s, Server t, Parameters parameters) {
     bandwidth = b;
     src = s;
     dst = t;
+    this.parameters = parameters;
     generateServiceChain();
   }
 
@@ -22,7 +24,7 @@ public class Request {
     //make sure all elements are valid nfv ids, and there are no repeats.
     HashSet<Integer> nfvs = new HashSet<>();
     for (int aSc : sc) {
-      if (aSc >= Parameters.L || nfvs.contains(aSc)) {
+      if (aSc >= parameters.L || nfvs.contains(aSc)) {
         return false;
       } else {
         nfvs.add(aSc);
@@ -42,18 +44,19 @@ public class Request {
 
   private void generateServiceChain() {
     //create randomly ordered list of NFVs
-    int[] nfvlist = new int[Parameters.L];
-    for (int i = 0; i < Parameters.L; i++)
+    int[] nfvlist = new int[parameters.L];
+    for (int i = 0; i < parameters.L; i++) {
       nfvlist[i] = i;
+    }
     //fisher-yates shuffle
-    for (int i = 0; i < Parameters.L; i++) {
+    for (int i = 0; i < parameters.L; i++) {
       int temp = nfvlist[i];
-      int index = (int) Math.floor(Math.random() * (Parameters.L - i) + i);
+      int index = (int) Math.floor(Math.random() * (parameters.L - i) + i);
       nfvlist[i] = nfvlist[index];
       nfvlist[index] = temp;
     }
 
-    int l = (int) Math.floor(Math.random() * (Parameters.L - 1) + 1); //ensure there is at least one service in the service chain
+    int l = (int) Math.floor(Math.random() * (parameters.L - 1) + 1); //ensure there is at least one service in the service chain
 
     SC = new int[l];
     System.arraycopy(nfvlist, 0, SC, 0, l);

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import Algorithm.CostFunctions.CostFunction;
+import Simulation.Parameters;
 
 public class AuxiliaryNetwork extends Network {
   private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
@@ -17,9 +18,10 @@ public class AuxiliaryNetwork extends Network {
   private Server dst;
   private final ArrayList<Server> auxServers;
   private final ArrayList<Link> auxLinks;
+  private final Parameters parameters;
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathcosts, double[][] pathdelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r) {
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r, Parameters parameters) {
     super(originalServers, originalLinks);
     pathCosts = pathcosts;
     pathDelays = pathdelays;
@@ -28,6 +30,7 @@ public class AuxiliaryNetwork extends Network {
     auxServers = new ArrayList<Server>();
     auxLinks = new ArrayList<Link>();
     serviceLayers = new ArrayList<HashSet<Server>>();
+    this.parameters = parameters;
   }
 
   public void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
@@ -108,7 +111,7 @@ public class AuxiliaryNetwork extends Network {
     for (int i = 1; i < path.size() - 1; i++) {
       Server cs = clonedServers.get(path.get(i).getId());
       int nfv = request.SC[i - 1];
-      cost += cf.getCost(cs, nfv);
+      cost += cf.getCost(cs, nfv, this.parameters);
       if (!cs.canCreateVM(nfv)) {
         return Double.MAX_VALUE;
       }
@@ -121,7 +124,7 @@ public class AuxiliaryNetwork extends Network {
       Server s2 = path.get(i + 1);
       for (Link l : getLinkPath(s1, s2)) {
         Link cl = clonedLinks.get(l);
-        cost += cf.getCost(cl, request.bandwidth);
+        cost += cf.getCost(cl, request.bandwidth, this.parameters);
         if (!cl.canSupportBandwidth(request.bandwidth)) {//obviously a rejection
           return Double.MAX_VALUE;
         }

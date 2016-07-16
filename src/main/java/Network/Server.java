@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import Simulation.Parameters;
-import Simulation.Simulation;
 
 public class Server {
   private final int id;
+  private final Parameters parameters;
   private int capacity; //some servers have 0 capacity as they are switches
   private final ArrayList<Link> links;
   private HashMap<Integer, VM> NFVs;
@@ -18,20 +18,22 @@ public class Server {
     for (Integer nfv : NFVs.keySet()) {
       newNFVs.put(nfv, new VM(nfv));
     }
-    return new Server(id, capacity, new ArrayList<Link>(), newNFVs);
+    return new Server(id, parameters, capacity, new ArrayList<Link>(), newNFVs);
   }
 
-  private Server(int Id, int c, ArrayList<Link> l, HashMap<Integer, VM> nfvs) {
-    id = Id;
-    capacity = c;
-    links = l;
-    NFVs = nfvs;
+  private Server(int Id, Parameters parameters, int c, ArrayList<Link> l, HashMap<Integer, VM> nfvs) {
+    this.id = Id;
+    this.parameters = parameters;
+    this.capacity = c;
+    this.links = l;
+    this.NFVs = nfvs;
   }
 
-  public Server(int Id) {
+  public Server(int Id, Parameters parameters) {
     id = Id;
     NFVs = new HashMap<Integer, VM>();
     links = new ArrayList<Link>();
+    this.parameters = parameters;
   }
 
   public int getId() {
@@ -59,7 +61,7 @@ public class Server {
   }
 
   public double getUtCost(int nfv) { //Exponential utilization cost for online algorithm
-    return Math.pow(Parameters.a * Simulation.networkSize, (capacity - remainingCapacity() - Parameters.NFVreq[nfv]) / capacity) - 1;
+    return Math.pow(parameters.alpha * parameters.networkSize, (capacity - remainingCapacity() - parameters.NFVreq[nfv]) / capacity) - 1;
   }
 
   public double getWorkLoad(int nfv) {
@@ -68,9 +70,9 @@ public class Server {
 
   public double getOpCost(int nfv) { //operational cost
     if (NFVs.get(nfv) == null) {
-      return Parameters.NFVOpCost[nfv] + Parameters.NFVInitCost[nfv];
+      return parameters.NFVOpCost[nfv] + parameters.NFVInitCost[nfv];
     }
-    return Parameters.NFVOpCost[nfv];
+    return parameters.NFVOpCost[nfv];
   }
 
   public Link getLink(Server s) {//returns link that connects "this" to Server s
@@ -124,7 +126,7 @@ public class Server {
   }
 
   public boolean canCreateVM(int nfv) { //has spare capacity to create enough VMs to handle rate
-    int serviceReq = Parameters.NFVreq[nfv];
+    int serviceReq = parameters.NFVreq[nfv];
     return serviceReq < remainingCapacity();
   }
 
@@ -153,7 +155,7 @@ public class Server {
     }
 
     int resourceAllocated() {
-      return Parameters.NFVreq[serviceType];
+      return parameters.NFVreq[serviceType];
     }
   }
 
@@ -171,7 +173,7 @@ public class Server {
 		public VM(int nfv, int arr){
 			serviceType = nfv;
 			arrivalRate = arr;
-			instances = ceilingIntDivision(arr, Parameters.NFVrate[serviceType]);
+			instances = ceilingIntDivision(arr, parameters.NFVrate[serviceType]);
 		}
 
 		public void createMoreInstances(int arr){ //create enough instances to meet demand of additional arrival rate arr.
@@ -180,14 +182,14 @@ public class Server {
 		}
 
 		public int additionalInstancesRequired(int arr){ //number of additional VMs required to service arrival rate arr.
-			int serviceRate = instances*Parameters.NFVrate[serviceType];
+			int serviceRate = instances*parameters.NFVrate[serviceType];
 			int diff = arrivalRate + arr - serviceRate;
 			if(diff<0) return 0;
 			else	   return ceilingIntDivision(diff, serviceRate);
 		}
 
 		public int resourceAllocated(){
-			return instances*Parameters.NFVreq[serviceType];
+			return instances*parameters.NFVreq[serviceType];
 		}
 
 		public int ceilingIntDivision(int num, int divisor) {

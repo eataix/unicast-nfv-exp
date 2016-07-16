@@ -45,14 +45,14 @@ public class AlgorithmTest {
     l2_3.setOpCost(2);
 
     Network n = new Network(servers, links);
-    NetworkValueSetter nvs = new NetworkValueSetter(n);
+    NetworkValueSetter nvs = new NetworkValueSetter(n, parameters);
     nvs.setConstantLinkCapacity(1000);
     nvs.setConstantServerCapacity(10000, 1);
 
     s1.addVM(0);
     s0.addVM(1);
 
-    Request r = new Request(0, s0, s3);
+    Request r = new Request(0, s0, s3, parameters);
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}

@@ -12,10 +12,12 @@ import Simulation.Parameters;
 public class NetworkValueSetter { //sets the parameters of a given network
   private final Network network;
   private final Random rand;
+  private final Parameters parameters;
 
-  public NetworkValueSetter(Network net) {
-    network = net;
-    rand = new Random();
+  public NetworkValueSetter(Network network, Parameters parameters) {
+    this.network = network;
+    this.parameters = parameters;
+    this.rand = new Random();
   }
 
   public Network getNetwork() {
@@ -24,7 +26,7 @@ public class NetworkValueSetter { //sets the parameters of a given network
 
   public void placeNFVs(
       double nfvProb) { //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
       ArrayList<Server> servers = network.getUnusedServers(nfv);
       for (Server s : servers) {
         if (Math.random() < nfvProb) {
@@ -108,38 +110,38 @@ public class NetworkValueSetter { //sets the parameters of a given network
   }
 
   public void setConstantNFVRequirements(int cap) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVreq[nfv] = cap;
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVreq[nfv] = cap;
     }
   }
 
   public void setNormalNFVRequirements(int mean, int weight) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVreq[nfv] = getNormal(mean, weight);
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVreq[nfv] = getNormal(mean, weight);
     }
   }
 
   public void setRandomNFVRequirements(int low, int high) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVreq[nfv] = getUniform(low, high);
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVreq[nfv] = getUniform(low, high);
     }
   }
 
   public void setConstantNFVServiceRate(int cap) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVrate[nfv] = cap;
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVrate[nfv] = cap;
     }
   }
 
   public void setNormalNFVServiceRate(int mean, int weight) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVrate[nfv] = getNormal(mean, weight);
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVrate[nfv] = getNormal(mean, weight);
     }
   }
 
   public void setRandomNFVServiceRate(int low, int high) {
-    for (int nfv = 0; nfv < Parameters.L; nfv++) {
-      Parameters.NFVrate[nfv] = getUniform(low, high);
+    for (int nfv = 0; nfv < parameters.L; nfv++) {
+      parameters.NFVrate[nfv] = getUniform(low, high);
     }
   }
 

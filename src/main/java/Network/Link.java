@@ -1,7 +1,6 @@
 package Network;
 
 import Simulation.Parameters;
-import Simulation.Simulation;
 
 public class Link {
   private final Server s1;
@@ -89,11 +88,11 @@ public class Link {
     }
   }
 
-  public double getUtCost(double bandwidth) { //TODO
+  public double getUtCost(double bandwidth, Parameters parameters) { //TODO
     if (selfLink()) {
       return 0;
     }
-    return Math.pow(Parameters.b * Simulation.networkSize, (reservedBandwidth + bandwidth) / bandwidthCapacity) - 1;
+    return Math.pow(parameters.beta * parameters.networkSize, (reservedBandwidth + bandwidth) / bandwidthCapacity) - 1;
   }
 
   public double getPathCost() { //to be used in the algorithm section

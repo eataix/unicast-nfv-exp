@@ -9,116 +9,105 @@ import java.util.ArrayList;
 import Network.Link;
 import Network.Network;
 import Network.Server;
+import Simulation.Parameters;
 
 public class NetworkGenerator {
 
-  public Network connectedGraphNetwork(int n) {
+  // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
+  public Network generateRealNetworks(int n, String networkIndexPostFix, Parameters parameters) {
     ArrayList<Server> servers = new ArrayList<Server>();
     ArrayList<Link> links = new ArrayList<Link>();
 
-    //create servers
-    for (int i = 0; i < n; i++) {
-      servers.add(new Server(i));
-      for (int j = 0; j < i; j++) {
-        Server s1 = servers.get(i);
-        Server s2 = servers.get(j);
-        Link l = new Link(s1, s2);
-        links.add(l);
-      }
+    String fileName = null;
+
+    if (networkIndexPostFix.equals("GEANT") || networkIndexPostFix.equals("AS1755") || networkIndexPostFix.equals("AS4755")) {
+      fileName = ".//data//" + networkIndexPostFix + ".txt";
+    } else {
+      fileName = ".//data//" + n + "-25-25" + networkIndexPostFix + ".txt";
     }
+
+    try {
+      File file = new File(fileName);
+      BufferedReader reader = new BufferedReader(new FileReader(file));
+
+      String lineString = null;
+      int readStatus = -1; // 0: reading vertices data; 1: reading edges data
+      int numOfNodeRead = 0;
+      while ((lineString = reader.readLine()) != null) {
+        if (lineString.startsWith("#")) {
+          continue;
+        }
+
+        if (lineString.contains("VERTICES")) {//start to parse vertices data
+          readStatus = 0;
+          continue;
+        } else if (lineString.contains("EDGES")) {
+          readStatus = 1;
+          continue;
+        }
+        if (0 == readStatus) {
+          lineString.trim();
+          String[] attrs = lineString.split(" ");
+
+          int id = Integer.parseInt(attrs[0]);
+          numOfNodeRead++;
+
+          servers.add(new Server(id, parameters));
+        }
+
+        if (1 == readStatus) {
+
+          lineString.trim();
+          String[] attrs = lineString.split(" ");
+
+          int fromNodeId = Integer.parseInt(attrs[0]);
+          int toNodeId = Integer.parseInt(attrs[1]);
+          Server s1 = null;
+          Server s2 = null;
+
+          for (Server server : servers) {
+            if (server.getId() == fromNodeId) {
+              s1 = server;
+            } else if (server.getId() == toNodeId) {
+              s2 = server;
+            }
+          }
+
+          Link l = new Link(s1, s2);
+          links.add(l);
+        }
+      }
+      reader.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     return new Network(servers, links);
   }
 
-  // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
-  public Network generateRealNetworks(int n, String networkIndexPostFix) {
-	  ArrayList<Server> servers = new ArrayList<Server>();
-	  ArrayList<Link> links = new ArrayList<Link>();
-
-	  String fileName = null;
-
-	  if (networkIndexPostFix.equals("GEANT") || networkIndexPostFix.equals("AS1755") || networkIndexPostFix.equals("AS4755"))
-		  fileName = ".//data//" + networkIndexPostFix + ".txt";
-	  else
-		  fileName = ".//data//" + n + "-25-25" + networkIndexPostFix + ".txt";
-
-	  try {
-		  File file = new File(fileName);
-		  BufferedReader reader = new BufferedReader(new FileReader(file));
-
-		  String lineString = null;
-		  int readStatus = -1; // 0: reading vertices data; 1: reading edges data
-		  int numOfNodeRead = 0;
-		  while ((lineString = reader.readLine()) != null){
-			  if (lineString.startsWith("#"))
-				  continue;
-
-			  if (lineString.contains("VERTICES")){//start to parse vertices data
-				  readStatus = 0;
-				  continue;
-			  } else if (lineString.contains("EDGES")){
-				  readStatus = 1;
-				  continue;
-			  }
-			  if (0 == readStatus){
-				  lineString.trim();
-				  String [] attrs = lineString.split(" ");
-
-				  int id = Integer.parseInt(attrs[0]);
-				  numOfNodeRead ++;
-
-				  servers.add(new Server(id));
-			  }
-
-			  if (1 == readStatus) {
-
-				  lineString.trim();
-				  String [] attrs = lineString.split(" ");
-
-				  int fromNodeId = Integer.parseInt(attrs[0]);
-				  int toNodeId = Integer.parseInt(attrs[1]);
-				  Server s1 = null;
-				  Server s2 = null;
-
-				  for (Server server : servers){
-					if (server.getId() == fromNodeId)
-						s1 = server;
-					else if (server.getId() == toNodeId)
-						s2 = server;
-				  }
-
-				  Link l = new Link(s1, s2);
-			      links.add(l);
-			  }
-		  }
-		  reader.close();
-	  } catch (IOException e) {
-		  e.printStackTrace();
-	  }
-
-	  return new Network(servers, links);
-  }
-
-  public Network barabasiAlbertNetwork(int n, int l) { //Barabasi-Albert Model - n is number of nodes. Servers are added one at a time
+  public Network barabasiAlbertNetwork(int n, int l, Parameters parameters) { //Barabasi-Albert Model - n is number of nodes. Servers are added one at a time
     ArrayList<Server> servers = new ArrayList<Server>();
     ArrayList<Link> links = new ArrayList<Link>();
     //create seed network
-    Server s1 = new Server(0);
+    Server s1 = new Server(0, parameters);
     servers.add(s1);
-    Server s2 = new Server(1);
+    Server s2 = new Server(1, parameters);
     servers.add(s2);
     Link li = new Link(s1, s2);
     links.add(li);
     int id = 2;
     //add server, and link server with existing server based on node degree distribution.
     while (id < n) {
-      Server next = new Server(id);
+      Server next = new Server(id, parameters);
       servers.add(next);
-      for (int i = 0; i < l; i++) { //each new server links to l other servers.
+      for (int i = 0; i < l; i++) { //each new server links to L other servers.
         int degrees = (links.size() - next.getDegree()) * 2; // total number of node degrees
         int index = (int) Math.floor(Math.random() * degrees);
         boolean addedLink = false;
         for (Server s : servers) {
-          if (s == next) continue;
+          if (s == next) {
+            continue;
+          }
           index -= s.getDegree();
           if (index <= 0) { //connect to this server and break
             Link link = new Link(next, s);
@@ -138,20 +127,22 @@ public class NetworkGenerator {
     return new Network(servers, links);
   }
 
-  public Network randomGraphNetwork(int n, double k) { //Random Graph Model - n is number of nodes, k is average degree of each node
+  public Network randomGraphNetwork(int n, double k, Parameters parameters) { //Random Graph Model - n is number of nodes, k is average degree of each node
     ArrayList<Server> servers = new ArrayList<Server>();
     ArrayList<Link> links = new ArrayList<Link>();
 
     //create servers
     for (int i = 0; i < n; i++) {
-      servers.add(new Server(i));
+      servers.add(new Server(i, parameters));
     }
     ArrayList<Server> traversed = new ArrayList<Server>();
 
     //create links
     for (Server s1 : servers) {
       for (Server s2 : servers) {
-        if (s1 == s2 || traversed.contains(s1)) continue;
+        if (s1 == s2 || traversed.contains(s1)) {
+          continue;
+        }
         if (Math.random() < k / (n - 1)) {//we create a link between these two servers
           Link l = new Link(s1, s2);
           links.add(l);
@@ -183,17 +174,18 @@ public class NetworkGenerator {
   }
 
   public Network testNetwork() {
+    Parameters parameters = new Parameters.Builder().build();
     //simple diamond shaped graph
     ArrayList<Server> servers = new ArrayList<Server>();
     ArrayList<Link> links = new ArrayList<Link>();
 
-    Server s0 = new Server(0);
+    Server s0 = new Server(0, parameters);
     servers.add(s0);
-    Server s1 = new Server(1);
+    Server s1 = new Server(1, parameters);
     servers.add(s1);
-    Server s2 = new Server(2);
+    Server s2 = new Server(2, parameters);
     servers.add(s2);
-    Server s3 = new Server(3);
+    Server s3 = new Server(3, parameters);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
@@ -214,9 +206,10 @@ public class NetworkGenerator {
   }
 
   // unit tests
-  public static void main(String [] s){
-	  NetworkGenerator netGen = new NetworkGenerator();
-	  Network net = netGen.generateRealNetworks(-1, "GEANT");
-	  System.out.println(net.toString());
+  public static void main(String[] s) {
+    Parameters parameters = new Parameters.Builder().build();
+    NetworkGenerator netGen = new NetworkGenerator();
+    Network net = netGen.generateRealNetworks(-1, "GEANT", parameters);
+    System.out.println(net.toString());
   }
 }
