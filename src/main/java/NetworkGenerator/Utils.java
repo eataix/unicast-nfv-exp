@@ -17,26 +17,58 @@ public class Utils {
   }
 
   /**
-   * @param s source
-   * @param t destination
-   * @param delay maximum delay
-   * @return A path from @s to @t
+   * @param src source
+   * @param dest destination
+   * @param maxDelay maximum maxDelay
+   * @return A shortest path from @src to @dest with delay no greater than @maxDelay
    */
-  static ArrayList<Link> LARAC(Network network, Server s, Server t, LinkCostFunction c, LinkCostFunction d, double delay) {
-    ArrayList<Link> path = new ArrayList<>();
+  static ArrayList<Link> LARAC(Network network, Server src, Server dest, double maxDelay) {
 
-    ReturnVal rvc = Dijkstra(network, s, t, c);
-    if (rvc.delay < delay) {
-      return path;
-    }
-
-    ReturnVal rvd = Dijkstra(network, s, t, d);
-    if (rvd.delay > delay) {
+    // PC is the shortest path on the original cost c
+    ReturnVal pc = Dijkstra(network, src, dest, new LinkCostFunction() {
+      @Override public double getCost(Link l) {
+        return l.getPathCost();
+      }
+    });
+    if (pc == null) {
       return null;
     }
+    if (pc.delay < maxDelay) {
+      return pc.shortestPath;
+    }
+
+    // PC is the shortest path on the delay d
+    ReturnVal pd = Dijkstra(network, src, dest, new LinkCostFunction() {
+      @Override public double getCost(Link l) {
+        return l.getDelay();
+      }
+    });
+    if (pd == null) {
+      return null;
+    }
+    if (pd.delay > maxDelay) {
+      return null;
+    }
+
     while (true) {
-      double lambda = (rvc.cost - rvd.cost) / (rvd.delay - rvc.delay);
-      ReturnVal rvr = Dijkstra(network, s, t, c);
+      final double lambda = (pc.cost - pd.cost) / (pd.delay - pc.delay);
+      ReturnVal pr = Dijkstra(network, src, dest, new LinkCostFunction() {
+        @Override public double getCost(Link l) {
+          return l.getPathCost() + lambda * l.getDelay();
+        }
+      });
+      if (pr == null) {
+        return null;
+      }
+
+      if (pr.cost == pc.cost) {
+        return pd.shortestPath;
+      }
+      if (pr.delay <= maxDelay) {
+        pd = pr;
+      } else {
+        pc = pr;
+      }
     }
   }
 
@@ -94,7 +126,7 @@ public class Utils {
     return new ReturnVal(shortestPath, delay, dist.get(dest));
   }
 
-  static class ReturnVal {
+  private static class ReturnVal {
     ArrayList<Link> shortestPath;
     double delay;
     double cost;
