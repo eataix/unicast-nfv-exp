@@ -31,7 +31,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
       final HashMap<Server, Double> pathCost = new HashMap<Server, Double>(); // cost of path from @src to other servers
       HashMap<Server, Server> prevNode = new HashMap<>();
       pathCost.put(src, 0.0);
-      PriorityQueue<Server> queue = new PriorityQueue<>(0, new Comparator<Server>() {
+      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(), new Comparator<Server>() {
         @Override public int compare(Server s1, Server s2) {
           return pathCost.get(s1).compareTo(pathCost.get(s2));
         }
