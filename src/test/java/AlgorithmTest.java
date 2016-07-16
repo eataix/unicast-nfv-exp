@@ -18,8 +18,8 @@ public class AlgorithmTest {
   public void testMinOpCostWithoutDelay() {
     //simple diamond shaped graph
     Parameters.importParameters("test1.txt");
-    ArrayList<Server> servers = new ArrayList<Server>();
-    ArrayList<Link> links = new ArrayList<Link>();
+    ArrayList<Server> servers = new ArrayList<>();
+    ArrayList<Link> links = new ArrayList<>();
 
     Server s0 = new Server(0);
     servers.add(s0);
@@ -50,7 +50,7 @@ public class AlgorithmTest {
     nvs.setConstantServerCapacity(10000, 1);
 
     s1.addVM(0);
-    s3.addVM(1);
+    s0.addVM(1);
 
     Request r = new Request(0, s0, s3);
     r.setServiceChain(new int[] {0, 1});
@@ -61,10 +61,10 @@ public class AlgorithmTest {
     Algorithm alg = new Algorithm(n, r);
     Result res = alg.minOpCostWithoutDelay();
     ArrayList<Server> path = res.getPath();
-    assertEquals(s0.getId(), path.get(0).getId());
-    assertEquals(s2.getId(), path.get(1).getId());
-    assertEquals(s3.getId(), path.get(2).getId());
-    assertEquals(s3.getId(), path.get(3).getId());
-    System.out.println("Path cost = " + res.pathCost); //should be 22.0
+    assertEquals(0, path.get(0).getId());
+    assertEquals(0, path.get(1).getId());
+    assertEquals(0, path.get(2).getId());
+    assertEquals(3, path.get(3).getId());
+    assertEquals(22, res.pathCost, 0.01);
   }
 }

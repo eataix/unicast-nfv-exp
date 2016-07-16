@@ -11,7 +11,7 @@ public class AuxiliaryNetwork extends Network {
   private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
   private final double[][] pathCosts;
   private final double[][] pathDelays;
-  private final ArrayList<HashSet<Server>> serviceLayers;
+  public final ArrayList<HashSet<Server>> serviceLayers;
   private final Request request;
   private Server src;
   private Server dst;

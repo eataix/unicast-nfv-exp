@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import Algorithm.CostFunctions.CostFunction;
 import Algorithm.CostFunctions.ExpCostFunction;
+import Algorithm.CostFunctions.OpCostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
 import Network.Network;
@@ -26,7 +27,7 @@ public class Algorithm {
   }
 
   public Result minOpCostWithoutDelay() {
-    CostFunction cf = new ExpCostFunction();
+    CostFunction cf = new OpCostFunction();
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result(); //this generates a no-admittance result
