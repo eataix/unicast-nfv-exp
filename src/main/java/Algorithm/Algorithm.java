@@ -12,6 +12,7 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkPathFinder;
+import NetworkGenerator.Utils;
 import Simulation.Parameters;
 
 public class Algorithm {
@@ -45,6 +46,27 @@ public class Algorithm {
     ArrayList<Server> path = shortestPathInAuxiliaryNetwork(cf);
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, cf);
     return new Result(path, finalPathCost, admitRequest(finalPathCost));
+  }
+
+  public Result minOpCostWithDelay(double delay) {
+    CostFunction cf = new ExpCostFunction();
+    createAuxiliaryNetwork(cf);
+    if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      return new Result(); //this generates a no-admittance result
+    }
+    auxiliaryNetwork.generateNetwork(true);
+    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
+    return new Result();
+  }
+
+  public Result maxThroughputWithDelay(CostFunction cf, double delay) { //s is source, t is sink
+    createAuxiliaryNetwork(cf);
+    if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      return new Result(); //this generates a no-admittance result
+    }
+    auxiliaryNetwork.generateNetwork(false);
+    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
+    return new Result();
   }
 
   private void createAuxiliaryNetwork(CostFunction cf) {

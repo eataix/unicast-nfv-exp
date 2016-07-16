@@ -12,7 +12,7 @@ import Network.Server;
 
 public class Utils {
 
-  public interface LinkCostFunction {
+  interface LinkCostFunction {
     double getCost(Link l);
   }
 
@@ -22,7 +22,7 @@ public class Utils {
    * @param maxDelay maximum maxDelay
    * @return A shortest path from @src to @dest with delay no greater than @maxDelay
    */
-  static ArrayList<Link> LARAC(Network network, Server src, Server dest, double maxDelay) {
+  static public ArrayList<Link> LARAC(Network network, Server src, Server dest, double maxDelay) {
 
     // PC is the shortest path on the original cost c
     ReturnVal pc = Dijkstra(network, src, dest, new LinkCostFunction() {

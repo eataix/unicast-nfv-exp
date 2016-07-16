@@ -60,10 +60,35 @@ public class Simulation {
     System.out.println(linSum);
 
 		/* Sanity check: bandwidth in original network links are being updated.
-		for(Link l : network.getLinks()){
+    for(Link l : network.getLinks()){
 			if(l.getBandwidth()!=l.getResidualBandwidth()){
 				System.out.println("Link resource usage in original network: "+(l.getBandwidth()-l.getResidualBandwidth())+"/"+l.getBandwidth());
 			}
 		}*/
+  }
+
+  /**
+   * We compare the performance of the proposed online algorithms while using different cost functions, i.e., a linear cost function and an exponential cost
+   * function
+   */
+  public static void CompareCostFns() {
+
+  }
+
+  /**
+   * We test the impact of beta on the performance of the proposed online algorithms by varying the value of beta from 2 to 6
+   */
+  public static void BetaEffect() {
+    for (int beta = 2; beta <= 6; beta += 2) {
+
+    }
+  }
+
+  /**
+   * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the treshold
+   */
+  public static void ThresholdEffect() {
+    for (int beta = 2; beta <= 6; beta += 2) {
+    }
   }
 }
