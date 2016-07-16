@@ -15,8 +15,9 @@ public class Server {
 
   public Server clone() {
     HashMap<Integer, VM> newNFVs = new HashMap<Integer, VM>();
-    for (Integer nfv : NFVs.keySet())
+    for (Integer nfv : NFVs.keySet()) {
       newNFVs.put(nfv, new VM(nfv));
+    }
     return new Server(id, capacity, new ArrayList<Link>(), newNFVs);
   }
 
@@ -155,14 +156,14 @@ public class Server {
       return Parameters.NFVreq[serviceType];
     }
   }
-  
+
   @Override
-  public String toString() { 
-	    return "Server: " + this.id + " Capacity: " + this.capacity;
+  public String toString() {
+    return "Server: " + this.id + " Capacity: " + this.capacity;
   }
 
 /*
-	private class VM { //service rate must exceed arrival rate.
+  private class VM { //service rate must exceed arrival rate.
 		int arrivalRate;
 		int serviceType;
 		int instances; //you can have multiple VM instances that run the same service to meet higher arrival rate of packets.

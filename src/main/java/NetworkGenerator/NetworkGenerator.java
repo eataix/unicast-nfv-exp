@@ -15,7 +15,7 @@ public class NetworkGenerator {
   public Network connectedGraphNetwork(int n) {
     ArrayList<Server> servers = new ArrayList<Server>();
     ArrayList<Link> links = new ArrayList<Link>();
-    
+
     //create servers
     for (int i = 0; i < n; i++) {
       servers.add(new Server(i));
@@ -28,30 +28,30 @@ public class NetworkGenerator {
     }
     return new Network(servers, links);
   }
-  
+
   // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
   public Network generateRealNetworks(int n, String networkIndexPostFix) {
 	  ArrayList<Server> servers = new ArrayList<Server>();
 	  ArrayList<Link> links = new ArrayList<Link>();
-	  
+
 	  String fileName = null;
-	
+
 	  if (networkIndexPostFix.equals("GEANT") || networkIndexPostFix.equals("AS1755") || networkIndexPostFix.equals("AS4755"))
 		  fileName = ".//data//" + networkIndexPostFix + ".txt";
 	  else
 		  fileName = ".//data//" + n + "-25-25" + networkIndexPostFix + ".txt";
-		
+
 	  try {
 		  File file = new File(fileName);
 		  BufferedReader reader = new BufferedReader(new FileReader(file));
-			
+
 		  String lineString = null;
 		  int readStatus = -1; // 0: reading vertices data; 1: reading edges data
 		  int numOfNodeRead = 0;
 		  while ((lineString = reader.readLine()) != null){
 			  if (lineString.startsWith("#"))
 				  continue;
-				
+
 			  if (lineString.contains("VERTICES")){//start to parse vertices data
 				  readStatus = 0;
 				  continue;
@@ -62,39 +62,39 @@ public class NetworkGenerator {
 			  if (0 == readStatus){
 				  lineString.trim();
 				  String [] attrs = lineString.split(" ");
-					
+
 				  int id = Integer.parseInt(attrs[0]);
 				  numOfNodeRead ++;
-				  
+
 				  servers.add(new Server(id));
 			  }
-				
+
 			  if (1 == readStatus) {
-					
+
 				  lineString.trim();
 				  String [] attrs = lineString.split(" ");
-					
+
 				  int fromNodeId = Integer.parseInt(attrs[0]);
 				  int toNodeId = Integer.parseInt(attrs[1]);
 				  Server s1 = null;
 				  Server s2 = null;
-				  
+
 				  for (Server server : servers){
 					if (server.getId() == fromNodeId)
 						s1 = server;
 					else if (server.getId() == toNodeId)
 						s2 = server;
 				  }
-				  
+
 				  Link l = new Link(s1, s2);
 			      links.add(l);
 			  }
-		  } 
+		  }
 		  reader.close();
 	  } catch (IOException e) {
-		  e.printStackTrace(); 
+		  e.printStackTrace();
 	  }
-	  
+
 	  return new Network(servers, links);
   }
 
@@ -212,7 +212,7 @@ public class NetworkGenerator {
 
     return new Network(servers, links);
   }
-  
+
   // unit tests
   public static void main(String [] s){
 	  NetworkGenerator netGen = new NetworkGenerator();
