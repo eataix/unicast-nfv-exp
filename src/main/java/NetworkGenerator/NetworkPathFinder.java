@@ -78,7 +78,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
         }
         //update all shortest paths map
         HashMap<Integer, ArrayList<Link>> srcMap =
-            (allShortestPaths.containsKey(src.getId())) ? allShortestPaths.get(src.getId()) : new HashMap<Integer, ArrayList<Link>>();
+            (allShortestPaths.containsKey(src.getId())) ? allShortestPaths.get(src.getId()) : new HashMap<>();
         srcMap.put(dest.getId(), shortestPath);
         allShortestPaths.put(src.getId(), srcMap);
         pathCosts[src.getId()][dest.getId()] = pathCost.get(dest);

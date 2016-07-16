@@ -1,6 +1,10 @@
 package Simulation;
 
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import Algorithm.Algorithm;
 import Algorithm.CostFunctions.ExpCostFunction;
@@ -14,6 +18,7 @@ import NetworkGenerator.NetworkGenerator;
   private static final int packets = 500; //number of requests to run through the network
   private static final int trials = 10;
   private static final Random random = new Random();
+  private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
 
   public static void main(String[] args) {
     //Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1);
@@ -21,6 +26,20 @@ import NetworkGenerator.NetworkGenerator;
     //nvs.setConstantServerCapacity(10000, 0.2); //make it excessively large
     //nvs.setRandomLinkCapacity(1000, 10000);
     //nvs.placeNFVs(0.25);
+
+    ArrayList<Runnable> listOfTasks = new ArrayList<>();
+    listOfTasks.add(new Thread(() -> CompareCostFns()));
+    listOfTasks.add(new Thread(() -> BetaEffect()));
+    listOfTasks.add(new Thread(() -> ThresholdEffect()));
+    listOfTasks.add(new Thread(() -> LEffect()));
+    listOfTasks.forEach(threadPool::execute);
+
+    threadPool.shutdown();
+    try {
+      threadPool.awaitTermination(1, TimeUnit.DAYS);
+    } catch (InterruptedException ie) {
+      ie.printStackTrace();
+    }
   }
 
   /**
@@ -38,7 +57,7 @@ import NetworkGenerator.NetworkGenerator;
 
     for (int networkSize : parametersWithExpCostFn.networkSizes) {
       for (int j = 0; j < parametersWithExpCostFn.numTrials; j++) {
-        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithExpCostFn);
+        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithExpCostFn); // TODO
         Request[] requests = new Request[parametersWithExpCostFn.numRequest];
         for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
           int bandwidth =
@@ -80,7 +99,7 @@ import NetworkGenerator.NetworkGenerator;
 
       for (int networkSize : parameters.networkSizes) {
         for (int j = 0; j < parameters.numTrials; j++) {
-          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters);
+          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters); // TODO
           Request[] requests = new Request[parameters.numRequest];
           for (int i = 0; i < parameters.numRequest; i++) {
             int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
@@ -115,7 +134,7 @@ import NetworkGenerator.NetworkGenerator;
 
     for (int networkSize : parametersWithOutThreshold.networkSizes) {
       for (int j = 0; j < parametersWithThreshold.numTrials; j++) {
-        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithOutThreshold);
+        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithOutThreshold); // TODO
         Request[] requests = new Request[parametersWithThreshold.numRequest];
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
           int bandwidth =
@@ -157,7 +176,7 @@ import NetworkGenerator.NetworkGenerator;
 
       for (int networkSize : parameters.networkSizes) {
         for (int j = 0; j < parameters.numTrials; j++) {
-          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters);
+          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters); // TODO
           Request[] requests = new Request[parameters.numRequest];
           for (int i = 0; i < parameters.numRequest; i++) {
             int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;

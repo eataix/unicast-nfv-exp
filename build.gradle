@@ -5,8 +5,8 @@ apply plugin: 'application'
 
 version = '0.1'
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
   mavenCentral()
@@ -18,7 +18,7 @@ dependencies {
 
 idea {
   project {
-    languageLevel = '1.7'
+    languageLevel = '1.8'
   }
   module {
     downloadJavadoc = true

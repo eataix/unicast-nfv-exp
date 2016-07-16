@@ -25,11 +25,7 @@ public class Utils {
   static public ArrayList<Link> LARAC(Network network, Server src, Server dest, double maxDelay) {
 
     // PC is the shortest path on the original cost c
-    ReturnVal pc = Dijkstra(network, src, dest, new LinkCostFunction() {
-      @Override public double getCost(Link l) {
-        return l.getPathCost();
-      }
-    });
+    ReturnVal pc = Dijkstra(network, src, dest, l -> l.getPathCost());
     if (pc == null) {
       return null;
     }
@@ -38,11 +34,7 @@ public class Utils {
     }
 
     // PC is the shortest path on the delay d
-    ReturnVal pd = Dijkstra(network, src, dest, new LinkCostFunction() {
-      @Override public double getCost(Link l) {
-        return l.getDelay();
-      }
-    });
+    ReturnVal pd = Dijkstra(network, src, dest, l -> l.getDelay());
     if (pd == null) {
       return null;
     }
@@ -52,11 +44,7 @@ public class Utils {
 
     while (true) {
       final double lambda = (pc.cost - pd.cost) / (pd.delay - pc.delay);
-      ReturnVal pr = Dijkstra(network, src, dest, new LinkCostFunction() {
-        @Override public double getCost(Link l) {
-          return l.getPathCost() + lambda * l.getDelay();
-        }
-      });
+      ReturnVal pr = Dijkstra(network, src, dest, l -> l.getPathCost() + lambda * l.getDelay());
       if (pr == null) {
         return null;
       }

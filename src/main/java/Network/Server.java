@@ -18,7 +18,7 @@ public class Server {
     for (Integer nfv : NFVs.keySet()) {
       newNFVs.put(nfv, new VM(nfv));
     }
-    return new Server(id, parameters, capacity, new ArrayList<Link>(), newNFVs);
+    return new Server(id, parameters, capacity, new ArrayList<>(), newNFVs);
   }
 
   private Server(int Id, Parameters parameters, int c, ArrayList<Link> l, HashMap<Integer, VM> nfvs) {
