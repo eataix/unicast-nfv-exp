@@ -45,10 +45,10 @@ public class Link {
   void wipe() {
     b = 0;
   }
-  
+
   @Override
   public String toString() {
-	    return this.s1.getId() + "<->" + this.s2.getId();
+    return this.s1.getId() + "<->" + this.s2.getId();
   }
 
   public int getResidualBandwidth() {
@@ -84,7 +84,9 @@ public class Link {
   }
 
   void allocateBandwidth(double d) {
-    if (b + d < B) b += d;
+    if (b + d < B) {
+      b += d;
+    }
   }
 
   public double getUtCost(double bandwidth) { //TODO

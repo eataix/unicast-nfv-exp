@@ -18,8 +18,8 @@ public class AuxiliaryNetwork extends Network {
   private final ArrayList<Server> auxServers;
   private final ArrayList<Link> auxLinks;
 
-  public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks,
-      double[][] pathcosts, double[][] pathdelays, HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r) {
+  public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathcosts, double[][] pathdelays,
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r) {
     super(originalServers, originalLinks);
     pathCosts = pathcosts;
     pathDelays = pathdelays;
@@ -28,7 +28,6 @@ public class AuxiliaryNetwork extends Network {
     auxServers = new ArrayList<Server>();
     auxLinks = new ArrayList<Link>();
     serviceLayers = new ArrayList<HashSet<Server>>();
-    // TODO Auto-generated constructor stub
   }
 
   public void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
@@ -42,7 +41,9 @@ public class AuxiliaryNetwork extends Network {
     //create service layers
     for (int nfv : SC) {
       HashSet<Server> origLayer = getReusableServers(nfv);
-      if (offline) origLayer.addAll(getUnusedServers(nfv));
+      if (offline) {
+        origLayer.addAll(getUnusedServers(nfv));
+      }
       HashSet<Server> currLayer = cloneServers(origLayer);
       for (Server curr : currLayer) {
         for (Server prev : prevLayer) {
