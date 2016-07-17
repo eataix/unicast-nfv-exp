@@ -142,7 +142,7 @@ public class AuxiliaryNetwork extends Network {
     return cost;
   }
 
-  public void admitRequest(ArrayList<Server> path) {//assign network resources for request
+  public void admitRequestAndReserveResources(ArrayList<Server> path) {//assign network resources for request
     //update servers
     for (int i = 0; i < request.SC.length; i++) { //the first and last server are the src and destination node of the request.
       int nfv = request.SC[i];

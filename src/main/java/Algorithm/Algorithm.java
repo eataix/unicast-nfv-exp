@@ -51,9 +51,13 @@ public class Algorithm {
     auxiliaryNetwork.generateOnlineNetwork();
     ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
+    boolean admit = admissionControl(finalPathCost);
+    if (admit) {
+      auxiliaryNetwork.admitRequestAndReserveResources(path);
+    }
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
-                               .admit(admitRequest(finalPathCost))
+                               .admit(admit)
                                .build();
   }
 
@@ -140,7 +144,7 @@ public class Algorithm {
     return extractPath(prevNode, dst);
   }
 
-  private boolean admitRequest(double pathCost) {
+  private boolean admissionControl(double pathCost) {
     return pathCost < auxiliaryNetwork.size() * parameters.threshold - 1;
   }
 }
