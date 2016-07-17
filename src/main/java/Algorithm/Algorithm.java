@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import Algorithm.CostFunctions.CostFunction;
-import Algorithm.CostFunctions.ExpCostFunction;
-import Algorithm.CostFunctions.OpCostFunction;
+import Algorithm.CostFunctions.ExponentialCostFunction;
+import Algorithm.CostFunctions.OperationalCostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
 import Network.Network;
@@ -30,14 +30,14 @@ public class Algorithm {
   }
 
   public Result minOpCostWithoutDelay() {
-    CostFunction cf = new OpCostFunction();
-    createAuxiliaryNetwork(cf);
+    CostFunction costFunction = new OperationalCostFunction();
+    createAuxiliaryNetwork(costFunction);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOfflineNetwork();
     ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
-    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, cf);
+    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
                                .build();
@@ -58,7 +58,7 @@ public class Algorithm {
   }
 
   public Result minOpCostWithDelay(double delay) {
-    CostFunction cf = new ExpCostFunction();
+    CostFunction cf = new ExponentialCostFunction();
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result

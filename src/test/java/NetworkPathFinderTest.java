@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-import Algorithm.CostFunctions.OpCostFunction;
+import Algorithm.CostFunctions.OperationalCostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
 import Network.Network;
@@ -43,7 +43,7 @@ public class NetworkPathFinderTest {
     l2_3.setOpCost(2);
 
     Network n = new Network(servers, links);
-    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, new Request(2, s0, s3, Simulation.defaultParameters), new OpCostFunction(),
+    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, new Request(2, s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
                                                                           Simulation.defaultParameters);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());

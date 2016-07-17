@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import Algorithm.Algorithm;
-import Algorithm.CostFunctions.ExpCostFunction;
+import Algorithm.CostFunctions.ExponentialCostFunction;
 import Algorithm.CostFunctions.LinCostFunction;
 import Algorithm.Result;
 import Network.Network;
@@ -45,18 +45,18 @@ import NetworkGenerator.NetworkValueSetter;
    * function
    */
   private static void CompareCostFns() {
-    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExpCostFunction()).build();
+    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
-    int accepted = 0;
     int expSum = 0;
     int linSum = 0;
 
     for (int networkSize : parametersWithExpCostFn.networkSizes) {
       for (int trial = 0; trial < parametersWithExpCostFn.numTrials; ++trial) {
+        int accepted = 0;
+
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
         network.wipeLinks();
-
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         Result[] expResults = new Result[parametersWithExpCostFn.numRequest];
@@ -140,15 +140,11 @@ import NetworkGenerator.NetworkValueSetter;
     for (int networkSize : parametersWithOutThreshold.networkSizes) {
       for (int trial = 0; trial < parametersWithThreshold.numTrials; trial++) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
-        Request[] requests = new Request[parametersWithThreshold.numRequest];
-        for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
-          int bandwidth =
-              random.nextInt((parametersWithThreshold.linkBWCapMax - parametersWithThreshold.linkBWCapMin) + 1) + parametersWithThreshold.linkBWCapMin;
-          requests[i] = new Request(bandwidth, network.getRandomServer(), network.getRandomServer(), parametersWithThreshold);
-        }
+        ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
+
         network.wipeLinks();
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
-          Algorithm alg = new Algorithm(network, requests[i], parametersWithThreshold);
+          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
           results[i] = alg.maxThroughputWithoutDelay();
           if (results[i].isAdmit()) {
             accepted++;
@@ -158,7 +154,7 @@ import NetworkGenerator.NetworkValueSetter;
         accepted = 0;
         network.wipeLinks();
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
-          Algorithm alg = new Algorithm(network, requests[i], parametersWithOutThreshold);
+          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
           results[i] = alg.maxThroughputWithoutDelay();
           if (results[i].isAdmit()) {
             accepted++;
@@ -172,7 +168,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   public static void CompareCostFnsRealTopology(String networkName) {
-    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExpCostFunction()).build();
+    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
     int accepted = 0; // number of accepted requests

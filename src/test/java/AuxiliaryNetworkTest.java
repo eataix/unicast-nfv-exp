@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import Algorithm.CostFunctions.OpCostFunction;
+import Algorithm.CostFunctions.OperationalCostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
 import Network.Network;
@@ -60,7 +60,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, r, new OpCostFunction(), Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
     auxnet.generateNetwork(true);
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();

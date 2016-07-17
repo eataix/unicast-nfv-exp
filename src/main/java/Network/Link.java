@@ -94,7 +94,7 @@ public class Link {
     pathUtCost = pathcost;
   }
 
-  public double getOpCost() {
+  public double getOperationalCost() {
     if (s1 == s2) {
       return 0;
     }

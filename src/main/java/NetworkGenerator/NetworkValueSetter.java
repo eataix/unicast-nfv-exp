@@ -111,37 +111,37 @@ public class NetworkValueSetter { //sets the parameters of a given network
 
   public void setConstantNFVRequirements(int cap) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVreq[nfv] = cap;
+      parameters.nfvReqs[nfv] = cap;
     }
   }
 
   public void setNormalNFVRequirements(int mean, int weight) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVreq[nfv] = getNormal(mean, weight);
+      parameters.nfvReqs[nfv] = getNormal(mean, weight);
     }
   }
 
   public void setRandomNFVRequirements(int low, int high) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVreq[nfv] = getUniform(low, high);
+      parameters.nfvReqs[nfv] = getUniform(low, high);
     }
   }
 
   public void setConstantNFVServiceRate(int cap) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVrate[nfv] = cap;
+      parameters.nfvRates[nfv] = cap;
     }
   }
 
   public void setNormalNFVServiceRate(int mean, int weight) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVrate[nfv] = getNormal(mean, weight);
+      parameters.nfvRates[nfv] = getNormal(mean, weight);
     }
   }
 
   public void setRandomNFVServiceRate(int low, int high) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.NFVrate[nfv] = getUniform(low, high);
+      parameters.nfvRates[nfv] = getUniform(low, high);
     }
   }
 

@@ -57,11 +57,11 @@ public class Server {
     return neighbours.size();
   }
 
-  public double getOpCost(int nfv) { //operational cost
+  public double getOperationalCost(int nfv) { //operational cost
     if (NFVs.get(nfv) == null) {
-      return Simulation.defaultParameters.NFVOpCost[nfv] + Simulation.defaultParameters.NFVInitCost[nfv];
+      return Simulation.defaultParameters.nfvOperationalCosts[nfv] + Simulation.defaultParameters.nfvInitCosts[nfv];
     }
-    return Simulation.defaultParameters.NFVOpCost[nfv];
+    return Simulation.defaultParameters.nfvOperationalCosts[nfv];
   }
 
   public Link getLink(Server s) {//returns link that connects "this" to Server s
@@ -115,7 +115,7 @@ public class Server {
   }
 
   public boolean canCreateVM(int nfv) { //has spare capacity to create enough VMs to handle rate
-    int serviceReq = Simulation.defaultParameters.NFVreq[nfv];
+    int serviceReq = Simulation.defaultParameters.nfvReqs[nfv];
     return serviceReq < remainingCapacity();
   }
 
@@ -144,7 +144,7 @@ public class Server {
     }
 
     int resourceAllocated() {
-      return Simulation.defaultParameters.NFVreq[serviceType];
+      return Simulation.defaultParameters.nfvReqs[serviceType];
     }
   }
 
@@ -162,7 +162,7 @@ public class Server {
 		public VM(int nfv, int arr){
 			serviceType = nfv;
 			arrivalRate = arr;
-			instances = ceilingIntDivision(arr, parameters.NFVrate[serviceType]);
+			instances = ceilingIntDivision(arr, parameters.nfvRates[serviceType]);
 		}
 
 		public void createMoreInstances(int arr){ //create enough instances to meet demand of additional arrival rate arr.
@@ -171,14 +171,14 @@ public class Server {
 		}
 
 		public int additionalInstancesRequired(int arr){ //number of additional VMs required to service arrival rate arr.
-			int serviceRate = instances*parameters.NFVrate[serviceType];
+			int serviceRate = instances*parameters.nfvRates[serviceType];
 			int diff = arrivalRate + arr - serviceRate;
 			if(diff<0) return 0;
 			else	   return ceilingIntDivision(diff, serviceRate);
 		}
 
 		public int resourceAllocated(){
-			return instances*parameters.NFVreq[serviceType];
+			return instances*parameters.nfvReqs[serviceType];
 		}
 
 		public int ceilingIntDivision(int num, int divisor) {

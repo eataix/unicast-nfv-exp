@@ -4,7 +4,7 @@ import Network.Link;
 import Network.Server;
 import Simulation.Parameters;
 
-public class ExpCostFunction implements CostFunction {
+public class ExponentialCostFunction implements CostFunction {
   @Override
   public double getCost(Link l, int b, Parameters parameters) {
     return Math.pow(parameters.beta * parameters.networkSize, (l.getAllocatedBandwidth() + b) / l.getBandwidth()) - 1;
@@ -12,6 +12,6 @@ public class ExpCostFunction implements CostFunction {
 
   @Override
   public double getCost(Server s, int nfv, Parameters parameters) {
-    return Math.pow(parameters.alpha * parameters.networkSize, (s.getCapacity() - s.remainingCapacity() - parameters.NFVreq[nfv]) / s.getCapacity()) - 1;
+    return Math.pow(parameters.alpha * parameters.networkSize, (s.getCapacity() - s.remainingCapacity() - parameters.nfvReqs[nfv]) / s.getCapacity()) - 1;
   }
 }

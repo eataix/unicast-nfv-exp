@@ -1,13 +1,13 @@
 package Simulation;
 
 import Algorithm.CostFunctions.CostFunction;
-import Algorithm.CostFunctions.ExpCostFunction;
+import Algorithm.CostFunctions.ExponentialCostFunction;
 
 public class Parameters {
-  public final int[] NFVreq; //nfv vm resource requirements
-  public final int[] NFVrate; //nfv vm service rate
-  public final int[] NFVOpCost; //operating cost of providing an vnf service
-  public final int[] NFVInitCost; //initialization cost of vnf service
+  public final int[] nfvReqs; //nfv vm resource requirements
+  public final int[] nfvRates; //nfv vm service rate
+  public final int[] nfvOperationalCosts; //operating cost of providing an vnf service
+  public final int[] nfvInitCosts; //initialization cost of vnf service
 
   public final int[] networkSizes; //initialization cost of vnf service
 
@@ -29,10 +29,12 @@ public class Parameters {
   public final double serverRatio;
   public final CostFunction costFunc;
   public final double nfvProb;
+  public final boolean online;
 
-  Parameters(int[] nfVreq, int[] nfVrate, int[] nfvOpCost, int[] nfvInitCost, int[] networkSizes, int alpha, int beta, int linkBWCapMin, int linkBWCapMax,
-             int numRequest, int L, int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayReqMin,
-             int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb) {
+  Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] networkSizes, int alpha, int beta, int linkBWCapMin,
+             int linkBWCapMax, int numRequest, int L, int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
+             int linkDelayReqMin, int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
+             boolean online) {
     this.networkSizes = networkSizes;
     this.alpha = alpha;
     this.beta = beta;
@@ -50,12 +52,13 @@ public class Parameters {
     this.threshold = threshold;
     this.networkSize = networkSize;
     this.serverRatio = serverRatio;
-    this.NFVreq = nfVreq;
-    this.NFVrate = nfVrate;
-    this.NFVOpCost = nfvOpCost;
-    this.NFVInitCost = nfvInitCost;
+    this.nfvReqs = nfvReqs;
+    this.nfvRates = nfvRates;
+    this.nfvOperationalCosts = nfvOperationalCosts;
+    this.nfvInitCosts = nfvInitCosts;
     this.costFunc = costFunc;
     this.nfvProb = nfvProb;
+    this.online = online;
   }
 
   public static class Builder {
@@ -76,13 +79,15 @@ public class Parameters {
     private double serverRatio = 0.2;
     private int networkSize = 50;
 
-    private int[] NFVreq = new int[] {2, 3, 5, 2, 6, 4};
-    private int[] NFVrate = new int[] {3, 5, 6, 7, 8, 5};
-    private int[] NFVOpCost = new int[] {2, 3, 5, 2, 6, 4};
-    private int[] NFVInitCost = new int[] {5, 6, 7, 4, 8, 5};
+    private int[] nfvReqs = new int[] {2, 3, 5, 2, 6, 4};
+    private int[] nfvRates = new int[] {3, 5, 6, 7, 8, 5};
+    private int[] nfvOperationalCosts = new int[] {2, 3, 5, 2, 6, 4};
+    private int[] nfvInitCosts = new int[] {5, 6, 7, 4, 8, 5};
+
     private int[] networkSizes = new int[] {50, 100, 200, 300, 400, 500, 600, 800, 1000};
-    private CostFunction costFunc = new ExpCostFunction();
+    private CostFunction costFunc = new ExponentialCostFunction();
     private double nfvProb = 0.1;
+    private boolean online = false;
 
     Builder alpha(int alpha) {
       this.beta = beta;
@@ -160,22 +165,22 @@ public class Parameters {
     }
 
     public Builder NFVreq(int[] NFVreq) {
-      this.NFVreq = NFVreq;
+      this.nfvReqs = NFVreq;
       return this;
     }
 
     public Builder NFVrate(int[] NFVrate) {
-      this.NFVrate = NFVrate;
+      this.nfvRates = NFVrate;
       return this;
     }
 
     public Builder NFVOpCost(int[] NFVOpCost) {
-      this.NFVOpCost = NFVOpCost;
+      this.nfvOperationalCosts = NFVOpCost;
       return this;
     }
 
     public Builder NFVInitCost(int[] NFVInitCost) {
-      this.NFVInitCost = NFVInitCost;
+      this.nfvInitCosts = NFVInitCost;
       return this;
     }
 
@@ -194,11 +199,17 @@ public class Parameters {
       return this;
     }
 
+    public Builder online(boolean online) {
+      this.online = online;
+      return this;
+    }
+
     public Parameters build() {
-      return new Parameters(NFVreq, NFVrate, NFVOpCost, NFVInitCost, networkSizes, alpha, beta, linkBWCapMin, linkBWCapMax, numRequest, L, reqNetworkReqMin,
+      return new Parameters(nfvReqs, nfvRates, nfvOperationalCosts, nfvInitCosts, networkSizes, alpha, beta, linkBWCapMin, linkBWCapMax, numRequest, L,
+                            reqNetworkReqMin,
                             reqNetworkReqMax,
                             reqDelayReqMin, reqDelayReqMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize, serverRatio, costFunc,
-                            nfvProb);
+                            nfvProb, online);
     }
   }
 }

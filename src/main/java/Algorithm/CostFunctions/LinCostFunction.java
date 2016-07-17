@@ -15,7 +15,7 @@ public class LinCostFunction implements CostFunction {
     if (s.canReuseVM(nfv)) {
       return (s.getCapacity() - s.remainingCapacity()) / s.getCapacity();
     } else {
-      return (s.getCapacity() - s.remainingCapacity() - parameters.NFVreq[nfv]) / s.getCapacity();
+      return (s.getCapacity() - s.remainingCapacity() - parameters.nfvReqs[nfv]) / s.getCapacity();
     }
   }
 }
