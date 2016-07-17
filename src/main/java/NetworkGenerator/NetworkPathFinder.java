@@ -39,13 +39,13 @@ public class NetworkPathFinder { //gets shortest path from network to network
         for (Server neighbour : curr.getAllNeighbours()) {
           Link l = curr.getLink(neighbour);
           //searched nodes and links without enough bandwidth
-          if (searched.contains(neighbour) || l.getResidualBandwidth() < request.bandwidth * request.SC.length) {
+          if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * request.getSC().length) {
             continue;
           }
           Double cost = pathCost.get(neighbour);
           cost = (cost == null) ? Double.MAX_VALUE : cost;
-          if (pathCost.get(curr) + costFn.getCost(l, request.bandwidth, parameters) < cost) {
-            pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.bandwidth, parameters));
+          if (pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters) < cost) {
+            pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters));
             prevNode.put(neighbour, curr);
           }
           //add to priority queue using insertion sort

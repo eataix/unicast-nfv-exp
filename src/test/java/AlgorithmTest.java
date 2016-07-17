@@ -52,7 +52,7 @@ public class AlgorithmTest {
     s1.addVM(0);
     s0.addVM(1);
 
-    Request r = new Request(0, s0, s3, Simulation.defaultParameters);
+    Request r = new Request(s0, s3, Simulation.defaultParameters);
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}

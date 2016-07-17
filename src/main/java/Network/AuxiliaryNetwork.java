@@ -14,8 +14,8 @@ public class AuxiliaryNetwork extends Network {
   private final double[][] pathDelays;
   public final ArrayList<HashSet<Server>> serviceLayers;
   private final Request request;
-  private Server src;
-  private Server dst;
+  private Server source;
+  private Server destination;
   private final ArrayList<Server> auxServers;
   private final ArrayList<Link> auxLinks;
   private final Parameters parameters;
@@ -42,13 +42,13 @@ public class AuxiliaryNetwork extends Network {
   }
 
   private void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
-    src = new Server(request.src);
-    dst = new Server(request.dst);
-    auxServers.add(src);
-    auxServers.add(dst);
-    HashSet<Server> prevLayer = new HashSet<Server>();
-    prevLayer.add(src);
-    int[] SC = request.SC;
+    source = new Server(request.getSource());
+    destination = new Server(request.getDestination());
+    auxServers.add(source);
+    auxServers.add(destination);
+    HashSet<Server> prevLayer = new HashSet<>();
+    prevLayer.add(source);
+    int[] SC = request.getSC();
     //create service layers
     for (int nfv : SC) {
       HashSet<Server> origLayer = getReusableServers(nfv);
@@ -66,10 +66,10 @@ public class AuxiliaryNetwork extends Network {
       serviceLayers.add(currLayer);
       prevLayer = currLayer;
     }
-    for (Server prev : prevLayer) { //link this up to dst
-      Link l = new Link(prev, dst);
-      l.setDelay(pathDelays[dst.getId()][prev.getId()]);
-      l.setPathCost(pathCosts[dst.getId()][prev.getId()]);
+    for (Server prev : prevLayer) { //link this up to destination
+      Link l = new Link(prev, destination);
+      l.setDelay(pathDelays[destination.getId()][prev.getId()]);
+      l.setPathCost(pathCosts[destination.getId()][prev.getId()]);
     }
   }
 
@@ -78,11 +78,11 @@ public class AuxiliaryNetwork extends Network {
   }
 
   public Server getSource() {
-    return src;
+    return source;
   }
 
   public Server getDestination() {
-    return dst;
+    return destination;
   }
 
   private HashSet<Server> cloneServers(Collection<Server> svrs) {
@@ -101,7 +101,7 @@ public class AuxiliaryNetwork extends Network {
   }
 
   public double calculatePathCost(ArrayList<Server> path, CostFunction cf) {
-    if (path.size() != request.SC.length + 2) { //No path was found
+    if (path.size() != request.getSC().length + 2) { //No path was found
       return Double.MAX_VALUE;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();
@@ -118,7 +118,7 @@ public class AuxiliaryNetwork extends Network {
     //get server costs
     for (int i = 1; i < path.size() - 1; i++) {
       Server cs = clonedServers.get(path.get(i).getId());
-      int nfv = request.SC[i - 1];
+      int nfv = request.getSC()[i - 1];
       cost += cf.getCost(cs, nfv, this.parameters);
       if (!cs.canCreateVM(nfv)) {
         return Double.MAX_VALUE;
@@ -132,11 +132,11 @@ public class AuxiliaryNetwork extends Network {
       Server s2 = path.get(i + 1);
       for (Link l : getLinkPath(s1, s2)) {
         Link cl = clonedLinks.get(l);
-        cost += cf.getCost(cl, request.bandwidth, this.parameters);
-        if (!cl.canSupportBandwidth(request.bandwidth)) {//obviously a rejection
+        cost += cf.getCost(cl, request.getBandwidth(), this.parameters);
+        if (!cl.canSupportBandwidth(request.getBandwidth())) {//obviously a rejection
           return Double.MAX_VALUE;
         }
-        cl.allocateBandwidth(request.bandwidth);
+        cl.allocateBandwidth(request.getBandwidth());
       }
     }
     return cost;
@@ -144,8 +144,8 @@ public class AuxiliaryNetwork extends Network {
 
   public void admitRequestAndReserveResources(ArrayList<Server> path) {//assign network resources for request
     //update servers
-    for (int i = 0; i < request.SC.length; i++) { //the first and last server are the src and destination node of the request.
-      int nfv = request.SC[i];
+    for (int i = 0; i < request.getSC().length; i++) { //the first and last server are the source and destination node of the request.
+      int nfv = request.getSC()[i];
       Server s = path.get(i + 1);
       useNFV(s.getId(), nfv);
     }
@@ -155,7 +155,7 @@ public class AuxiliaryNetwork extends Network {
       Server s1 = path.get(i);
       Server s2 = path.get(i + 1);
       //The links in the allShortestPaths mapping are from the original network.
-      allocateBandwidthOnPath(allShortestPaths.get(s1.getId()).get(s2.getId()), request.bandwidth);
+      allocateBandwidthOnPath(allShortestPaths.get(s1.getId()).get(s2.getId()), request.getBandwidth());
     }
   }
 }

@@ -20,7 +20,6 @@ public class Algorithm {
   private final Network originalNetwork;
   private final Request request;
   private final Parameters parameters;
-
   private AuxiliaryNetwork auxiliaryNetwork;
 
   public Algorithm(Network originalNetwork, Request request, Parameters parameters) {
@@ -61,24 +60,24 @@ public class Algorithm {
                                .build();
   }
 
-  public Result minOpCostWithDelay(double delay) {
+  public Result minOpCostWithDelay() {
     CostFunction cf = new ExponentialCostFunction();
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
+    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), request.getDelayReq());
     return new Result.Builder().build();
   }
 
-  public Result maxThroughputWithDelay(CostFunction cf, double delay) { //s is source, t is sink
-    createAuxiliaryNetwork(cf);
+  public Result maxThroughputWithDelay() { //s is source, t is sink
+    createAuxiliaryNetwork(parameters.costFunc);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
+    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), request.getDelayReq());
     return new Result.Builder().build();
   }
 
@@ -86,10 +85,10 @@ public class Algorithm {
     auxiliaryNetwork = NetworkPathFinder.shortestPathsByCost(originalNetwork, request, cf, this.parameters);
   }
 
-  private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server dst) {
+  private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server destination) {
     ArrayList<Server> path = new ArrayList<>();
-    Server curr = dst;
-    int i = request.SC.length;
+    Server curr = destination;
+    int i = request.getSC().length;
     while (curr != null) {
       path.add(0, curr);
       curr = (i >= 0) ? prevNode.get(curr) : null;
@@ -106,9 +105,9 @@ public class Algorithm {
     prevLayer.add(src);
     pathCost.put(auxiliaryNetwork.getSource(), 0.0);
 
-    int l = request.SC.length;
+    int l = request.getSC().length;
     for (int i = 0; i < l; i++) {
-      int nfv = request.SC[i];
+      int nfv = request.getSC()[i];
       HashSet<Server> currLayer = auxiliaryNetwork.getServiceLayer(i);
       for (Server curr : currLayer) {
         //				System.out.println("layer "+i+" : Server id:"+curr.getId());

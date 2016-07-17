@@ -2,22 +2,20 @@ package NetworkGenerator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 
 import Network.Link;
 import Network.Network;
 import Network.Server;
 import Simulation.Parameters;
+import Simulation.Simulation;
 
 public class NetworkValueSetter { //sets the parameters of a given network
   private final Network network;
-  private final Random rand;
   private final Parameters parameters;
 
   public NetworkValueSetter(Network network, Parameters parameters) {
     this.network = network;
     this.parameters = parameters;
-    this.rand = new Random();
   }
 
   public Network getNetwork() {
@@ -145,15 +143,15 @@ public class NetworkValueSetter { //sets the parameters of a given network
     }
   }
 
-  private int getNormal(int mean, int weight) {
+  public static int getNormal(int mean, int weight) {
     int cap = -1;
     while (cap < 0) {
-      cap = (int) Math.round(rand.nextGaussian() * weight + mean);
+      cap = (int) Math.round(Simulation.random.nextGaussian() * weight + mean);
     }
     return cap;
   }
 
-  private int getUniform(int low, int high) {
+  public static int getUniform(int low, int high) {
     return (int) (low + Math.random() * (high - low));
   }
 }

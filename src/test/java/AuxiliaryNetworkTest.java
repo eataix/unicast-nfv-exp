@@ -54,7 +54,7 @@ public class AuxiliaryNetworkTest {
     s1.addVM(0);
     s3.addVM(1);
 
-    Request r = new Request(0, s0, s3, new Parameters.Builder().build());
+    Request r = new Request(s0, s3, new Parameters.Builder().build());
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}

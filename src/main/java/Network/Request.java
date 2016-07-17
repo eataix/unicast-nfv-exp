@@ -2,21 +2,23 @@ package Network;
 
 import java.util.HashSet;
 
+import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 
 public class Request {
-  public int delay; //delay bound requirement
-  public int[] SC; //each number points to index of nfv in Parameters
-  public final int bandwidth;
-  final Server src;
-  final Server dst;
-  final Parameters parameters;
+  private int[] SC; //each number points to index of nfv in Parameters
+  private final int bandwidth;
+  private final Server source;
+  private final Server destination;
+  private int delayReq; //delayReq bound requirement
+  private final Parameters parameters;
 
-  public Request(int b, Server s, Server t, Parameters parameters) {
-    bandwidth = b;
-    src = s;
-    dst = t;
+  public Request(Server source, Server destination, Parameters parameters) {
+    this.source = source;
+    this.destination = destination;
     this.parameters = parameters;
+    this.bandwidth = NetworkValueSetter.getUniform(parameters.reqBWReqMin, parameters.reqBWReqMax);
+    this.delayReq = NetworkValueSetter.getUniform(parameters.reqDelayReqMin, parameters.reqDelayReqMax);
     generateServiceChain();
   }
 
@@ -34,31 +36,47 @@ public class Request {
     return true;
   }
 
-  public Server getSource() {
-    return src;
-  }
-
-  public Server getDest() {
-    return dst;
-  }
-
   private void generateServiceChain() {
     //create randomly ordered list of NFVs
-    int[] nfvlist = new int[parameters.L];
+    int[] nfvs = new int[parameters.L];
     for (int i = 0; i < parameters.L; i++) {
-      nfvlist[i] = i;
+      nfvs[i] = i;
     }
     //fisher-yates shuffle
     for (int i = 0; i < parameters.L; i++) {
-      int temp = nfvlist[i];
+      int temp = nfvs[i];
       int index = (int) Math.floor(Math.random() * (parameters.L - i) + i);
-      nfvlist[i] = nfvlist[index];
-      nfvlist[index] = temp;
+      nfvs[i] = nfvs[index];
+      nfvs[index] = temp;
     }
 
     int l = (int) Math.floor(Math.random() * (parameters.L - 1) + 1); //ensure there is at least one service in the service chain
 
     SC = new int[l];
-    System.arraycopy(nfvlist, 0, SC, 0, l);
+    System.arraycopy(nfvs, 0, SC, 0, l);
+  }
+
+  public int[] getSC() {
+    return SC;
+  }
+
+  public int getBandwidth() {
+    return bandwidth;
+  }
+
+  public Server getSource() {
+    return source;
+  }
+
+  public Server getDestination() {
+    return destination;
+  }
+
+  public int getDelayReq() {
+    return delayReq;
+  }
+
+  public Parameters getParameters() {
+    return parameters;
   }
 }

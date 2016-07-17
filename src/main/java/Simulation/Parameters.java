@@ -17,8 +17,8 @@ public class Parameters {
   public final int linkBWCapMax;
   public final int numRequest;
   public final int L;
-  public final int reqNetworkReqMin;
-  public final int reqNetworkReqMax;
+  public final int reqBWReqMin;
+  public final int reqBWReqMax;
   public final int reqDelayReqMin;
   public final int reqDelayReqMax;
   public final int numTrials;
@@ -32,7 +32,7 @@ public class Parameters {
   public final boolean online;
 
   Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] networkSizes, int alpha, int beta, int linkBWCapMin,
-             int linkBWCapMax, int numRequest, int L, int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
+             int linkBWCapMax, int numRequest, int L, int reqBWReqMin, int reqBWReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
              int linkDelayReqMin, int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
              boolean online) {
     this.networkSizes = networkSizes;
@@ -42,8 +42,8 @@ public class Parameters {
     this.linkBWCapMax = linkBWCapMax;
     this.numRequest = numRequest;
     this.L = L;
-    this.reqNetworkReqMin = reqNetworkReqMin;
-    this.reqNetworkReqMax = reqNetworkReqMax;
+    this.reqBWReqMin = reqBWReqMin;
+    this.reqBWReqMax = reqBWReqMax;
     this.reqDelayReqMin = reqDelayReqMin;
     this.reqDelayReqMax = reqDelayReqMax;
     this.numTrials = numTrials;
@@ -70,8 +70,8 @@ public class Parameters {
     private int linkDelayReqMax = 100;
     private int numRequest = 500;
     private int L = 4;
-    private int reqNetworkReqMin = 10;
-    private int reqNetworkReqMax = 100;
+    private int reqBWReqMin = 10;
+    private int reqBWReqMax = 100;
     private int reqDelayReqMin = 10;
     private int reqDelayReqMax = 100;
     private int numTrials = 10;
@@ -130,12 +130,12 @@ public class Parameters {
     }
 
     public Builder reqNetworkReqMin(int reqNetworkReqMin) {
-      this.reqNetworkReqMin = reqNetworkReqMin;
+      this.reqBWReqMin = reqNetworkReqMin;
       return this;
     }
 
     public Builder reqNetworkReqMax(int reqNetworkReqMax) {
-      this.reqNetworkReqMax = reqNetworkReqMax;
+      this.reqBWReqMax = reqNetworkReqMax;
       return this;
     }
 
@@ -206,8 +206,8 @@ public class Parameters {
 
     public Parameters build() {
       return new Parameters(nfvReqs, nfvRates, nfvOperationalCosts, nfvInitCosts, networkSizes, alpha, beta, linkBWCapMin, linkBWCapMax, numRequest, L,
-                            reqNetworkReqMin,
-                            reqNetworkReqMax,
+                            reqBWReqMin,
+                            reqBWReqMax,
                             reqDelayReqMin, reqDelayReqMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize, serverRatio, costFunc,
                             nfvProb, online);
     }
