@@ -9,12 +9,11 @@ import java.util.ArrayList;
 import Network.Link;
 import Network.Network;
 import Network.Server;
-import Simulation.Parameters;
 
 public class NetworkGenerator {
 
   // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
-  public Network generateRealNetworks(int n, String networkIndexPostFix, Parameters parameters) {
+  public Network generateRealNetworks(int n, String networkIndexPostFix) {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
@@ -52,7 +51,7 @@ public class NetworkGenerator {
           int id = Integer.parseInt(attrs[0]);
           numOfNodeRead++;
 
-          servers.add(new Server(id, parameters));
+          servers.add(new Server(id));
         }
 
         if (1 == readStatus) {
@@ -84,20 +83,20 @@ public class NetworkGenerator {
     return new Network(servers, links);
   }
 
-  public Network barabasiAlbertNetwork(int n, int l, Parameters parameters) { //Barabasi-Albert Model - n is number of nodes. Servers are added one at a time
+  public Network barabasiAlbertNetwork(int n, int l) { //Barabasi-Albert Model - n is number of nodes. Servers are added one at a time
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
     //create seed network
-    Server s1 = new Server(0, parameters);
+    Server s1 = new Server(0);
     servers.add(s1);
-    Server s2 = new Server(1, parameters);
+    Server s2 = new Server(1);
     servers.add(s2);
     Link li = new Link(s1, s2);
     links.add(li);
     int id = 2;
     //add server, and link server with existing server based on node degree distribution.
     while (id < n) {
-      Server next = new Server(id, parameters);
+      Server next = new Server(id);
       servers.add(next);
       for (int i = 0; i < l; i++) { //each new server links to L other servers.
         int degrees = (links.size() - next.getDegree()) * 2; // total number of node degrees
@@ -126,13 +125,13 @@ public class NetworkGenerator {
     return new Network(servers, links);
   }
 
-  public Network randomGraphNetwork(int n, double k, Parameters parameters) { //Random Graph Model - n is number of nodes, k is average degree of each node
+  public Network randomGraphNetwork(int n, double k) { //Random Graph Model - n is number of nodes, k is average degree of each node
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
     //create servers
     for (int i = 0; i < n; i++) {
-      servers.add(new Server(i, parameters));
+      servers.add(new Server(i));
     }
     ArrayList<Server> traversed = new ArrayList<>();
 
@@ -173,18 +172,17 @@ public class NetworkGenerator {
   }
 
   public Network testNetwork() {
-    Parameters parameters = new Parameters.Builder().build();
     //simple diamond shaped graph
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
-    Server s0 = new Server(0, parameters);
+    Server s0 = new Server(0);
     servers.add(s0);
-    Server s1 = new Server(1, parameters);
+    Server s1 = new Server(1);
     servers.add(s1);
-    Server s2 = new Server(2, parameters);
+    Server s2 = new Server(2);
     servers.add(s2);
-    Server s3 = new Server(3, parameters);
+    Server s3 = new Server(3);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
@@ -206,9 +204,8 @@ public class NetworkGenerator {
 
   // unit tests
   public static void main(String[] s) {
-    Parameters parameters = new Parameters.Builder().build();
     NetworkGenerator netGen = new NetworkGenerator();
-    Network net = netGen.generateRealNetworks(-1, "GEANT", parameters);
+    Network net = netGen.generateRealNetworks(-1, "GEANT");
     System.out.println(net.toString());
   }
 }

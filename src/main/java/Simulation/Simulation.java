@@ -15,24 +15,20 @@ import Network.Request;
 import NetworkGenerator.NetworkGenerator;
 
 @SuppressWarnings("Duplicates") public class Simulation {
-  private static final int packets = 500; //number of requests to run through the network
-  private static final int trials = 10;
   private static final Random random = new Random();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   public static final Parameters defaultParameters = new Parameters.Builder().build();
 
   public static void main(String[] args) {
-    //Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1);
-    //NetworkValueSetter nvs = new NetworkValueSetter(network, parameters);
-    //nvs.setConstantServerCapacity(10000, 0.2); //make it excessively large
-    //nvs.setRandomLinkCapacity(1000, 10000);
-    //nvs.placeNFVs(0.25);
-
     ArrayList<Runnable> listOfTasks = new ArrayList<>();
     listOfTasks.add(new Thread(() -> CompareCostFns()));
-    listOfTasks.add(new Thread(() -> BetaEffect()));
+    listOfTasks.add(new Thread(() -> betaImpact()));
     listOfTasks.add(new Thread(() -> ThresholdEffect()));
     listOfTasks.add(new Thread(() -> LEffect()));
+    //listOfTasks.add(new Thread(() -> CompareCostFnsRealTopology()));
+    //listOfTasks.add(new Thread(() -> BeEffectRealTopology()));
+    //listOfTasks.add(new Thread(() -> ThresholdEffectRealToplolgy()));
+    //listOfTasks.add(new Thread(() -> LEffectRealTopology()));
     listOfTasks.forEach(threadPool::execute);
 
     threadPool.shutdown();
@@ -51,46 +47,62 @@ import NetworkGenerator.NetworkGenerator;
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExpCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
-    int accepted = 0; //number of accepted requests
-    int expSum = 0; //sum of all exponential cost accepted requests
-    int linSum = 0; //sum of all linear cost accepted requests
-    Result[] results = new Result[parametersWithExpCostFn.numRequest];
+    int accepted = 0;
+    int expSum = 0;
+    int linSum = 0;
 
     for (int networkSize : parametersWithExpCostFn.networkSizes) {
-      for (int j = 0; j < parametersWithExpCostFn.numTrials; j++) {
-        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithExpCostFn); // TODO
+      for (int trial = 0; trial < parametersWithExpCostFn.numTrials; trial++) {
+
+        Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+        network.wipeLinks();
+
+        Result[] expResults = new Result[parametersWithExpCostFn.numRequest];
         Request[] requests = new Request[parametersWithExpCostFn.numRequest];
-        for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
+        for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           int bandwidth =
               random.nextInt((parametersWithExpCostFn.linkBWCapMax - parametersWithExpCostFn.linkBWCapMin) + 1) + parametersWithExpCostFn.linkBWCapMin;
           requests[i] = new Request(bandwidth, network.getRandomServer(), network.getRandomServer(), parametersWithExpCostFn);
         }
-        network.wipeLinks();
-        for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
+
+        for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithExpCostFn);
-          results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].isAdmit()) {
-            accepted++;
+          expResults[i] = alg.maxThroughputWithoutDelay();
+          if (expResults[i].isAdmit()) {
+            ++accepted;
           }
         }
         expSum += accepted;
+
+        Result[] linearResults = new Result[parametersWithExpCostFn.numRequest];
         accepted = 0;
         network.wipeLinks();
-        for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
+        for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithLinearCostFn);
-          results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].isAdmit()) {
-            accepted++;
+          linearResults[i] = alg.maxThroughputWithoutDelay();
+          if (linearResults[i].isAdmit()) {
+            ++accepted;
           }
         }
         linSum += accepted;
       }
     }
-    System.out.println("\n" + expSum);
-    System.out.println(linSum);
   }
 
-  private static void BetaEffect() {
+  private static int generateLinkBandwidth(Parameters parameters) {
+    return random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
+  }
+
+  private static ArrayList<Request> generateRequests(Parameters parameters, Network network, int numRequests) {
+    ArrayList<Request> requests = new ArrayList<>();
+    for (int i = 0; i < numRequests; ++i) {
+      int bandwidth = generateLinkBandwidth(parameters);
+      requests.add(new Request(bandwidth, network.getRandomServer(), network.getRandomServer(), parameters));
+    }
+    return requests;
+  }
+
+  private static void betaImpact() {
     for (int beta = 2; beta <= 6; beta += 2) {
       Parameters parameters = new Parameters.Builder().beta(beta).build();
 
@@ -99,16 +111,12 @@ import NetworkGenerator.NetworkGenerator;
       Result[] results = new Result[parameters.numRequest];
 
       for (int networkSize : parameters.networkSizes) {
-        for (int j = 0; j < parameters.numTrials; j++) {
-          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters); // TODO
-          Request[] requests = new Request[parameters.numRequest];
-          for (int i = 0; i < parameters.numRequest; i++) {
-            int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
-            requests[i] = new Request(bandwidth, network.getRandomServer(), network.getRandomServer(), parameters);
-          }
+        for (int trial = 0; trial < parameters.numTrials; trial++) {
+          Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+          ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
           for (int i = 0; i < parameters.numRequest; i++) {
-            Algorithm alg = new Algorithm(network, requests[i], parameters);
+            Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[i] = alg.maxThroughputWithoutDelay();
             if (results[i].isAdmit()) {
               accepted++;
@@ -126,7 +134,8 @@ import NetworkGenerator.NetworkGenerator;
    */
   private static void ThresholdEffect() {
     Parameters parametersWithThreshold = new Parameters.Builder().build();
-    Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE).build();
+    Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
+                                                                    .build();
 
     int accepted = 0; //number of accepted requests
     int expSum = 0; //sum of all exponential cost accepted requests
@@ -134,8 +143,8 @@ import NetworkGenerator.NetworkGenerator;
     Result[] results = new Result[parametersWithThreshold.numRequest];
 
     for (int networkSize : parametersWithOutThreshold.networkSizes) {
-      for (int j = 0; j < parametersWithThreshold.numTrials; j++) {
-        Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parametersWithOutThreshold); // TODO
+      for (int trial = 0; trial < parametersWithThreshold.numTrials; trial++) {
+        Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
         Request[] requests = new Request[parametersWithThreshold.numRequest];
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
           int bandwidth =
@@ -177,7 +186,7 @@ import NetworkGenerator.NetworkGenerator;
     Result[] results = new Result[parametersWithExpCostFn.numRequest];
 
     for (int j = 0; j < parametersWithExpCostFn.numTrials; j++) {
-      Network network = new NetworkGenerator().generateRealNetworks(-1, networkName, parametersWithExpCostFn);
+      Network network = new NetworkGenerator().generateRealNetworks(-1, networkName);
       Request[] requests = new Request[parametersWithExpCostFn.numRequest];
       for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
         int bandwidth = random
@@ -219,7 +228,7 @@ import NetworkGenerator.NetworkGenerator;
       Result[] results = new Result[parameters.numRequest];
 
       for (int j = 0; j < parameters.numTrials; j++) {
-        Network network = new NetworkGenerator().generateRealNetworks(-1, networkName, parameters); // TODO
+        Network network = new NetworkGenerator().generateRealNetworks(-1, networkName); // TODO
         Request[] requests = new Request[parameters.numRequest];
         for (int i = 0; i < parameters.numRequest; i++) {
           int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
@@ -242,7 +251,7 @@ import NetworkGenerator.NetworkGenerator;
   /**
    * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the treshold
    */
-  public static void ThresholdEffectRealToplolgy(String networkName) {
+  private static void ThresholdEffectRealToplolgy(String networkName) {
     Parameters parametersWithThreshold = new Parameters.Builder().build();
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE).build();
 
@@ -252,7 +261,7 @@ import NetworkGenerator.NetworkGenerator;
     Result[] results = new Result[parametersWithThreshold.numRequest];
 
     for (int j = 0; j < parametersWithThreshold.numTrials; j++) {
-      Network network = new NetworkGenerator().generateRealNetworks(-1, networkName, parametersWithOutThreshold);
+      Network network = new NetworkGenerator().generateRealNetworks(-1, networkName);
       Request[] requests = new Request[parametersWithThreshold.numRequest];
       for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
         int bandwidth =
@@ -293,7 +302,7 @@ import NetworkGenerator.NetworkGenerator;
 
       for (int networkSize : parameters.networkSizes) {
         for (int j = 0; j < parameters.numTrials; j++) {
-          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1, parameters); // TODO
+          Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1); // TODO
           Request[] requests = new Request[parameters.numRequest];
           for (int i = 0; i < parameters.numRequest; i++) {
             int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
@@ -314,7 +323,7 @@ import NetworkGenerator.NetworkGenerator;
     }
   }
 
-  public static void LEffectRealTopology(String networkName) {
+  private static void LEffectRealTopology(String networkName) {
 
     for (int L = 2; L <= 6; L += 2) {
       Parameters parameters = new Parameters.Builder().L(L).build();
@@ -324,7 +333,7 @@ import NetworkGenerator.NetworkGenerator;
       Result[] results = new Result[parameters.numRequest];
 
       for (int j = 0; j < parameters.numTrials; j++) {
-        Network network = new NetworkGenerator().generateRealNetworks(-1, networkName, parameters); // TODO
+        Network network = new NetworkGenerator().generateRealNetworks(-1, networkName); // TODO
         Request[] requests = new Request[parameters.numRequest];
         for (int i = 0; i < parameters.numRequest; i++) {
           int bandwidth = random.nextInt((parameters.linkBWCapMax - parameters.linkBWCapMin) + 1) + parameters.linkBWCapMin;
@@ -342,5 +351,9 @@ import NetworkGenerator.NetworkGenerator;
       }
       System.out.println("\n" + expSum);
     }
+  }
+
+  public static Network generateNetwork(int size, int trial) {
+    return new NetworkGenerator().generateRealNetworks(size, String.valueOf(trial));
   }
 }

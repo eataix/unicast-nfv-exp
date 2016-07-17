@@ -63,7 +63,7 @@ public class Parameters {
     private int linkBWCapMax = 10000;
     private int linkDelayReqMin = 10;
     private int linkDelayReqMax = 100;
-    private int numRequest = 400;
+    private int numRequest = 500;
     private int L = 4;
     private int reqNetworkReqMin = 10;
     private int reqNetworkReqMax = 100;

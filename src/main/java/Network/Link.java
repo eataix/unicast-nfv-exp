@@ -1,12 +1,10 @@
 package Network;
 
-import Simulation.Parameters;
-
 public class Link {
   private final Server s1;
   private final Server s2;
   private int bandwidthCapacity; //bandwidth capacity
-  private int reservedBandwidth; //bandwidth being used
+  private int allocatedBandwidth; //bandwidth being used
   private int opCost; //operation cost
   private double d; //delay
   private double pathUtCost; //utilization cost of a link representing a shortest path.
@@ -26,13 +24,13 @@ public class Link {
     s1 = svr1;
     s2 = svr2;
     bandwidthCapacity = BW;
-    reservedBandwidth = bw;
+    allocatedBandwidth = bw;
     d = delay;
     opCost = opcost;
   }
 
   public Link clone() {
-    return new Link(s1, s2, bandwidthCapacity, reservedBandwidth, d, opCost);
+    return new Link(s1, s2, bandwidthCapacity, allocatedBandwidth, d, opCost);
   }
 
   public Link(Server s) { //use this constructor to create a self link
@@ -42,7 +40,7 @@ public class Link {
   }
 
   void wipe() {
-    reservedBandwidth = 0;
+    allocatedBandwidth = 0;
   }
 
   @Override
@@ -51,7 +49,7 @@ public class Link {
   }
 
   public int getResidualBandwidth() {
-    return bandwidthCapacity - reservedBandwidth;
+    return bandwidthCapacity - allocatedBandwidth;
   }
 
   public int getBandwidth() {
@@ -59,7 +57,7 @@ public class Link {
   }
 
   public int getAllocatedBandwidth() {
-    return reservedBandwidth;
+    return allocatedBandwidth;
   }
 
   public void setDelay(double D) {
@@ -75,7 +73,7 @@ public class Link {
   }
 
   boolean canSupportBandwidth(double d) {
-    return reservedBandwidth + d < bandwidthCapacity;
+    return allocatedBandwidth + d < bandwidthCapacity;
   }
 
   private boolean selfLink() {
@@ -83,16 +81,9 @@ public class Link {
   }
 
   void allocateBandwidth(double d) {
-    if (reservedBandwidth + d < bandwidthCapacity) {
-      reservedBandwidth += d;
+    if (allocatedBandwidth + d < bandwidthCapacity) {
+      allocatedBandwidth += d;
     }
-  }
-
-  public double getUtCost(double bandwidth, Parameters parameters) { //TODO
-    if (selfLink()) {
-      return 0;
-    }
-    return Math.pow(parameters.beta * parameters.networkSize, (reservedBandwidth + bandwidth) / bandwidthCapacity) - 1;
   }
 
   public double getPathCost() { //to be used in the algorithm section

@@ -7,11 +7,11 @@ import Simulation.Parameters;
 public class ExpCostFunction implements CostFunction {
   @Override
   public double getCost(Link l, int b, Parameters parameters) {
-    return l.getUtCost(b, parameters);
+    return Math.pow(parameters.beta * parameters.networkSize, (l.getAllocatedBandwidth() + b) / l.getBandwidth()) - 1;
   }
 
   @Override
   public double getCost(Server s, int nfv, Parameters parameters) {
-    return s.getUtCost(nfv);
+    return Math.pow(parameters.alpha * parameters.networkSize, (s.getCapacity() - s.remainingCapacity() - parameters.NFVreq[nfv]) / s.getCapacity()) - 1;
   }
 }
