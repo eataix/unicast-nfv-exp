@@ -6,6 +6,7 @@ import Algorithm.CostFunctions.LinCostFunction;
 import Algorithm.Result;
 import Network.Network;
 import Network.Request;
+import Network.Server;
 import NetworkGenerator.NetworkGenerator;
 import NetworkGenerator.NetworkValueSetter;
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+//import com.sun.corba.se.spi.activation.Server;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
@@ -65,7 +68,11 @@ import java.util.concurrent.TimeUnit;
 
     Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
     Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
-    for (int networkSize : defaultParameters.networkSizes) {
+    
+    for (int nSizeIndex = 0; nSizeIndex < defaultParameters.networkSizes.length; nSizeIndex ++) {
+    	
+      int networkSize = defaultParameters.networkSizes[nSizeIndex];
+      
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         int accepted = 0;
 
@@ -88,6 +95,8 @@ import java.util.concurrent.TimeUnit;
       double[] expNumAdmitted = new double[defaultParameters.numRequest];
       double[] linearNumAdmitted = new double[defaultParameters.numRequest];
 
+      double expAverageCostThisNetworkSize = 0d; 
+      double linearAverageCostThisNetworkSize = 0d; 
       for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
         double expAdmittedCount = 0;
         double expPathCost = 0;
@@ -157,7 +166,13 @@ import java.util.concurrent.TimeUnit;
       int numRequests) {
     ArrayList<Request> requests = new ArrayList<>();
     for (int i = 0; i < numRequests; ++i) {
-      requests.add(new Request(network.getRandomServer(), network.getRandomServer(), parameters));
+      // source and destination should be different. 
+      Server source = network.getRandomServer(); 
+      Server destination = network.getRandomServer();
+      while (source.equals(destination)) {
+    	  destination = network.getRandomServer();
+      }
+      requests.add(new Request(source, destination, parameters));
     }
     return requests;
   }
@@ -308,34 +323,48 @@ import java.util.concurrent.TimeUnit;
 
   private static void LEffectWithoutDelays() {
     for (int L = 2; L <= 6; L += 2) {
+    	
+      System.out.println("L:" + L);
+      
       Parameters parameters = new Parameters.Builder().L(L).build();
 
       int accepted = 0; //number of accepted requests
       int expSum = 0; //sum of all exponential cost accepted requests
       Result[] results = new Result[parameters.numRequest];
 
+      //double[] averageCost = new double[defaultParameters.networkSizes.length];
+      
       for (int networkSize : defaultParameters.networkSizes) {
-        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+    	double averageCostNet = 0d; 
+    	for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
+          double averageCostReq = 0d; 
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[i] = alg.minOpCostWithoutDelay();
-            if (results[i].isAdmitted()) {
+            if (results[i].isAdmitted()) {// not sure about here, this request should be always accepted according to assumptions. 
               accepted++;
+              averageCostReq += results[i].getPathCost();
             }
+            
           }
+          averageCostReq = averageCostReq / accepted;
+          averageCostNet += (averageCostNet / defaultParameters.numTrials);
           expSum += accepted;
         }
-        System.out.println("\n" + expSum);
+        System.out.println(networkSize + " " + averageCostNet);
       }
     }
   }
 
   private static void LEffectWithDelays() {
     for (int L = 2; L <= 6; L += 2) {
+    	
+      System.out.println("L:" + L);
+
       Parameters parameters = new Parameters.Builder().L(L).build();
 
       int accepted = 0; //number of accepted requests
@@ -343,6 +372,7 @@ import java.util.concurrent.TimeUnit;
       Result[] results = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
+      	double averageCostNet = 0d; 
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           Request[] requests = new Request[parameters.numRequest];
@@ -351,16 +381,20 @@ import java.util.concurrent.TimeUnit;
                 new Request(network.getRandomServer(), network.getRandomServer(), parameters);
           }
           network.wipeLinks();
+          double averageCostReq = 0d; 
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests[i], parameters);
             results[i] = alg.minOpCostWithoutDelay();
             if (results[i].isAdmitted()) {
               accepted++;
+              averageCostReq += results[i].getPathCost();
             }
           }
+          averageCostReq = averageCostReq / accepted;
+          averageCostNet += (averageCostNet / defaultParameters.numTrials);
           expSum += accepted;
         }
-        System.out.println("\n" + expSum);
+        System.out.println(networkSize + " " + averageCostNet);
       }
     }
   }
