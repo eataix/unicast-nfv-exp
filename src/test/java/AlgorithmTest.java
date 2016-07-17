@@ -7,7 +7,7 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkValueSetter;
-import Simulation.Parameters;
+import Simulation.Simulation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -17,17 +17,17 @@ public class AlgorithmTest {
   @Test
   public void testMinOpCostWithoutDelay() {
     //simple diamond shaped graph
-    Parameters.importParameters("test1.txt");
+    //Parameters.importParameters("test1.txt");
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
-    Server s0 = new Server(0);
+    Server s0 = new Server(0, Simulation.defaultParameters);
     servers.add(s0);
-    Server s1 = new Server(1);
+    Server s1 = new Server(1, Simulation.defaultParameters);
     servers.add(s1);
-    Server s2 = new Server(2);
+    Server s2 = new Server(2, Simulation.defaultParameters);
     servers.add(s2);
-    Server s3 = new Server(3);
+    Server s3 = new Server(3, Simulation.defaultParameters);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
@@ -45,20 +45,20 @@ public class AlgorithmTest {
     l2_3.setOpCost(2);
 
     Network n = new Network(servers, links);
-    NetworkValueSetter nvs = new NetworkValueSetter(n, parameters);
+    NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.defaultParameters);
     nvs.setConstantLinkCapacity(1000);
     nvs.setConstantServerCapacity(10000, 1);
 
     s1.addVM(0);
     s0.addVM(1);
 
-    Request r = new Request(0, s0, s3, parameters);
+    Request r = new Request(0, s0, s3, Simulation.defaultParameters);
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    Algorithm alg = new Algorithm(n, r);
+    Algorithm alg = new Algorithm(n, r, Simulation.defaultParameters);
     Result res = alg.minOpCostWithoutDelay();
     ArrayList<Server> path = res.getPath();
     assertEquals(0, path.get(0).getId());

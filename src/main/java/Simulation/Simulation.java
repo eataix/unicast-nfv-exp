@@ -19,6 +19,7 @@ import NetworkGenerator.NetworkGenerator;
   private static final int trials = 10;
   private static final Random random = new Random();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
+  public static final Parameters defaultParameters = new Parameters.Builder().build();
 
   public static void main(String[] args) {
     //Network network = new NetworkGenerator().barabasiAlbertNetwork(networkSize, 1);
@@ -46,7 +47,7 @@ import NetworkGenerator.NetworkGenerator;
    * We compare the performance of the proposed online algorithms while using different cost functions, i.e., a linear cost function and an exponential cost
    * function
    */
-  public static void CompareCostFns() {
+  private static void CompareCostFns() {
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExpCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
@@ -89,7 +90,7 @@ import NetworkGenerator.NetworkGenerator;
     System.out.println(linSum);
   }
 
-  public static void BetaEffect() {
+  private static void BetaEffect() {
     for (int beta = 2; beta <= 6; beta += 2) {
       Parameters parameters = new Parameters.Builder().beta(beta).build();
 
@@ -123,7 +124,7 @@ import NetworkGenerator.NetworkGenerator;
   /**
    * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the treshold
    */
-  public static void ThresholdEffect() {
+  private static void ThresholdEffect() {
     Parameters parametersWithThreshold = new Parameters.Builder().build();
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE).build();
 
@@ -282,7 +283,7 @@ import NetworkGenerator.NetworkGenerator;
     System.out.println(linSum);
   }
 
-  public static void LEffect() {
+  private static void LEffect() {
     for (int L = 2; L <= 6; L += 2) {
       Parameters parameters = new Parameters.Builder().beta(L).build();
 
