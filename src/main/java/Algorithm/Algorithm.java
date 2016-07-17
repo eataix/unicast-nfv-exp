@@ -78,7 +78,7 @@ public class Algorithm {
   }
 
   private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server dst) {
-    ArrayList<Server> path = new ArrayList<Server>();
+    ArrayList<Server> path = new ArrayList<>();
     Server curr = dst;
     int i = request.SC.length;
     while (curr != null) {
@@ -90,9 +90,9 @@ public class Algorithm {
   }
 
   private ArrayList<Server> shortestPathInAuxiliaryNetwork() {
-    HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
-    HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
-    HashSet<Server> prevLayer = new HashSet<Server>();
+    HashMap<Server, Double> pathCost = new HashMap<>();
+    HashMap<Server, Server> prevNode = new HashMap<>();
+    HashSet<Server> prevLayer = new HashSet<>();
     Server src = auxiliaryNetwork.getSource();
     prevLayer.add(src);
     pathCost.put(auxiliaryNetwork.getSource(), 0.0);

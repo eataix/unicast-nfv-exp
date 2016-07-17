@@ -15,8 +15,8 @@ public class NetworkGenerator {
 
   // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
   public Network generateRealNetworks(int n, String networkIndexPostFix, Parameters parameters) {
-    ArrayList<Server> servers = new ArrayList<Server>();
-    ArrayList<Link> links = new ArrayList<Link>();
+    ArrayList<Server> servers = new ArrayList<>();
+    ArrayList<Link> links = new ArrayList<>();
 
     String fileName = null;
 
@@ -46,7 +46,7 @@ public class NetworkGenerator {
           continue;
         }
         if (0 == readStatus) {
-          lineString.trim();
+          lineString = lineString.trim();
           String[] attrs = lineString.split(" ");
 
           int id = Integer.parseInt(attrs[0]);
@@ -56,8 +56,7 @@ public class NetworkGenerator {
         }
 
         if (1 == readStatus) {
-
-          lineString.trim();
+          lineString = lineString.trim();
           String[] attrs = lineString.split(" ");
 
           int fromNodeId = Integer.parseInt(attrs[0]);
@@ -86,8 +85,8 @@ public class NetworkGenerator {
   }
 
   public Network barabasiAlbertNetwork(int n, int l, Parameters parameters) { //Barabasi-Albert Model - n is number of nodes. Servers are added one at a time
-    ArrayList<Server> servers = new ArrayList<Server>();
-    ArrayList<Link> links = new ArrayList<Link>();
+    ArrayList<Server> servers = new ArrayList<>();
+    ArrayList<Link> links = new ArrayList<>();
     //create seed network
     Server s1 = new Server(0, parameters);
     servers.add(s1);
@@ -128,14 +127,14 @@ public class NetworkGenerator {
   }
 
   public Network randomGraphNetwork(int n, double k, Parameters parameters) { //Random Graph Model - n is number of nodes, k is average degree of each node
-    ArrayList<Server> servers = new ArrayList<Server>();
-    ArrayList<Link> links = new ArrayList<Link>();
+    ArrayList<Server> servers = new ArrayList<>();
+    ArrayList<Link> links = new ArrayList<>();
 
     //create servers
     for (int i = 0; i < n; i++) {
       servers.add(new Server(i, parameters));
     }
-    ArrayList<Server> traversed = new ArrayList<Server>();
+    ArrayList<Server> traversed = new ArrayList<>();
 
     //create links
     for (Server s1 : servers) {
@@ -154,8 +153,8 @@ public class NetworkGenerator {
     //connect disjoint servers
     ArrayList<Server> disconnected = (ArrayList<Server>) servers.clone();
     while (disconnected.size() > 0) {
-      ArrayList<Server> queue = new ArrayList<Server>();
-      ArrayList<Server> connected = new ArrayList<Server>();
+      ArrayList<Server> queue = new ArrayList<>();
+      ArrayList<Server> connected = new ArrayList<>();
       queue.add(servers.get(0));
       while (!queue.isEmpty()) {
         Server curr = queue.remove(0);
@@ -176,8 +175,8 @@ public class NetworkGenerator {
   public Network testNetwork() {
     Parameters parameters = new Parameters.Builder().build();
     //simple diamond shaped graph
-    ArrayList<Server> servers = new ArrayList<Server>();
-    ArrayList<Link> links = new ArrayList<Link>();
+    ArrayList<Server> servers = new ArrayList<>();
+    ArrayList<Link> links = new ArrayList<>();
 
     Server s0 = new Server(0, parameters);
     servers.add(s0);

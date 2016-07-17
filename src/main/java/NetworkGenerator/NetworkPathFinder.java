@@ -1,7 +1,6 @@
 package NetworkGenerator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
@@ -29,14 +28,10 @@ public class NetworkPathFinder { //gets shortest path from network to network
     }
 
     for (Server src : network.getServers()) { //find shortest path from s to every other server in the network
-      final HashMap<Server, Double> pathCost = new HashMap<Server, Double>(); // cost of path from @src to other servers
+      final HashMap<Server, Double> pathCost = new HashMap<>(); // cost of path from @src to other servers
       HashMap<Server, Server> prevNode = new HashMap<>();
       pathCost.put(src, 0.0);
-      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(), new Comparator<Server>() {
-        @Override public int compare(Server s1, Server s2) {
-          return pathCost.get(s1).compareTo(pathCost.get(s2));
-        }
-      }); //priority queue
+      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(), (s1, s2) -> pathCost.get(s1).compareTo(pathCost.get(s2))); //priority queue
       ArrayList<Server> searched = new ArrayList<>();
       queue.add(src);
       while (!queue.isEmpty()) {

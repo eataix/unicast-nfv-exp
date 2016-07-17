@@ -14,7 +14,7 @@ public class Server {
   private HashMap<Integer, VM> NFVs;
 
   public Server clone() {
-    HashMap<Integer, VM> newNFVs = new HashMap<Integer, VM>();
+    HashMap<Integer, VM> newNFVs = new HashMap<>();
     for (Integer nfv : NFVs.keySet()) {
       newNFVs.put(nfv, new VM(nfv));
     }
@@ -53,7 +53,7 @@ public class Server {
   }
 
   public int getDegree() { //just in case there are duplicate links. There shouldn't be, but just in case...
-    HashSet<Server> neighbours = new HashSet<Server>();
+    HashSet<Server> neighbours = new HashSet<>();
     for (Link l : links) {
       neighbours.add(l.getLinkedServer(this));
     }
@@ -95,7 +95,7 @@ public class Server {
   }
 
   public ArrayList<Server> getAllNeighbours() {
-    ArrayList<Server> neighbours = new ArrayList<Server>();
+    ArrayList<Server> neighbours = new ArrayList<>();
     for (Link l : links) {
       neighbours.add(l.getLinkedServer(this));
     }
@@ -104,7 +104,7 @@ public class Server {
 
   public ArrayList<Server> getReachableNeighbours(int b) {
     //get neighbours where link can carry additional bandwidth b
-    ArrayList<Server> neighbours = new ArrayList<Server>();
+    ArrayList<Server> neighbours = new ArrayList<>();
     for (Link l : links) {
       if (l.canSupportBandwidth(b)) {
         neighbours.add(l.getLinkedServer(this));

@@ -2,7 +2,6 @@ package NetworkGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 
@@ -60,16 +59,12 @@ public class Utils {
     }
   }
 
-  static ReturnVal Dijkstra(Network network, Server src, Server dest, LinkCostFunction costFunction) {
+  private static ReturnVal Dijkstra(Network network, Server src, Server dest, LinkCostFunction costFunction) {
     final HashMap<Server, Double> dist = new HashMap<>();
     HashMap<Server, Server> prev = new HashMap<>();
     dist.put(src, 0.0);
 
-    PriorityQueue<Server> Q = new PriorityQueue<>(network.getServers().size(), new Comparator<Server>() {
-      @Override public int compare(Server s1, Server s2) {
-        return dist.get(s1).compareTo(dist.get(s2));
-      }
-    });
+    PriorityQueue<Server> Q = new PriorityQueue<>(network.getServers().size(), (s1, s2) -> dist.get(s1).compareTo(dist.get(s2)));
 
     for (Server s : network.getServers()) {
       if (s == src) {
