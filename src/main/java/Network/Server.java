@@ -12,12 +12,16 @@ public class Server {
   private final ArrayList<Link> links;
   private HashMap<Integer, VM> NFVs;
 
-  public Server clone() {
+  private static HashMap<Integer, VM> copyVMs(HashMap<Integer, VM> NFVs) {
     HashMap<Integer, VM> newNFVs = new HashMap<>();
     for (Integer nfv : NFVs.keySet()) {
       newNFVs.put(nfv, new VM(nfv));
     }
-    return new Server(id, capacity, new ArrayList<>(), newNFVs);
+    return newNFVs;
+  }
+
+  public Server(Server server) {
+    this(server.getId(), server.getCapacity(), new ArrayList<>(), copyVMs(server.NFVs));
   }
 
   private Server(int Id, int c, ArrayList<Link> l, HashMap<Integer, VM> nfvs) {
@@ -136,7 +140,7 @@ public class Server {
     }
   }
 
-  private class VM {
+  private static class VM {
     final int serviceType;
 
     VM(int nfv) {

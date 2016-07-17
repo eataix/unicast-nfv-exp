@@ -42,8 +42,8 @@ public class AuxiliaryNetwork extends Network {
   }
 
   private void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
-    src = request.src.clone();
-    dst = request.dst.clone();
+    src = new Server(request.src);
+    dst = new Server(request.dst);
     auxServers.add(src);
     auxServers.add(dst);
     HashSet<Server> prevLayer = new HashSet<Server>();
@@ -88,7 +88,7 @@ public class AuxiliaryNetwork extends Network {
   private HashSet<Server> cloneServers(Collection<Server> svrs) {
     HashSet<Server> clones = new HashSet<Server>();
     for (Server s : svrs) {
-      clones.add(s.clone());
+      clones.add(new Server(s));
     }
     return clones;
   }
@@ -104,13 +104,13 @@ public class AuxiliaryNetwork extends Network {
     if (path.size() != request.SC.length + 2) { //No path was found
       return Double.MAX_VALUE;
     }
-    HashMap<Link, Link> clonedLinks = new HashMap<Link, Link>();
-    HashMap<Integer, Server> clonedServers = new HashMap<Integer, Server>();
+    HashMap<Link, Link> clonedLinks = new HashMap<>();
+    HashMap<Integer, Server> clonedServers = new HashMap<>();
     for (Link l : links) {
-      clonedLinks.put(l, l.clone());
+      clonedLinks.put(l, new Link(l));
     }
     for (Server s : servers) {
-      clonedServers.put(s.getId(), s.clone());
+      clonedServers.put(s.getId(), new Server(s));
     }
 
     double cost = 0;

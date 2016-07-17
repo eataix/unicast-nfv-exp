@@ -150,7 +150,7 @@ public class NetworkGenerator {
     }
 
     //connect disjoint servers
-    ArrayList<Server> disconnected = (ArrayList<Server>) servers.clone();
+    ArrayList<Server> disconnected = new ArrayList<>(servers);
     while (disconnected.size() > 0) {
       ArrayList<Server> queue = new ArrayList<>();
       ArrayList<Server> connected = new ArrayList<>();
@@ -194,10 +194,10 @@ public class NetworkGenerator {
     Link l2_3 = new Link(s2, s3);
     links.add(l2_3);
 
-    l0_1.setOpCost(8);
-    l0_2.setOpCost(10);
-    l1_3.setOpCost(15);
-    l2_3.setOpCost(2);
+    l0_1.setOperationalCost(8);
+    l0_2.setOperationalCost(10);
+    l1_3.setOperationalCost(15);
+    l2_3.setOperationalCost(2);
 
     return new Network(servers, links);
   }

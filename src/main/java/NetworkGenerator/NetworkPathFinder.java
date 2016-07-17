@@ -24,7 +24,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
 
     ArrayList<Server> auxServers = new ArrayList<>();
     for (Server s : network.getServers()) {
-      auxServers.add(s.clone());
+      auxServers.add(new Server(s));
     }
 
     for (Server src : network.getServers()) { //find shortest path from s to every other server in the network

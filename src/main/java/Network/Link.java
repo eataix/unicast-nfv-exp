@@ -5,8 +5,8 @@ public class Link {
   private final Server s2;
   private int bandwidthCapacity; //bandwidth capacity
   private int allocatedBandwidth; //bandwidth being used
-  private int opCost; //operation cost
-  private double d; //delay
+  private int operationalCost; //operation cost
+  private double delay; //delay
   private double pathUtCost; //utilization cost of a link representing a shortest path.
 
   public Link(Server svr1, Server svr2) {
@@ -25,12 +25,12 @@ public class Link {
     s2 = svr2;
     bandwidthCapacity = BW;
     allocatedBandwidth = bw;
-    d = delay;
-    opCost = opcost;
+    this.delay = delay;
+    operationalCost = opcost;
   }
 
-  public Link clone() {
-    return new Link(s1, s2, bandwidthCapacity, allocatedBandwidth, d, opCost);
+  public Link(Link oLink) {
+    this(oLink.getS1(), oLink.getS2(), oLink.getBandwidth(), oLink.getAllocatedBandwidth(), oLink.getDelay(), oLink.getOperationalCost());
   }
 
   public Link(Server s) { //use this constructor to create a self link
@@ -61,11 +61,11 @@ public class Link {
   }
 
   public void setDelay(double D) {
-    d = D;
+    delay = D;
   }
 
   public double getDelay() {
-    return d;
+    return delay;
   }
 
   public void setBandwidth(int bw) {
@@ -90,19 +90,19 @@ public class Link {
     return pathUtCost;
   }
 
-  void setPathCost(double pathcost) {
-    pathUtCost = pathcost;
+  void setPathCost(double pathCost) {
+    this.pathUtCost = pathCost;
   }
 
-  public double getOperationalCost() {
+  public int getOperationalCost() {
     if (s1 == s2) {
       return 0;
     }
-    return opCost;
+    return operationalCost;
   }
 
-  public void setOpCost(int cost) {
-    opCost = cost;
+  public void setOperationalCost(int cost) {
+    operationalCost = cost;
   }
 
   Server getLinkedServer(Server s) {
@@ -114,5 +114,21 @@ public class Link {
     } else {
       return null;
     }
+  }
+
+  private Server getS1() {
+    return s1;
+  }
+
+  private Server getS2() {
+    return s2;
+  }
+
+  public int getBandwidthCapacity() {
+    return bandwidthCapacity;
+  }
+
+  public double getPathUtCost() {
+    return pathUtCost;
   }
 }

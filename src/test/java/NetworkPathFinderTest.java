@@ -19,13 +19,13 @@ public class NetworkPathFinderTest {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
-    Server s0 = new Server(0, Simulation.defaultParameters);
+    Server s0 = new Server(0);
     servers.add(s0);
-    Server s1 = new Server(1, Simulation.defaultParameters);
+    Server s1 = new Server(1);
     servers.add(s1);
-    Server s2 = new Server(2, Simulation.defaultParameters);
+    Server s2 = new Server(2);
     servers.add(s2);
-    Server s3 = new Server(3, Simulation.defaultParameters);
+    Server s3 = new Server(3);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
@@ -37,10 +37,10 @@ public class NetworkPathFinderTest {
     Link l2_3 = new Link(s2, s3);
     links.add(l2_3);
 
-    l0_1.setOpCost(8);
-    l0_2.setOpCost(10);
-    l1_3.setOpCost(15);
-    l2_3.setOpCost(2);
+    l0_1.setOperationalCost(8);
+    l0_2.setOperationalCost(10);
+    l1_3.setOperationalCost(15);
+    l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
     AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, new Request(2, s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
