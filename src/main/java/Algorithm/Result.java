@@ -19,7 +19,7 @@ public class Result {
     return path;
   }
 
-  public boolean isAdmit() {
+  public boolean isAdmitted() {
     return admit;
   }
 
