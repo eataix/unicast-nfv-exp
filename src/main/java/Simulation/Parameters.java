@@ -28,10 +28,11 @@ public class Parameters {
   public final int networkSize;
   public final double serverRatio;
   public final CostFunction costFunc;
+  public final double nfvProb;
 
   Parameters(int[] nfVreq, int[] nfVrate, int[] nfvOpCost, int[] nfvInitCost, int[] networkSizes, int alpha, int beta, int linkBWCapMin, int linkBWCapMax,
              int numRequest, int L, int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayReqMin,
-             int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc) {
+             int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb) {
     this.networkSizes = networkSizes;
     this.alpha = alpha;
     this.beta = beta;
@@ -54,6 +55,7 @@ public class Parameters {
     this.NFVOpCost = nfvOpCost;
     this.NFVInitCost = nfvInitCost;
     this.costFunc = costFunc;
+    this.nfvProb = nfvProb;
   }
 
   public static class Builder {
@@ -80,6 +82,7 @@ public class Parameters {
     private int[] NFVInitCost = new int[] {5, 6, 7, 4, 8, 5};
     private int[] networkSizes = new int[] {50, 100, 200, 300, 400, 500, 600, 800, 1000};
     private CostFunction costFunc = new ExpCostFunction();
+    private double nfvProb = 0.1;
 
     Builder alpha(int alpha) {
       this.beta = beta;
@@ -186,10 +189,16 @@ public class Parameters {
       return this;
     }
 
+    public Builder nfvProb(double nfvProb) {
+      this.nfvProb = nfvProb;
+      return this;
+    }
+
     public Parameters build() {
       return new Parameters(NFVreq, NFVrate, NFVOpCost, NFVInitCost, networkSizes, alpha, beta, linkBWCapMin, linkBWCapMax, numRequest, L, reqNetworkReqMin,
                             reqNetworkReqMax,
-                            reqDelayReqMin, reqDelayReqMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize, serverRatio, costFunc);
+                            reqDelayReqMin, reqDelayReqMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize, serverRatio, costFunc,
+                            nfvProb);
     }
   }
 }

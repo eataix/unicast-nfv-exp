@@ -24,8 +24,8 @@ public class NetworkValueSetter { //sets the parameters of a given network
     return network;
   }
 
-  public void placeNFVs(
-      double nfvProb) { //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
+  //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
+  public void placeNFVs(double nfvProb) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       ArrayList<Server> servers = network.getUnusedServers(nfv);
       for (Server s : servers) {

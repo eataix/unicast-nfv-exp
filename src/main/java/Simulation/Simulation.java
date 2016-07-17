@@ -13,6 +13,7 @@ import Algorithm.Result;
 import Network.Network;
 import Network.Request;
 import NetworkGenerator.NetworkGenerator;
+import NetworkGenerator.NetworkValueSetter;
 
 @SuppressWarnings("Duplicates") public class Simulation {
   private static final Random random = new Random();
@@ -52,21 +53,15 @@ import NetworkGenerator.NetworkGenerator;
     int linSum = 0;
 
     for (int networkSize : parametersWithExpCostFn.networkSizes) {
-      for (int trial = 0; trial < parametersWithExpCostFn.numTrials; trial++) {
-
-        Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+      for (int trial = 0; trial < parametersWithExpCostFn.numTrials; ++trial) {
+        Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
         network.wipeLinks();
 
-        Result[] expResults = new Result[parametersWithExpCostFn.numRequest];
-        Request[] requests = new Request[parametersWithExpCostFn.numRequest];
-        for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
-          int bandwidth =
-              random.nextInt((parametersWithExpCostFn.linkBWCapMax - parametersWithExpCostFn.linkBWCapMin) + 1) + parametersWithExpCostFn.linkBWCapMin;
-          requests[i] = new Request(bandwidth, network.getRandomServer(), network.getRandomServer(), parametersWithExpCostFn);
-        }
+        ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
+        Result[] expResults = new Result[parametersWithExpCostFn.numRequest];
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests[i], parametersWithExpCostFn);
+          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[i] = alg.maxThroughputWithoutDelay();
           if (expResults[i].isAdmit()) {
             ++accepted;
@@ -78,7 +73,7 @@ import NetworkGenerator.NetworkGenerator;
         accepted = 0;
         network.wipeLinks();
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests[i], parametersWithLinearCostFn);
+          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
           linearResults[i] = alg.maxThroughputWithoutDelay();
           if (linearResults[i].isAdmit()) {
             ++accepted;
@@ -112,7 +107,7 @@ import NetworkGenerator.NetworkGenerator;
 
       for (int networkSize : parameters.networkSizes) {
         for (int trial = 0; trial < parameters.numTrials; trial++) {
-          Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+          Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
           for (int i = 0; i < parameters.numRequest; i++) {
@@ -144,7 +139,7 @@ import NetworkGenerator.NetworkGenerator;
 
     for (int networkSize : parametersWithOutThreshold.networkSizes) {
       for (int trial = 0; trial < parametersWithThreshold.numTrials; trial++) {
-        Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+        Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
         Request[] requests = new Request[parametersWithThreshold.numRequest];
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
           int bandwidth =
@@ -353,7 +348,20 @@ import NetworkGenerator.NetworkGenerator;
     }
   }
 
-  public static Network generateNetwork(int size, int trial) {
-    return new NetworkGenerator().generateRealNetworks(size, String.valueOf(trial));
+  private static void initializeNetwork(Network network, Parameters parameters) {
+    NetworkValueSetter networkValueSetter = new NetworkValueSetter(network, parameters);
+    networkValueSetter.setConstantServerCapacity(Integer.MAX_VALUE, parameters.serverRatio);
+    networkValueSetter.setRandomLinkCapacity(parameters.linkBWCapMin, parameters.linkBWCapMax);
+    networkValueSetter.placeNFVs(parameters.nfvProb);
+  }
+
+  private static Network generateNetwork(int networkSize, int trial) {
+    return new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+  }
+
+  private static Network generateAndInitializeNetwork(int networkSize, int trial, Parameters parameters) {
+    Network network = generateNetwork(networkSize, trial);
+    initializeNetwork(network, parameters);
+    return network;
   }
 }
