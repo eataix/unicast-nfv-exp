@@ -69,7 +69,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithExpCostFn);
           results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }
@@ -79,7 +79,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithLinearCostFn);
           results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }
@@ -110,7 +110,7 @@ import NetworkGenerator.NetworkGenerator;
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests[i], parameters);
             results[i] = alg.maxThroughputWithoutDelay();
-            if (results[i].admit) {
+            if (results[i].isAdmit()) {
               accepted++;
             }
           }
@@ -146,7 +146,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithThreshold);
           results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }
@@ -156,7 +156,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parametersWithOutThreshold);
           results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }
@@ -190,7 +190,7 @@ import NetworkGenerator.NetworkGenerator;
       for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
         Algorithm alg = new Algorithm(network, requests[i], parametersWithExpCostFn);
         results[i] = alg.maxThroughputWithoutDelay();
-        if (results[i].admit) {
+        if (results[i].isAdmit()) {
           accepted++;
         }
       }
@@ -200,7 +200,7 @@ import NetworkGenerator.NetworkGenerator;
       for (int i = 0; i < parametersWithExpCostFn.numRequest; i++) {
         Algorithm alg = new Algorithm(network, requests[i], parametersWithLinearCostFn);
         results[i] = alg.maxThroughputWithoutDelay();
-        if (results[i].admit) {
+        if (results[i].isAdmit()) {
           accepted++;
         }
       }
@@ -229,7 +229,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parameters.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parameters);
           results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }
@@ -263,7 +263,7 @@ import NetworkGenerator.NetworkGenerator;
       for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
         Algorithm alg = new Algorithm(network, requests[i], parametersWithThreshold);
         results[i] = alg.maxThroughputWithoutDelay();
-        if (results[i].admit) {
+        if (results[i].isAdmit()) {
           accepted++;
         }
       }
@@ -273,7 +273,7 @@ import NetworkGenerator.NetworkGenerator;
       for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
         Algorithm alg = new Algorithm(network, requests[i], parametersWithOutThreshold);
         results[i] = alg.maxThroughputWithoutDelay();
-        if (results[i].admit) {
+        if (results[i].isAdmit()) {
           accepted++;
         }
       }
@@ -285,7 +285,7 @@ import NetworkGenerator.NetworkGenerator;
 
   private static void LEffect() {
     for (int L = 2; L <= 6; L += 2) {
-      Parameters parameters = new Parameters.Builder().beta(L).build();
+      Parameters parameters = new Parameters.Builder().L(L).build();
 
       int accepted = 0; //number of accepted requests
       int expSum = 0; //sum of all exponential cost accepted requests
@@ -303,7 +303,7 @@ import NetworkGenerator.NetworkGenerator;
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests[i], parameters);
             results[i] = alg.minOpCostWithoutDelay();
-            if (results[i].admit) {
+            if (results[i].isAdmit()) {
               accepted++;
             }
           }
@@ -317,7 +317,7 @@ import NetworkGenerator.NetworkGenerator;
   public static void LEffectRealTopology(String networkName) {
 
     for (int L = 2; L <= 6; L += 2) {
-      Parameters parameters = new Parameters.Builder().beta(L).build();
+      Parameters parameters = new Parameters.Builder().L(L).build();
 
       int accepted = 0; //number of accepted requests
       int expSum = 0; //sum of all exponential cost accepted requests
@@ -334,7 +334,7 @@ import NetworkGenerator.NetworkGenerator;
         for (int i = 0; i < parameters.numRequest; i++) {
           Algorithm alg = new Algorithm(network, requests[i], parameters);
           results[i] = alg.minOpCostWithoutDelay();
-          if (results[i].admit) {
+          if (results[i].isAdmit()) {
             accepted++;
           }
         }

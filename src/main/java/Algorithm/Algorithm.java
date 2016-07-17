@@ -33,48 +33,53 @@ public class Algorithm {
     CostFunction cf = new OpCostFunction();
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
-      return new Result(); //this generates a no-admittance result
+      return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateNetwork(true);
+    auxiliaryNetwork.generateOfflineNetwork();
     ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, cf);
-    return new Result(path, finalPathCost);
+    return new Result.Builder().path(path)
+                               .pathCost(finalPathCost)
+                               .build();
   }
 
   public Result maxThroughputWithoutDelay() { //s is source, t is sink
     createAuxiliaryNetwork(parameters.costFunc);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
-      return new Result(); //this generates a no-admittance result
+      return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateNetwork(false);
+    auxiliaryNetwork.generateOnlineNetwork();
     ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
-    return new Result(path, finalPathCost, admitRequest(finalPathCost));
+    return new Result.Builder().path(path)
+                               .pathCost(finalPathCost)
+                               .admit(admitRequest(finalPathCost))
+                               .build();
   }
 
   public Result minOpCostWithDelay(double delay) {
     CostFunction cf = new ExpCostFunction();
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
-      return new Result(); //this generates a no-admittance result
+      return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateNetwork(true);
+    auxiliaryNetwork.generateOnlineNetwork();
     ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
-    return new Result();
+    return new Result.Builder().build();
   }
 
   public Result maxThroughputWithDelay(CostFunction cf, double delay) { //s is source, t is sink
     createAuxiliaryNetwork(cf);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
-      return new Result(); //this generates a no-admittance result
+      return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateNetwork(false);
+    auxiliaryNetwork.generateOnlineNetwork();
     ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), delay);
-    return new Result();
+    return new Result.Builder().build();
   }
 
   private void createAuxiliaryNetwork(CostFunction cf) {
-    auxiliaryNetwork = new NetworkPathFinder().shortestPathsByCost(originalNetwork, request, cf, this.parameters);
+    auxiliaryNetwork = NetworkPathFinder.shortestPathsByCost(originalNetwork, request, cf, this.parameters);
   }
 
   private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server dst) {

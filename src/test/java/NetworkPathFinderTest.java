@@ -43,9 +43,8 @@ public class NetworkPathFinderTest {
     l2_3.setOpCost(2);
 
     Network n = new Network(servers, links);
-    AuxiliaryNetwork auxnet =
-        new NetworkPathFinder().shortestPathsByCost(n, new Request(2, s0, s3, Simulation.defaultParameters), new OpCostFunction(),
-                                                    Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, new Request(2, s0, s3, Simulation.defaultParameters), new OpCostFunction(),
+                                                                          Simulation.defaultParameters);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());
     assertEquals(l0_2, path.get(0));

@@ -5,27 +5,50 @@ import java.util.ArrayList;
 import Network.Server;
 
 public class Result {
-  private ArrayList<Server> path;
-  public final double pathCost;
-  public boolean admit;
+  private final ArrayList<Server> path;
+  private final double pathCost;
+  private final boolean admit;
 
-  Result(ArrayList<Server> p, double pc, boolean a) {
+  private Result(ArrayList<Server> p, double pc, boolean a) {
     path = p;
     pathCost = pc;
     admit = a;
   }
 
-  Result(ArrayList<Server> p, double pc) {
-    path = p;
-    pathCost = pc;
-  }
-
-  Result() {
-    admit = false;
-    pathCost = Double.MAX_VALUE;
-  }
-
   public ArrayList<Server> getPath() {
     return path;
+  }
+
+  public boolean isAdmit() {
+    return admit;
+  }
+
+  public double getPathCost() {
+    return pathCost;
+  }
+
+  static class Builder {
+    private ArrayList<Server> path = null;
+    private double pathCost = Double.MAX_VALUE;
+    private boolean admit = false;
+
+    public Builder path(ArrayList<Server> path) {
+      this.path = path;
+      return this;
+    }
+
+    public Builder pathCost(double pathCost) {
+      this.pathCost = pathCost;
+      return this;
+    }
+
+    public Builder admit(boolean admit) {
+      this.admit = admit;
+      return this;
+    }
+
+    public Result build() {
+      return new Result(path, pathCost, admit);
+    }
   }
 }

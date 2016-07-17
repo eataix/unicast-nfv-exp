@@ -17,12 +17,12 @@ public class NetworkPathFinder { //gets shortest path from network to network
   /**
    * Use djikstra to get shortest paths by @costFn. New Link takes the minimum bandwidth in shortest path.
    */
-  public AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
+  public static AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths = new HashMap<>();
     final double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
 
-    ArrayList<Server> auxServers = new ArrayList<Server>();
+    ArrayList<Server> auxServers = new ArrayList<>();
     for (Server s : network.getServers()) {
       auxServers.add(s.clone());
     }

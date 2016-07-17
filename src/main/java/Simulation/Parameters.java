@@ -30,9 +30,8 @@ public class Parameters {
   public final CostFunction costFunc;
 
   Parameters(int[] nfVreq, int[] nfVrate, int[] nfvOpCost, int[] nfvInitCost, int[] networkSizes, int alpha, int beta, int linkBWCapMin, int linkBWCapMax,
-             int numRequest, int L,
-             int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayReqMin, int linkDelayReqMax,
-             int threshold, int networkSize, double serverRatio, CostFunction costFunc) {
+             int numRequest, int L, int reqNetworkReqMin, int reqNetworkReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayReqMin,
+             int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc) {
     this.networkSizes = networkSizes;
     this.alpha = alpha;
     this.beta = beta;
@@ -60,8 +59,8 @@ public class Parameters {
   public static class Builder {
     private int alpha = 2;
     private int beta = 2;
-    private int linkBWCapMin = 200;
-    private int linkBWCapMax = 400;
+    private int linkBWCapMin = 1000;
+    private int linkBWCapMax = 10000;
     private int linkDelayReqMin = 10;
     private int linkDelayReqMax = 100;
     private int numRequest = 400;

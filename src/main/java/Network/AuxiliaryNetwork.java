@@ -33,7 +33,15 @@ public class AuxiliaryNetwork extends Network {
     this.parameters = parameters;
   }
 
-  public void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
+  public void generateOnlineNetwork() {
+    generateNetwork(false);
+  }
+
+  public void generateOfflineNetwork() {
+    generateNetwork(true);
+  }
+
+  private void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
     src = request.src.clone();
     dst = request.dst.clone();
     auxServers.add(src);
