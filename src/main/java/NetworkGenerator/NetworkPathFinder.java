@@ -1,10 +1,5 @@
 package NetworkGenerator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
-
 import Algorithm.CostFunctions.CostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
@@ -12,6 +7,10 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import Simulation.Parameters;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public class NetworkPathFinder { //gets shortest path from network to network
 

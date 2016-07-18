@@ -85,9 +85,6 @@ import java.util.concurrent.TimeUnit;
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
-    int expSum = 0;
-    int linSum = 0;
-
     Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
     Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
 
@@ -113,11 +110,6 @@ import java.util.concurrent.TimeUnit;
         }
       }
 
-      double[] expNumAdmitted = new double[defaultParameters.numRequest];
-      double[] linearNumAdmitted = new double[defaultParameters.numRequest];
-
-      double expAverageCostThisNetworkSize = 0d;
-      double linearAverageCostThisNetworkSize = 0d;
       for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
         double expAdmittedCount = 0;
         double expPathCost = 0;
@@ -139,6 +131,8 @@ import java.util.concurrent.TimeUnit;
         expPathCost /= parametersWithExpCostFn.numTrials;
         linearAdmittedCount /= parametersWithExpCostFn.numTrials;
         linearPathCost /= parametersWithExpCostFn.numTrials;
+        System.out.printf("%d %f %f\n", networkSize, expAdmittedCount, linearAdmittedCount);
+        System.out.printf("%d %f %f\n", networkSize, expPathCost, linearPathCost);
       }
     }
   }
@@ -147,157 +141,204 @@ import java.util.concurrent.TimeUnit;
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
-    int expSum = 0;
-    int linSum = 0;
-
+    Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
+    Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
-        int accepted = 0;
-
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
-        network.wipeLinks();
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
-        Result[] expResults = new Result[parametersWithExpCostFn.numRequest];
+        network.wipeLinks();
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
-          expResults[i] = alg.maxThroughputWithDelay();
-          if (expResults[i].isAdmitted()) {
-            ++accepted;
-          }
+          expResults[trial][i] = alg.maxThroughputWithDelay();
         }
-        expSum += accepted;
 
-        Result[] linearResults = new Result[parametersWithExpCostFn.numRequest];
-        accepted = 0;
         network.wipeLinks();
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
-          linearResults[i] = alg.maxThroughputWithDelay();
-          if (linearResults[i].isAdmitted()) {
-            ++accepted;
+          linearResults[trial][i] = alg.maxThroughputWithDelay();
+        }
+      }
+
+      for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
+        double expAdmittedCount = 0;
+        double expPathCost = 0;
+        double linearAdmittedCount = 0;
+        double linearPathCost = 0;
+
+        for (int trial = 0; trial < parametersWithExpCostFn.numTrials; ++trial) {
+          if (expResults[trial][i].isAdmitted()) {
+            ++expAdmittedCount;
+            expPathCost += expResults[trial][i].getPathCost();
+          }
+          if (linearResults[trial][i].isAdmitted()) {
+            ++linearAdmittedCount;
+            linearPathCost += linearResults[trial][i].getPathCost();
           }
         }
-        linSum += accepted;
-      }
-    }
-  }
 
-  private static ArrayList<Request> generateRequests(Parameters parameters, Network network,
-      int numRequests) {
-    ArrayList<Request> requests = new ArrayList<>();
-    for (int i = 0; i < numRequests; ++i) {
-      // source and destination should be different.
-      Server source = network.getRandomServer();
-      Server destination = network.getRandomServer();
-      while (source.equals(destination)) {
-        destination = network.getRandomServer();
+        expAdmittedCount /= parametersWithExpCostFn.numTrials;
+        expPathCost /= parametersWithExpCostFn.numTrials;
+        linearAdmittedCount /= parametersWithExpCostFn.numTrials;
+        linearPathCost /= parametersWithExpCostFn.numTrials;
+        System.out.printf("%d %f %f\n", networkSize, expAdmittedCount, linearAdmittedCount);
+        System.out.printf("%d %f %f\n", networkSize, expPathCost, linearPathCost);
       }
-      requests.add(new Request(source, destination, parameters));
     }
-    return requests;
   }
 
   private static void betaImpactWithoutDelays() {
-    for (int beta = 2; beta <= 6; beta += 2) {
-      Parameters parameters = new Parameters.Builder().beta(beta).build();
+    int[] betas = new int[] {2, 4, 6};
+    for (int networkSize : defaultParameters.networkSizes) {
+      Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequest];
 
-      int accepted = 0; //number of accepted requests
-      int expSum = 0; //sum of all exponential cost accepted requests
-      Result[] results = new Result[parameters.numRequest];
+      for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
+        int beta = betas[betaIdx];
+        Parameters parameters = new Parameters.Builder().beta(beta).build();
 
-      for (int networkSize : defaultParameters.networkSizes) {
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
-          ArrayList<Request> requests =
-              generateRequests(parameters, network, parameters.numRequest);
+          ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
-            results[i] = alg.maxThroughputWithoutDelay();
-            if (results[i].isAdmitted()) {
-              accepted++;
+            results[betaIdx][trial][i] = alg.maxThroughputWithoutDelay();
+          }
+        }
+      }
+
+      for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
+        int beta = betas[betaIdx];
+        StringBuilder count = new StringBuilder();
+        StringBuilder cost = new StringBuilder();
+        count.append(networkSize).append(" ");
+        cost.append(networkSize).append(" ");
+        for (int i = 0; i < defaultParameters.numRequest; ++i) {
+          double expAdmittedCount = 0;
+          double expPathCost = 0;
+
+          for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+            if (results[betaIdx][trial][i].isAdmitted()) {
+              ++expAdmittedCount;
+              expPathCost += results[betaIdx][trial][i].getPathCost();
             }
           }
-          expSum += accepted;
+
+          expAdmittedCount /= defaultParameters.numTrials;
+          count.append(expAdmittedCount).append(" ");
+          expPathCost /= defaultParameters.numTrials;
+          cost.append(expPathCost).append("");
         }
-        System.out.println("\n" + expSum);
+        System.out.println(count.toString());
+        System.out.println(cost.toString());
       }
     }
   }
 
   private static void betaImpactWithDelays() {
-    for (int beta = 2; beta <= 6; beta += 2) {
-      Parameters parameters = new Parameters.Builder().beta(beta).build();
+    int[] betas = new int[] {2, 4, 6};
+    for (int networkSize : defaultParameters.networkSizes) {
+      Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequest];
 
-      int accepted = 0; //number of accepted requests
-      int expSum = 0; //sum of all exponential cost accepted requests
-      Result[] results = new Result[parameters.numRequest];
+      for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
+        int beta = betas[betaIdx];
+        Parameters parameters = new Parameters.Builder().beta(beta).build();
 
-      for (int networkSize : defaultParameters.networkSizes) {
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
-          ArrayList<Request> requests =
-              generateRequests(parameters, network, parameters.numRequest);
+          ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
-            results[i] = alg.maxThroughputWithDelay();
-            if (results[i].isAdmitted()) {
-              accepted++;
+            results[betaIdx][trial][i] = alg.maxThroughputWithDelay();
+          }
+        }
+      }
+
+      for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
+        int beta = betas[betaIdx];
+        StringBuilder count = new StringBuilder();
+        StringBuilder cost = new StringBuilder();
+        count.append(networkSize).append(" ");
+        cost.append(networkSize).append(" ");
+        for (int i = 0; i < defaultParameters.numRequest; ++i) {
+          double expAdmittedCount = 0;
+          double expPathCost = 0;
+
+          for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+            if (results[betaIdx][trial][i].isAdmitted()) {
+              ++expAdmittedCount;
+              expPathCost += results[betaIdx][trial][i].getPathCost();
             }
           }
-          expSum += accepted;
+
+          expAdmittedCount /= defaultParameters.numTrials;
+          count.append(expAdmittedCount).append(" ");
+          expPathCost /= defaultParameters.numTrials;
+          cost.append(expPathCost).append("");
         }
-        System.out.println("\n" + expSum);
+        System.out.println(count.toString());
+        System.out.println(cost.toString());
       }
     }
   }
 
   /**
-   * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the treshold
+   * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the threshold
    */
-
   private static void ThresholdEffectWithoutDelays() {
     Parameters parametersWithThreshold = new Parameters.Builder().build();
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
                                                                     .build();
 
-    int accepted = 0; //number of accepted requests
-    int expSum = 0; //sum of all exponential cost accepted requests
-    int linSum = 0; //sum of all linear cost accepted requests
-    Result[] results = new Result[parametersWithThreshold.numRequest];
+    Result[][] withThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
+    Result[][] withoutThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
 
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
-        ArrayList<Request> requests =
-            generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
+        ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
-        for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
+        for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
-          results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].isAdmitted()) {
-            accepted++;
-          }
+          withThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
-        expSum += accepted;
-        accepted = 0;
+
         network.wipeLinks();
-        for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
+        for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
-          results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].isAdmitted()) {
-            accepted++;
+          withoutThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
+        }
+      }
+
+      for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
+        double expAdmittedCount = 0;
+        double expPathCost = 0;
+        double linearAdmittedCount = 0;
+        double linearPathCost = 0;
+
+        for (int trial = 0; trial < parametersWithThreshold.numTrials; ++trial) {
+          if (withThresholdResults[trial][i].isAdmitted()) {
+            ++expAdmittedCount;
+            expPathCost += withThresholdResults[trial][i].getPathCost();
+          }
+          if (withoutThresholdResults[trial][i].isAdmitted()) {
+            ++linearAdmittedCount;
+            linearPathCost += withoutThresholdResults[trial][i].getPathCost();
           }
         }
-        linSum += accepted;
+
+        expAdmittedCount /= parametersWithThreshold.numTrials;
+        expPathCost /= parametersWithThreshold.numTrials;
+        linearAdmittedCount /= parametersWithOutThreshold.numTrials;
+        linearPathCost /= parametersWithOutThreshold.numTrials;
+        System.out.printf("%d %f %f\n", networkSize, expAdmittedCount, linearAdmittedCount);
+        System.out.printf("%d %f %f\n", networkSize, expPathCost, linearPathCost);
       }
-      System.out.println("\n" + expSum);
-      System.out.println(linSum);
     }
   }
 
@@ -306,10 +347,8 @@ import java.util.concurrent.TimeUnit;
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
                                                                     .build();
 
-    int accepted = 0; //number of accepted requests
-    int expSum = 0; //sum of all exponential cost accepted requests
-    int linSum = 0; //sum of all linear cost accepted requests
-    Result[] results = new Result[parametersWithThreshold.numRequest];
+    Result[][] withThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
+    Result[][] withoutThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
 
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
@@ -317,27 +356,42 @@ import java.util.concurrent.TimeUnit;
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
-        for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
+        for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
-          results[i] = alg.maxThroughputWithoutDelay();
-          if (results[i].isAdmitted()) {
-            accepted++;
-          }
+          withThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
-        expSum += accepted;
-        accepted = 0;
+
         network.wipeLinks();
-        for (int i = 0; i < parametersWithThreshold.numRequest; i++) {
+        for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
-          results[i] = alg.maxThroughputWithDelay();
-          if (results[i].isAdmitted()) {
-            accepted++;
+          withoutThresholdResults[trial][i] = alg.maxThroughputWithDelay();
+        }
+      }
+
+      for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
+        double expAdmittedCount = 0;
+        double expPathCost = 0;
+        double linearAdmittedCount = 0;
+        double linearPathCost = 0;
+
+        for (int trial = 0; trial < parametersWithThreshold.numTrials; ++trial) {
+          if (withThresholdResults[trial][i].isAdmitted()) {
+            ++expAdmittedCount;
+            expPathCost += withThresholdResults[trial][i].getPathCost();
+          }
+          if (withoutThresholdResults[trial][i].isAdmitted()) {
+            ++linearAdmittedCount;
+            linearPathCost += withoutThresholdResults[trial][i].getPathCost();
           }
         }
-        linSum += accepted;
+
+        expAdmittedCount /= parametersWithThreshold.numTrials;
+        expPathCost /= parametersWithThreshold.numTrials;
+        linearAdmittedCount /= parametersWithOutThreshold.numTrials;
+        linearPathCost /= parametersWithOutThreshold.numTrials;
+        System.out.printf("%d %f %f\n", networkSize, expAdmittedCount, linearAdmittedCount);
+        System.out.printf("%d %f %f\n", networkSize, expPathCost, linearPathCost);
       }
-      System.out.println("\n" + expSum);
-      System.out.println(linSum);
     }
   }
 
@@ -418,6 +472,20 @@ import java.util.concurrent.TimeUnit;
     }
   }
 
+  private static ArrayList<Request> generateRequests(Parameters parameters, Network network, int numRequests) {
+    ArrayList<Request> requests = new ArrayList<>();
+    for (int i = 0; i < numRequests; ++i) {
+      // source and destination should be different.
+      Server source = network.getRandomServer();
+      Server destination = network.getRandomServer();
+      while (source.equals(destination)) {
+        destination = network.getRandomServer();
+      }
+      requests.add(new Request(source, destination, parameters));
+    }
+    return requests;
+  }
+
   private static void initializeNetwork(Network network, Parameters parameters) {
     NetworkValueSetter networkValueSetter = new NetworkValueSetter(network, parameters);
     networkValueSetter.setConstantServerCapacity(Integer.MAX_VALUE, parameters.serverRatio);
@@ -425,8 +493,7 @@ import java.util.concurrent.TimeUnit;
     networkValueSetter.placeNFVs(parameters.nfvProb);
   }
 
-  private static Network generateAndInitializeNetwork(int networkSize, int trial,
-      Parameters parameters) {
+  private static Network generateAndInitializeNetwork(int networkSize, int trial, Parameters parameters) {
     Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
     initializeNetwork(network, parameters);
     return network;
