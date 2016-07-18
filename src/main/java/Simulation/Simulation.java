@@ -1,11 +1,5 @@
 package Simulation;
 
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 import Algorithm.Algorithm;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 import Algorithm.CostFunctions.LinCostFunction;
@@ -15,26 +9,52 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkGenerator;
 import NetworkGenerator.NetworkValueSetter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   public static final Parameters defaultParameters = new Parameters.Builder().build();
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
-  public static final Logger logger = LoggerFactory.getLogger("Simulation");
 
   public static void main(String[] args) {
     ArrayList<Runnable> listOfTasks = new ArrayList<>();
-    listOfTasks.add(new Thread(() -> CompareCostFnsWithoutDelays()));
-    listOfTasks.add(new Thread(() -> CompareCostFnsWithDelays()));
-    //listOfTasks.add(new Thread(() -> betaImpactWithoutDelays()));
-    //listOfTasks.add(new Thread(() -> betaImpactWithDelays()));
-    //listOfTasks.add(new Thread(() -> ThresholdEffectWithoutDelays()));
-    //listOfTasks.add(new Thread(() -> ThresholdEffectWithDelays()));
-    //listOfTasks.add(new Thread(() -> LEffectWithoutDelays()));
-    //listOfTasks.add(new Thread(() -> LEffectWithDelays()));
+    for (String arg : args) {
+      switch (arg) {
+        case "0":
+          listOfTasks.add(new Thread(() -> LEffectWithoutDelays()));
+          break;
+        case "1":
+          listOfTasks.add(new Thread(() -> LEffectWithDelays()));
+          break;
+        case "2":
+          listOfTasks.add(new Thread(() -> betaImpactWithoutDelays()));
+          break;
+        case "3":
+          listOfTasks.add(new Thread(() -> betaImpactWithDelays()));
+          break;
+        case "4":
+          listOfTasks.add(new Thread(() -> ThresholdEffectWithoutDelays()));
+          break;
+        case "5":
+          listOfTasks.add(new Thread(() -> ThresholdEffectWithDelays()));
+          break;
+        case "6":
+          listOfTasks.add(new Thread(() -> CompareCostFnsWithoutDelays()));
+          break;
+        case "7":
+          listOfTasks.add(new Thread(() -> CompareCostFnsWithDelays()));
+          break;
+        default:
+          System.out.println("Unknown argument: " + arg);
+          System.exit(1);
+      }
+    }
+
     listOfTasks.forEach(threadPool::execute);
 
     threadPool.shutdown();
@@ -62,7 +82,6 @@ import org.slf4j.LoggerFactory;
    * function
    */
   private static void CompareCostFnsWithoutDelays() {
-    logger.debug("CompareCostFnsWithoutDelays started");
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
@@ -76,7 +95,6 @@ import org.slf4j.LoggerFactory;
       int networkSize = defaultParameters.networkSizes[nSizeIndex];
 
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
-        logger.debug(String.format("Network size: %d; trial: %d", networkSize, trial));
         int accepted = 0;
 
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
@@ -134,7 +152,6 @@ import org.slf4j.LoggerFactory;
 
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
-        logger.debug(String.format("Network size: %d; trial: %d", networkSize, trial));
         int accepted = 0;
 
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);

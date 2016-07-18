@@ -1,9 +1,5 @@
 package Algorithm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import Algorithm.CostFunctions.CostFunction;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 import Algorithm.CostFunctions.OperationalCostFunction;
@@ -14,6 +10,9 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkPathFinder;
 import Simulation.Parameters;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Algorithm {
   private final Network originalNetwork;
@@ -108,7 +107,7 @@ public class Algorithm {
    * @return A shortest path in @auxiliaryNetwork for @request with respect to @edgeWeightFunction
    */
   private static ArrayList<Server> shortestPathInAuxiliaryNetwork(AuxiliaryNetwork auxiliaryNetwork, Request request, Parameters parameters,
-                                                                  CostFunction edgeWeightFunction) {
+      CostFunction edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
     HashSet<Server> prevLayer = new HashSet<>();
