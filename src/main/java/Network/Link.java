@@ -20,17 +20,17 @@ public class Link {
     s2.addLink(this);
   }
 
-  private Link(Server svr1, Server svr2, int BW, int bw, double delay, int opcost) {
-    s1 = svr1;
-    s2 = svr2;
-    bandwidthCapacity = BW;
-    allocatedBandwidth = bw;
+  private Link(Server s1, Server s2, int bandwidthCapacity, int allocatedBandwidth, double delay, int operationalCost) {
+    this.s1 = s1;
+    this.s2 = s2;
+    this.bandwidthCapacity = bandwidthCapacity;
+    this.allocatedBandwidth = allocatedBandwidth;
     this.delay = delay;
-    operationalCost = opcost;
+    this.operationalCost = operationalCost;
   }
 
-  public Link(Link oLink) {
-    this(oLink.getS1(), oLink.getS2(), oLink.getBandwidth(), oLink.getAllocatedBandwidth(), oLink.getDelay(), oLink.getOperationalCost());
+  public Link(Link link) {
+    this(link.getS1(), link.getS2(), link.getBandwidth(), link.getAllocatedBandwidth(), link.getDelay(), link.getOperationalCost());
   }
 
   public Link(Server s) { //use this constructor to create a self link
