@@ -7,6 +7,7 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkPathFinder;
+import Simulation.Parameters;
 import Simulation.Simulation;
 import org.junit.Test;
 
@@ -18,6 +19,8 @@ public class NetworkPathFinderTest {
     //simple diamond shaped graph
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
+
+    Parameters parameters = new Parameters.Builder().L(2).build();
 
     Server s0 = new Server(0);
     servers.add(s0);

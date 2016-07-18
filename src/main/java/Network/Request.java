@@ -10,7 +10,7 @@ public class Request {
   private final int bandwidth;
   private final Server source;
   private final Server destination;
-  private int delayReq; //delayReq bound requirement
+  private double delayReq; //delayReq bound requirement
   private final Parameters parameters;
 
   public Request(Server source, Server destination, Parameters parameters) {
@@ -72,7 +72,7 @@ public class Request {
     return destination;
   }
 
-  public int getDelayReq() {
+  public double getDelayReq() {
     return delayReq;
   }
 

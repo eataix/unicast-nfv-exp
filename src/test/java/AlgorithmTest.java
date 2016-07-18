@@ -7,6 +7,7 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkValueSetter;
+import Simulation.Parameters;
 import Simulation.Simulation;
 import org.junit.Test;
 
@@ -20,6 +21,8 @@ public class AlgorithmTest {
     //Parameters.importParameters("test1.txt");
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
+
+    Parameters parameters = new Parameters.Builder().L(2).build();
 
     Server s0 = new Server(0);
     servers.add(s0);

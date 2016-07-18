@@ -62,6 +62,7 @@ public class AuxiliaryNetwork extends Network {
           Link l = new Link(prev, curr);
           l.setDelay(pathDelays[curr.getId()][prev.getId()]);
           l.setPathCost(pathCosts[curr.getId()][prev.getId()]);
+          this.auxLinks.add(l);
         }
       }
       serviceLayers.add(currLayer);
@@ -71,6 +72,7 @@ public class AuxiliaryNetwork extends Network {
       Link l = new Link(prev, destination);
       l.setDelay(pathDelays[destination.getId()][prev.getId()]);
       l.setPathCost(pathCosts[destination.getId()][prev.getId()]);
+      this.auxLinks.add(l);
     }
   }
 

@@ -23,6 +23,8 @@ public class AuxiliaryNetworkTest {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
+    Parameters parameters = new Parameters.Builder().L(2).build();
+
     Server s0 = new Server(0);
     servers.add(s0);
     Server s1 = new Server(1);

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import Network.Link;
 import Network.Network;
 import Network.Server;
+import Simulation.Parameters;
 
 public class NetworkGenerator {
 
@@ -129,7 +130,7 @@ public class NetworkGenerator {
     return new Network(servers, links);
   }
 
-  public Network randomGraphNetwork(int n, double k) { //Random Graph Model - n is number of nodes, k is average degree of each node
+  public Network randomGraphNetwork(int n, double k, Parameters parameters) { //Random Graph Model - n is number of nodes, k is average degree of each node
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
@@ -180,6 +181,8 @@ public class NetworkGenerator {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
+    Parameters parameters = new Parameters.Builder().L(2).build();
+    
     Server s0 = new Server(0);
     servers.add(s0);
     Server s1 = new Server(1);
@@ -204,12 +207,5 @@ public class NetworkGenerator {
     l2_3.setOperationalCost(2);
 
     return new Network(servers, links);
-  }
-
-  // unit tests
-  public static void main(String[] s) {
-    NetworkGenerator netGen = new NetworkGenerator();
-    Network net = netGen.generateRealNetworks(-1, "GEANT");
-    System.out.println(net.toString());
   }
 }

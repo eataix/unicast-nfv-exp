@@ -116,11 +116,11 @@ public class Link {
     }
   }
 
-  private Server getS1() {
+  public Server getS1() {
     return s1;
   }
 
-  private Server getS2() {
+  public Server getS2() {
     return s2;
   }
 
@@ -131,4 +131,5 @@ public class Link {
   public double getPathUtCost() {
     return pathUtCost;
   }
+  
 }
