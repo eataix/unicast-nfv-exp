@@ -59,7 +59,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
           continue;
         }
         if (pathCost.get(dest) == null) {//Auxiliary graph could not be constructed (some destinations are not reachable with current residual bandwidth)
-          return null;
+          return null; // TODO: Zichuan, would you please check if we should really do this?
         }
         Server curr = dest;
         double delay = 0;

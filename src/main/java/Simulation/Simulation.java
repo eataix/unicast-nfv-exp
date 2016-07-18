@@ -403,7 +403,7 @@ import java.util.concurrent.TimeUnit;
           double averageCostReq = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests[i], parameters);
-            results[i] = alg.minOpCostWithoutDelay();
+            results[i] = alg.minOpCostWithDelay();
             if (results[i].isAdmitted()) {
               accepted++;
               averageCostReq += results[i].getPathCost();
