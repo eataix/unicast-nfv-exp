@@ -371,7 +371,7 @@ import java.util.concurrent.TimeUnit;
             }
           }
           averageCostReq = averageCostReq / accepted;
-          averageCostNet += (averageCostNet / defaultParameters.numTrials);
+          averageCostNet += (averageCostReq / defaultParameters.numTrials);
           expSum += accepted;
         }
         System.out.println(networkSize + " " + averageCostNet);

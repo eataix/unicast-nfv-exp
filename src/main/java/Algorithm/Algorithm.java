@@ -37,6 +37,7 @@ public class Algorithm {
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
+                               .admit(true)
                                .build();
   }
 
