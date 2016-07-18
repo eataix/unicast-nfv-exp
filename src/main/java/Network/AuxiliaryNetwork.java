@@ -20,17 +20,18 @@ public class AuxiliaryNetwork extends Network {
   private final ArrayList<Link> auxLinks;
   private final Parameters parameters;
 
-  public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathcosts, double[][] pathdelays,
-      HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r, Parameters parameters) {
+  public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
+      HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters) {
     super(originalServers, originalLinks);
-    pathCosts = pathcosts;
-    pathDelays = pathdelays;
-    allShortestPaths = asp;
-    request = r;
+    this.pathCosts = pathCosts;
+    this.pathDelays = pathDelays;
+    this.allShortestPaths = allShortestPaths;
+    this.request = request;
+    this.parameters = parameters;
+
     auxServers = new ArrayList<Server>();
     auxLinks = new ArrayList<Link>();
     serviceLayers = new ArrayList<HashSet<Server>>();
-    this.parameters = parameters;
   }
 
   public void generateOnlineNetwork() {
