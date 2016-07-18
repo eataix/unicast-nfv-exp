@@ -3,6 +3,7 @@ package NetworkGenerator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 import Algorithm.CostFunctions.CostFunction;
 import Network.AuxiliaryNetwork;
@@ -22,18 +23,17 @@ public class NetworkPathFinder { //gets shortest path from network to network
     final double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
 
-    ArrayList<Server> auxServers = new ArrayList<>();
-    for (Server s : network.getServers()) {
-      auxServers.add(new Server(s));
-    }
+    ArrayList<Server> auxServers = network.getServers().stream().map(s -> new Server(s)).collect(Collectors.toCollection(ArrayList::new));
 
-    for (Server src : network.getServers()) { //find shortest path from s to every other server in the network
-      final HashMap<Server, Double> pathCost = new HashMap<>(); // cost of path from @src to other servers
+    for (Server server : network.getServers()) { //find shortest path from server to every other server in the network
+      final HashMap<Server, Double> pathCost = new HashMap<>(); // cost of path from @server to other servers
       HashMap<Server, Server> prevNode = new HashMap<>();
-      pathCost.put(src, 0.0);
-      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(), (s1, s2) -> pathCost.get(s1).compareTo(pathCost.get(s2))); //priority queue
+      pathCost.put(server, 0d);
+      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(),
+          (s1, s2) -> pathCost.getOrDefault(s1, Double.POSITIVE_INFINITY).compareTo(pathCost.getOrDefault(s2, Double.POSITIVE_INFINITY))); //priority queue
+
       ArrayList<Server> searched = new ArrayList<>();
-      queue.add(src);
+      queue.add(server);
       while (!queue.isEmpty()) {
         Server curr = queue.poll();
         for (Server neighbour : curr.getAllNeighbours()) {
@@ -42,8 +42,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
           if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * request.getSC().length) {
             continue;
           }
-          Double cost = pathCost.get(neighbour);
-          cost = (cost == null) ? Double.MAX_VALUE : cost;
+          Double cost = pathCost.getOrDefault(neighbour, Double.POSITIVE_INFINITY);
           if (pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters) < cost) {
             pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters));
             prevNode.put(neighbour, curr);
@@ -56,7 +55,7 @@ public class NetworkPathFinder { //gets shortest path from network to network
 
       //update shortest paths
       for (Server dest : network.getServers()) {
-        if (dest == src) {
+        if (dest == server) {
           continue;
         }
         if (pathCost.get(dest) == null) {//Auxiliary graph could not be constructed (some destinations are not reachable with current residual bandwidth)
@@ -73,11 +72,11 @@ public class NetworkPathFinder { //gets shortest path from network to network
         }
         //update all shortest paths map
         HashMap<Integer, ArrayList<Link>> srcMap =
-            (allShortestPaths.containsKey(src.getId())) ? allShortestPaths.get(src.getId()) : new HashMap<>();
+            (allShortestPaths.containsKey(server.getId())) ? allShortestPaths.get(server.getId()) : new HashMap<>();
         srcMap.put(dest.getId(), shortestPath);
-        allShortestPaths.put(src.getId(), srcMap);
-        pathCosts[src.getId()][dest.getId()] = pathCost.get(dest);
-        pathDelays[src.getId()][dest.getId()] = delay;
+        allShortestPaths.put(server.getId(), srcMap);
+        pathCosts[server.getId()][dest.getId()] = pathCost.get(dest);
+        pathDelays[server.getId()][dest.getId()] = delay;
       }
     }
     return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request, parameters);

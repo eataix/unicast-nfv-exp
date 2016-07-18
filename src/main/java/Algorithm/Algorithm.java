@@ -13,8 +13,8 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkPathFinder;
-import NetworkGenerator.Utils;
 import Simulation.Parameters;
+import Simulation.Simulation;
 
 public class Algorithm {
   private final Network originalNetwork;
@@ -35,7 +35,21 @@ public class Algorithm {
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOfflineNetwork();
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters, costFunction);
+    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
+    return new Result.Builder().path(path)
+                               .pathCost(finalPathCost)
+                               .build();
+  }
+
+  public Result minOpCostWithDelay() {
+    CostFunction costFunction = new ExponentialCostFunction();
+    createAuxiliaryNetwork(costFunction);
+    if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      return new Result.Builder().build(); //this generates a no-admittance result
+    }
+    auxiliaryNetwork.generateOnlineNetwork();
+    ArrayList<Server> path = LARAC(auxiliaryNetwork, request, parameters);
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
@@ -48,7 +62,7 @@ public class Algorithm {
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork();
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters, parameters.costFunc);
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
     boolean admit = admissionControl(finalPathCost);
     if (admit) {
@@ -60,24 +74,18 @@ public class Algorithm {
                                .build();
   }
 
-  public Result minOpCostWithDelay() {
-    CostFunction cf = new ExponentialCostFunction();
-    createAuxiliaryNetwork(cf);
-    if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
-      return new Result.Builder().build(); //this generates a no-admittance result
-    }
-    auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), request.getDelayReq());
-    return new Result.Builder().build();
-  }
-
   public Result maxThroughputWithDelay() { //s is source, t is sink
     createAuxiliaryNetwork(parameters.costFunc);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Link> path = Utils.LARAC(auxiliaryNetwork, auxiliaryNetwork.getSource(), auxiliaryNetwork.getDestination(), request.getDelayReq());
+    ArrayList<Server> path = LARAC(this.auxiliaryNetwork, this.request, this.parameters);
+    double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
+    boolean admit = admissionControl(finalPathCost);
+    if (admit) {
+      auxiliaryNetwork.admitRequestAndReserveResources(path);
+    }
     return new Result.Builder().build();
   }
 
@@ -85,7 +93,7 @@ public class Algorithm {
     auxiliaryNetwork = NetworkPathFinder.shortestPathsByCost(originalNetwork, request, cf, this.parameters);
   }
 
-  private ArrayList<Server> extractPath(HashMap<Server, Server> prevNode, Server destination) {
+  private static ArrayList<Server> extractPath(Request request, HashMap<Server, Server> prevNode, Server destination) {
     ArrayList<Server> path = new ArrayList<>();
     Server curr = destination;
     int i = request.getSC().length;
@@ -97,7 +105,8 @@ public class Algorithm {
     return path;
   }
 
-  private ArrayList<Server> shortestPathInAuxiliaryNetwork() {
+  public static ArrayList<Server> shortestPathInAuxiliaryNetwork(AuxiliaryNetwork auxiliaryNetwork, Request request, Parameters parameters,
+      CostFunction weightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
     HashSet<Server> prevLayer = new HashSet<>();
@@ -110,12 +119,11 @@ public class Algorithm {
       int nfv = request.getSC()[i];
       HashSet<Server> currLayer = auxiliaryNetwork.getServiceLayer(i);
       for (Server curr : currLayer) {
-        //				System.out.println("layer "+i+" : Server id:"+curr.getId());
         double minCost = Double.MAX_VALUE;
         Server minPrev = null;
         for (Server prev : prevLayer) {
           Link link = (prev.getId() == curr.getId()) ? new Link(curr) : prev.getLink(curr);
-          double cost = link.getPathCost() + parameters.costFunc.getCost(curr, nfv, parameters) + pathCost.get(prev);
+          double cost = link.getPathCost() + weightFunction.getCost(curr, nfv, parameters) + pathCost.get(prev);
           if (cost < minCost) {
             minCost = cost;
             minPrev = prev;
@@ -140,7 +148,86 @@ public class Algorithm {
     }
     prevNode.put(dst, minPrev);
 
-    return extractPath(prevNode, dst);
+    return extractPath(request, prevNode, dst);
+  }
+
+  /**
+   * @param network
+   * @param request
+   * @param parameters
+   * @return
+   */
+  private static ArrayList<Server> LARAC(AuxiliaryNetwork network, Request request, Parameters parameters) {
+    // PC is the shortest path on the original cost c
+    Simulation.logger.debug("Finding PC");
+    CostFunction weightOnly = new CostFunction() {
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return parameters.costFunc.getCost(l, b, parameters);
+      }
+
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return parameters.costFunc.getCost(s, nfv, parameters);
+      }
+    };
+    ArrayList<Server> pc = shortestPathInAuxiliaryNetwork(network, request, parameters, weightOnly);
+    if (pc == null) {
+      return null;
+    }
+    CostFunction calculateDelay = new CostFunction() {
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return 0;
+      }
+    };
+
+    if (network.calculatePathCost(pc, calculateDelay) < request.getDelayReq()) {
+      return pc;
+    }
+    ArrayList<Server> pd = shortestPathInAuxiliaryNetwork(network, request, parameters, calculateDelay);
+    if (pd == null) {
+      return null;
+    }
+    if (network.calculatePathCost(pd, calculateDelay) > request.getDelayReq()) {
+      return null;
+    }
+
+    while (true) {
+      double pcc = network.calculatePathCost(pc, weightOnly);
+      double pcd = network.calculatePathCost(pc, calculateDelay);
+      double pdc = network.calculatePathCost(pd, weightOnly);
+      double pdd = network.calculatePathCost(pd, calculateDelay);
+
+      final double lambda = (pcc - pdc) / (pdd - pcd);
+      CostFunction modifiedCostFunction = new CostFunction() {
+        @Override public double getCost(Link l, int b, Parameters parameters) {
+          return parameters.costFunc.getCost(l, b, parameters) + lambda * calculateDelay.getCost(l, b, parameters);
+        }
+
+        @Override public double getCost(Server s, int nfv, Parameters parameters) {
+          return parameters.costFunc.getCost(s, nfv, parameters) + lambda * calculateDelay.getCost(s, nfv, parameters);
+        }
+      };
+
+      ArrayList<Server> pr = shortestPathInAuxiliaryNetwork(network, request, parameters, modifiedCostFunction);
+      if (pr == null) {
+        return null;
+      }
+
+      double prc = network.calculatePathCost(pr, weightOnly);
+      double prd = network.calculatePathCost(pr, calculateDelay);
+
+      if (prc == pcc) {
+        return pd;
+      }
+      if (prd <= request.getDelayReq()) {
+        pd = pr;
+      } else {
+        pc = pr;
+      }
+    }
   }
 
   private boolean admissionControl(double pathCost) {

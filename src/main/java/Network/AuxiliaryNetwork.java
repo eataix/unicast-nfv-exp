@@ -21,7 +21,7 @@ public class AuxiliaryNetwork extends Network {
   private final Parameters parameters;
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathcosts, double[][] pathdelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r, Parameters parameters) {
+      HashMap<Integer, HashMap<Integer, ArrayList<Link>>> asp, Request r, Parameters parameters) {
     super(originalServers, originalLinks);
     pathCosts = pathcosts;
     pathDelays = pathdelays;
@@ -100,8 +100,8 @@ public class AuxiliaryNetwork extends Network {
     return allShortestPaths.get(s1.getId()).get(s2.getId());
   }
 
-  public double calculatePathCost(ArrayList<Server> path, CostFunction cf) {
-    if (path.size() != request.getSC().length + 2) { //No path was found
+  public double calculatePathCost(ArrayList<Server> servers, CostFunction costFunction) {
+    if (servers.size() != request.getSC().length + 2) { //No path was found
       return Double.MAX_VALUE;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();
@@ -109,17 +109,17 @@ public class AuxiliaryNetwork extends Network {
     for (Link l : links) {
       clonedLinks.put(l, new Link(l));
     }
-    for (Server s : servers) {
+    for (Server s : this.servers) {
       clonedServers.put(s.getId(), new Server(s));
     }
 
     double cost = 0;
 
     //get server costs
-    for (int i = 1; i < path.size() - 1; i++) {
-      Server cs = clonedServers.get(path.get(i).getId());
+    for (int i = 1; i < servers.size() - 1; i++) {
+      Server cs = clonedServers.get(servers.get(i).getId());
       int nfv = request.getSC()[i - 1];
-      cost += cf.getCost(cs, nfv, this.parameters);
+      cost += costFunction.getCost(cs, nfv, this.parameters);
       if (!cs.canCreateVM(nfv)) {
         return Double.MAX_VALUE;
       }
@@ -127,12 +127,12 @@ public class AuxiliaryNetwork extends Network {
     }
 
     //get link costs
-    for (int i = 0; i < path.size() - 1; i++) {
-      Server s1 = path.get(i);
-      Server s2 = path.get(i + 1);
+    for (int i = 0; i < servers.size() - 1; i++) {
+      Server s1 = servers.get(i);
+      Server s2 = servers.get(i + 1);
       for (Link l : getLinkPath(s1, s2)) {
         Link cl = clonedLinks.get(l);
-        cost += cf.getCost(cl, request.getBandwidth(), this.parameters);
+        cost += costFunction.getCost(cl, request.getBandwidth(), this.parameters);
         if (!cl.canSupportBandwidth(request.getBandwidth())) {//obviously a rejection
           return Double.MAX_VALUE;
         }

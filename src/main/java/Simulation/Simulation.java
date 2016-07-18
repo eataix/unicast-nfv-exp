@@ -1,5 +1,11 @@
 package Simulation;
 
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import Algorithm.Algorithm;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 import Algorithm.CostFunctions.LinCostFunction;
@@ -9,30 +15,26 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkGenerator;
 import NetworkGenerator.NetworkValueSetter;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-//import com.sun.corba.se.spi.activation.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   public static final Parameters defaultParameters = new Parameters.Builder().build();
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
+  public static final Logger logger = LoggerFactory.getLogger("Simulation");
 
   public static void main(String[] args) {
     ArrayList<Runnable> listOfTasks = new ArrayList<>();
     listOfTasks.add(new Thread(() -> CompareCostFnsWithoutDelays()));
     listOfTasks.add(new Thread(() -> CompareCostFnsWithDelays()));
-    listOfTasks.add(new Thread(() -> betaImpactWithoutDelays()));
-    listOfTasks.add(new Thread(() -> betaImpactWithDelays()));
-    listOfTasks.add(new Thread(() -> ThresholdEffectWithoutDelays()));
-    listOfTasks.add(new Thread(() -> ThresholdEffectWithDelays()));
-    listOfTasks.add(new Thread(() -> LEffectWithoutDelays()));
-    listOfTasks.add(new Thread(() -> LEffectWithDelays()));
+    //listOfTasks.add(new Thread(() -> betaImpactWithoutDelays()));
+    //listOfTasks.add(new Thread(() -> betaImpactWithDelays()));
+    //listOfTasks.add(new Thread(() -> ThresholdEffectWithoutDelays()));
+    //listOfTasks.add(new Thread(() -> ThresholdEffectWithDelays()));
+    //listOfTasks.add(new Thread(() -> LEffectWithoutDelays()));
+    //listOfTasks.add(new Thread(() -> LEffectWithDelays()));
     listOfTasks.forEach(threadPool::execute);
 
     threadPool.shutdown();
@@ -56,10 +58,11 @@ import java.util.concurrent.TimeUnit;
   }
 
   /**
-   * We compare the performance of the proposed online algorithms while using different cost
-   * functions, i.e., a linear cost function and an exponential cost function
+   * We compare the performance of the proposed online algorithms while using different cost functions, i.e., a linear cost function and an exponential cost
+   * function
    */
   private static void CompareCostFnsWithoutDelays() {
+    logger.debug("CompareCostFnsWithoutDelays started");
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
@@ -68,12 +71,12 @@ import java.util.concurrent.TimeUnit;
 
     Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
     Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
-    
-    for (int nSizeIndex = 0; nSizeIndex < defaultParameters.networkSizes.length; nSizeIndex ++) {
-    	
+
+    for (int nSizeIndex = 0; nSizeIndex < defaultParameters.networkSizes.length; nSizeIndex++) {
       int networkSize = defaultParameters.networkSizes[nSizeIndex];
-      
+
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        logger.debug(String.format("Network size: %d; trial: %d", networkSize, trial));
         int accepted = 0;
 
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
@@ -95,8 +98,8 @@ import java.util.concurrent.TimeUnit;
       double[] expNumAdmitted = new double[defaultParameters.numRequest];
       double[] linearNumAdmitted = new double[defaultParameters.numRequest];
 
-      double expAverageCostThisNetworkSize = 0d; 
-      double linearAverageCostThisNetworkSize = 0d; 
+      double expAverageCostThisNetworkSize = 0d;
+      double linearAverageCostThisNetworkSize = 0d;
       for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
         double expAdmittedCount = 0;
         double expPathCost = 0;
@@ -131,6 +134,7 @@ import java.util.concurrent.TimeUnit;
 
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        logger.debug(String.format("Network size: %d; trial: %d", networkSize, trial));
         int accepted = 0;
 
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
@@ -166,11 +170,11 @@ import java.util.concurrent.TimeUnit;
       int numRequests) {
     ArrayList<Request> requests = new ArrayList<>();
     for (int i = 0; i < numRequests; ++i) {
-      // source and destination should be different. 
-      Server source = network.getRandomServer(); 
+      // source and destination should be different.
+      Server source = network.getRandomServer();
       Server destination = network.getRandomServer();
       while (source.equals(destination)) {
-    	  destination = network.getRandomServer();
+        destination = network.getRandomServer();
       }
       requests.add(new Request(source, destination, parameters));
     }
@@ -236,8 +240,7 @@ import java.util.concurrent.TimeUnit;
   }
 
   /**
-   * We test the impact of threshold on the performance of the proposed online algorithms by running
-   * the algorithms with and without the treshold
+   * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the treshold
    */
 
   private static void ThresholdEffectWithoutDelays() {
@@ -323,9 +326,9 @@ import java.util.concurrent.TimeUnit;
 
   private static void LEffectWithoutDelays() {
     for (int L = 2; L <= 6; L += 2) {
-    	
+
       System.out.println("L:" + L);
-      
+
       Parameters parameters = new Parameters.Builder().L(L).build();
 
       int accepted = 0; //number of accepted requests
@@ -333,23 +336,22 @@ import java.util.concurrent.TimeUnit;
       Result[] results = new Result[parameters.numRequest];
 
       //double[] averageCost = new double[defaultParameters.networkSizes.length];
-      
+
       for (int networkSize : defaultParameters.networkSizes) {
-    	double averageCostNet = 0d; 
-    	for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        double averageCostNet = 0d;
+        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
-          double averageCostReq = 0d; 
+          double averageCostReq = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[i] = alg.minOpCostWithoutDelay();
-            if (results[i].isAdmitted()) {// not sure about here, this request should be always accepted according to assumptions. 
+            if (results[i].isAdmitted()) {// not sure about here, this request should be always accepted according to assumptions.
               accepted++;
               averageCostReq += results[i].getPathCost();
             }
-            
           }
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostNet / defaultParameters.numTrials);
@@ -362,7 +364,7 @@ import java.util.concurrent.TimeUnit;
 
   private static void LEffectWithDelays() {
     for (int L = 2; L <= 6; L += 2) {
-    	
+
       System.out.println("L:" + L);
 
       Parameters parameters = new Parameters.Builder().L(L).build();
@@ -372,7 +374,7 @@ import java.util.concurrent.TimeUnit;
       Result[] results = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
-      	double averageCostNet = 0d; 
+        double averageCostNet = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           Request[] requests = new Request[parameters.numRequest];
@@ -381,7 +383,7 @@ import java.util.concurrent.TimeUnit;
                 new Request(network.getRandomServer(), network.getRandomServer(), parameters);
           }
           network.wipeLinks();
-          double averageCostReq = 0d; 
+          double averageCostReq = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests[i], parameters);
             results[i] = alg.minOpCostWithoutDelay();

@@ -22,10 +22,11 @@ public class NetworkGenerator {
     if (networkIndexPostFix.equals("GEANT") || networkIndexPostFix.equals("AS1755") || networkIndexPostFix.equals("AS4755")) {
       fileName = ".//data//" + networkIndexPostFix + ".txt";
     } else {
-    	if (!networkIndexPostFix.equals("0"))
-    		fileName = ".//data//" + n + "-25-25-" + networkIndexPostFix + ".txt";
-    	else 
-    		fileName = ".//data//" + n + "-25-25" + ".txt";
+      if (!networkIndexPostFix.equals("0")) {
+        fileName = ".//data//" + n + "-25-25-" + networkIndexPostFix + ".txt";
+      } else {
+        fileName = ".//data//" + n + "-25-25" + ".txt";
+      }
     }
 
     try {
