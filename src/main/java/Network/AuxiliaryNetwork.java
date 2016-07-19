@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.function.Function;
 
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
@@ -20,6 +21,7 @@ import Simulation.Parameters;
   private final double[][] pathCosts;
   private final double[][] pathDelays;
   private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
+  private final CostFunction costFunction; // cost function for edges in the original graph
 
   private final Request request;
   private final Parameters parameters;
@@ -27,14 +29,15 @@ import Simulation.Parameters;
   private final Server source;
   private final Server destination;
 
-  private final ArrayList<Server> auxServers = new ArrayList<Server>(); // TODO: Talk to Mike regarding what these variable does
-  private final ArrayList<Link> auxLinks = new ArrayList<Link>();
+  private final ArrayList<Server> auxServers = new ArrayList<>(); // TODO: Talk to Mike regarding what these variable does
+  private final ArrayList<Link> auxLinks = new ArrayList<>();
 
   // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
   public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<HashSet<Server>>();
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters, boolean online) {
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters, boolean offline,
+                          CostFunction costFunction) {
     super(originalServers, originalLinks);
     this.pathCosts = pathCosts;
     this.pathDelays = pathDelays;
@@ -43,8 +46,9 @@ import Simulation.Parameters;
     this.parameters = parameters;
     this.source = request.getSource();
     this.destination = request.getDestination();
+    this.costFunction = costFunction;
 
-    generateNetwork(online);
+    generateNetwork(offline);
   }
 
   /**
@@ -97,23 +101,15 @@ import Simulation.Parameters;
    * @return a shortest path for the request, which was given to the constructor of this class.
    */
   public ArrayList<Server> findShortestPath() {
-    return findShortestPath(new CostFunction() {
-      @Override public double getCost(Link l, int b, Parameters parameters) {
-        return l.getWeight();
-      }
-
-      @Override public double getCost(Server s, int nfv, Parameters parameters) {
-        return 0;
-      }
-    });
+    return findShortestPath(l -> l.getWeight());
   }
 
   /**
    * @return A shortest path in this network with respect to @edgeWeightFunction
-   * <p>
+   *
    * Notice: The auxiliary network is a DAG
    */
-  private ArrayList<Server> findShortestPath(CostFunction edgeWeightFunction) {
+  private ArrayList<Server> findShortestPath(Function<Link, Double> edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
     HashSet<Server> prevLayer = new HashSet<>();
@@ -130,7 +126,7 @@ import Simulation.Parameters;
         for (Server prev : prevLayer) {
           Link link = prev.getLink(curr);
           if (link != null) {
-            double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+            double cost = edgeWeightFunction.apply(link) + pathCost.get(prev);
             if (cost < minCost) {
               minCost = cost;
               minPrev = prev;
@@ -149,7 +145,7 @@ import Simulation.Parameters;
     for (Server prev : prevLayer) {
       Link link = prev.getLink(dest);
       if (link != null) {
-        double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+        double cost = edgeWeightFunction.apply(link) + pathCost.get(prev);
         if (cost < minCost) {
           minCost = cost;
           minPrev = prev;
@@ -163,14 +159,15 @@ import Simulation.Parameters;
 
   public ArrayList<Server> findDelayAwareShortestPath() {
     CostFunction costOnly = new CostFunction() {
-      @Override public double getCost(Link l, int b, Parameters parameters) {
-        return l.getWeight();
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return costFunction.getCost(s, nfv, parameters);
       }
 
-      @Override public double getCost(Server s, int nfv, Parameters parameters) {
-        return 0;
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return costFunction.getCost(l, b, parameters);
       }
     };
+
     CostFunction delayOnly = new CostFunction() {
       @Override public double getCost(Server s, int nfv, Parameters parameters) {
         return 0;
@@ -182,7 +179,7 @@ import Simulation.Parameters;
     };
 
     // PC is the shortest path on the original cost c
-    ArrayList<Server> pathC = findShortestPath(costOnly);
+    ArrayList<Server> pathC = findShortestPath(l -> l.getWeight());
     if (pathC == null) {
       return null;
     }
@@ -193,7 +190,7 @@ import Simulation.Parameters;
       return pathC; // clearly no solution exists
     }
 
-    ArrayList<Server> pathD = findShortestPath(delayOnly);
+    ArrayList<Server> pathD = findShortestPath(l -> l.getDelay());
     if (pathD == null) {
       return null;
     }
@@ -207,15 +204,15 @@ import Simulation.Parameters;
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
       CostFunction modifiedCostFunction = new CostFunction() {
         @Override public double getCost(Link l, int b, Parameters parameters) {
-          return l.getWeight() + lambda * l.getDelay();
+          return costFunction.getCost(l, b, parameters) + lambda * l.getDelay();
         }
 
         @Override public double getCost(Server s, int nfv, Parameters parameters) {
-          return 0;
+          return costFunction.getCost(s, nfv, parameters);
         }
       };
 
-      ArrayList<Server> pathR = findShortestPath(modifiedCostFunction);
+      ArrayList<Server> pathR = findShortestPath(l -> l.getWeight() + lambda * l.getDelay());
       if (pathR == null) {
         return null;
       }

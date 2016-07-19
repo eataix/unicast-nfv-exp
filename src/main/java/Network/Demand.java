@@ -2,10 +2,10 @@ package Network;
 
 class Demand {
   private static int length; // number of nfvs
-  private final int rate;
   private static int delay;
   private static int[] NFVreq; //nfv vm resource requirements
   private static int[] NFVrate; //nfv vm service rate
+  private final int rate;
 
   public Demand(int r, int d) {
     rate = r;

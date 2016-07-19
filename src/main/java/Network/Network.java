@@ -8,8 +8,8 @@ import Algorithm.CostFunctions.CostFunction;
 
 public class Network {
   final ArrayList<Server> servers;
-  ArrayList<Link> links;
   private final HashMap<Integer, Server> serversById;
+  ArrayList<Link> links;
 
   public Network(ArrayList<Server> servers, ArrayList<Link> links) {
     this.servers = servers;
@@ -82,8 +82,9 @@ public class Network {
   }
 
   public void wipeLinks() {//this returns all servers and bandwidth to 0% utilization
-    for (Link l : links)
+    for (Link l : links) {
       l.wipe();
+    }
   }
 
   void allocateBandwidthOnPath(ArrayList<Link> path, int b) {

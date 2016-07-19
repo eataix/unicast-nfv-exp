@@ -22,8 +22,8 @@ public class Parameters {
   public final int reqDelayReqMin; // minimum request delay requirement
   public final int reqDelayReqMax; // maximum request delay requirement
   public final int numTrials;
-  public final int linkDelayReqMin;
-  public final int linkDelayReqMax;
+  public final int linkDelayMin;
+  public final int linkDelayMax;
   public final int threshold;
   public final int networkSize;
   public final double serverRatio;
@@ -33,7 +33,7 @@ public class Parameters {
 
   private Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] networkSizes, int alpha, int beta, int linkBWCapMin,
                      int linkBWCapMax, int numRequest, int L, int reqBWReqMin, int reqBWReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
-                     int linkDelayReqMin, int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
+                     int linkDelayMin, int linkDelayMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
                      boolean online) {
     this.networkSizes = networkSizes;
     this.alpha = alpha;
@@ -47,8 +47,8 @@ public class Parameters {
     this.reqDelayReqMin = reqDelayReqMin;
     this.reqDelayReqMax = reqDelayReqMax;
     this.numTrials = numTrials;
-    this.linkDelayReqMin = linkDelayReqMin;
-    this.linkDelayReqMax = linkDelayReqMax;
+    this.linkDelayMin = linkDelayMin;
+    this.linkDelayMax = linkDelayMax;
     this.threshold = threshold;
     this.networkSize = networkSize;
     this.serverRatio = serverRatio;
@@ -72,8 +72,8 @@ public class Parameters {
     private int L = 4;
     private int reqBWReqMin = 10;
     private int reqBWReqMax = 100;
-    private int reqDelayReqMin = 10;
-    private int reqDelayReqMax = 100;
+    private int reqDelayMin = 10;
+    private int reqDelayMax = 100;
     private int numTrials = 10;
     private int threshold;
     private double serverRatio = 0.2;
@@ -90,7 +90,7 @@ public class Parameters {
     private boolean online = false;
 
     Builder alpha(int alpha) {
-      this.beta = beta;
+      this.alpha = alpha;
       return this;
     }
 
@@ -129,23 +129,23 @@ public class Parameters {
       return this;
     }
 
-    public Builder reqNetworkReqMin(int reqNetworkReqMin) {
-      this.reqBWReqMin = reqNetworkReqMin;
+    public Builder reqBWReqMin(int reqBWReqMin) {
+      this.reqBWReqMin = reqBWReqMin;
       return this;
     }
 
-    public Builder reqNetworkReqMax(int reqNetworkReqMax) {
-      this.reqBWReqMax = reqNetworkReqMax;
+    public Builder reqBWReqMax(int reqBWReqMax) {
+      this.reqBWReqMax = reqBWReqMax;
       return this;
     }
 
-    public Builder reqDelayReqMin(int reqDelayReqMin) {
-      this.reqDelayReqMin = reqDelayReqMin;
+    public Builder reqDelayMin(int reqDelayMin) {
+      this.reqDelayMin = reqDelayMin;
       return this;
     }
 
-    public Builder reqDelayReqMax(int reqDelayReqMax) {
-      this.reqDelayReqMax = reqDelayReqMax;
+    public Builder reqDelayMax(int reqDelayMax) {
+      this.reqDelayMax = reqDelayMax;
       return this;
     }
 
@@ -206,10 +206,8 @@ public class Parameters {
 
     public Parameters build() {
       return new Parameters(nfvReqs, nfvRates, nfvOperationalCosts, nfvInitCosts, networkSizes, alpha, beta, linkBWCapMin, linkBWCapMax, numRequest, L,
-                            reqBWReqMin,
-                            reqBWReqMax,
-                            reqDelayReqMin, reqDelayReqMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize, serverRatio, costFunc,
-                            nfvProb, online);
+                            reqBWReqMin, reqBWReqMax, reqDelayMin, reqDelayMax, numTrials, linkDelayReqMin, linkDelayReqMax, threshold, networkSize,
+                            serverRatio, costFunc, nfvProb, online);
     }
   }
 }

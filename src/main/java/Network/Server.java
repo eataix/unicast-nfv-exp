@@ -8,17 +8,9 @@ import Simulation.Simulation;
 
 public class Server {
   private final int id;
-  private int capacity; //some servers have 0 capacity as they are switches
   private final ArrayList<Link> links;
+  private int capacity; //some servers have 0 capacity as they are switches
   private HashMap<Integer, VM> NFVs;
-
-  private static HashMap<Integer, VM> copyVMs(HashMap<Integer, VM> NFVs) {
-    HashMap<Integer, VM> newNFVs = new HashMap<>();
-    for (Integer nfv : NFVs.keySet()) {
-      newNFVs.put(nfv, new VM(nfv));
-    }
-    return newNFVs;
-  }
 
   public Server(Server server) {
     this(server.getId(), server.getCapacity(), new ArrayList<>(), copyVMs(server.NFVs));
@@ -35,6 +27,14 @@ public class Server {
     id = Id;
     NFVs = new HashMap<Integer, VM>();
     links = new ArrayList<Link>();
+  }
+
+  private static HashMap<Integer, VM> copyVMs(HashMap<Integer, VM> NFVs) {
+    HashMap<Integer, VM> newNFVs = new HashMap<>();
+    for (Integer nfv : NFVs.keySet()) {
+      newNFVs.put(nfv, new VM(nfv));
+    }
+    return newNFVs;
   }
 
   public int getId() {
@@ -140,6 +140,11 @@ public class Server {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Server: " + this.id + " Capacity: " + this.capacity;
+  }
+
   private static class VM {
     final int serviceType;
 
@@ -150,11 +155,6 @@ public class Server {
     int resourceAllocated() {
       return Simulation.defaultParameters.nfvReqs[serviceType];
     }
-  }
-
-  @Override
-  public String toString() {
-    return "Server: " + this.id + " Capacity: " + this.capacity;
   }
 
 /*

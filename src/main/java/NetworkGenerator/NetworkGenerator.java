@@ -14,7 +14,7 @@ import Simulation.Parameters;
 public class NetworkGenerator {
 
   // use "networkIndexPostFix" to either denote the number of the generated network, or the name of a real topology, such as "GEANT", "AS1755"
-  public Network generateRealNetworks(int n, String networkIndexPostFix) {
+  public static Network generateRealNetworks(int n, String networkIndexPostFix) {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
@@ -182,7 +182,7 @@ public class NetworkGenerator {
     ArrayList<Link> links = new ArrayList<>();
 
     Parameters parameters = new Parameters.Builder().L(2).build();
-    
+
     Server s0 = new Server(0);
     servers.add(s0);
     Server s1 = new Server(1);

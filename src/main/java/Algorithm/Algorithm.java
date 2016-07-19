@@ -24,9 +24,12 @@ import Simulation.Parameters;
     this.parameters = parameters;
   }
 
+  /**
+   * Operational cost minimization without delay constraints
+   */
   public Result minOpCostWithoutDelay() {
     CostFunction costFunction = new OperationalCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, false);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
@@ -38,9 +41,12 @@ import Simulation.Parameters;
                                .build();
   }
 
+  /**
+   * Operational cost minimization with delay constraints
+   */
   public Result minOpCostWithDelay() {
     CostFunction costFunction = new ExponentialCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, false);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
@@ -52,8 +58,11 @@ import Simulation.Parameters;
                                .build();
   }
 
+  /**
+   * Throughput maximization without delay constraints
+   */
   public Result maxThroughputWithoutDelay() { //s is source, t is sink
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, true);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
@@ -69,8 +78,11 @@ import Simulation.Parameters;
                                .build();
   }
 
+  /**
+   * Throughput maximization with delay constraints
+   */
   public Result maxThroughputWithDelay() { //s is source, t is sink
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, true);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }

@@ -18,6 +18,18 @@ public class NetworkValueSetter { //sets the parameters of a given network
     this.parameters = parameters;
   }
 
+  private static int getNormal(int mean, int weight) {
+    int cap = -1;
+    while (cap < 0) {
+      cap = (int) Math.round(Simulation.random.nextGaussian() * weight + mean);
+    }
+    return cap;
+  }
+
+  public static int getUniform(int low, int high) {
+    return (int) (low + Math.random() * (high - low));
+  }
+
   public Network getNetwork() {
     return network;
   }
@@ -141,17 +153,5 @@ public class NetworkValueSetter { //sets the parameters of a given network
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       parameters.nfvRates[nfv] = getUniform(low, high);
     }
-  }
-
-  public static int getNormal(int mean, int weight) {
-    int cap = -1;
-    while (cap < 0) {
-      cap = (int) Math.round(Simulation.random.nextGaussian() * weight + mean);
-    }
-    return cap;
-  }
-
-  public static int getUniform(int low, int high) {
-    return (int) (low + Math.random() * (high - low));
   }
 }

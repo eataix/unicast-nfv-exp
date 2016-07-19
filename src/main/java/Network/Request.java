@@ -6,12 +6,12 @@ import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 
 public class Request {
-  private int[] SC; //each number points to index of nfv in Parameters
   private final int bandwidth;
   private final Server source;
   private final Server destination;
-  private double delayReq; //delayReq bound requirement
   private final Parameters parameters;
+  private int[] SC; //each number points to index of nfv in Parameters
+  private double delayReq; //delayReq bound requirement
 
   public Request(Server source, Server destination, Parameters parameters) {
     this.source = source;

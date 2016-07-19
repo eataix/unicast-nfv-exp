@@ -19,8 +19,8 @@ import NetworkGenerator.NetworkValueSetter;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
-  private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   public static final Parameters defaultParameters = new Parameters.Builder().build();
+  private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
 
   public static void main(String[] args) {
@@ -94,12 +94,10 @@ import NetworkGenerator.NetworkValueSetter;
       int networkSize = defaultParameters.networkSizes[nSizeIndex];
 
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
-        int accepted = 0;
-
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
-        network.wipeLinks();
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
+        network.wipeLinks();
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[trial][i] = alg.maxThroughputWithoutDelay();
@@ -528,17 +526,18 @@ import NetworkGenerator.NetworkValueSetter;
     NetworkValueSetter networkValueSetter = new NetworkValueSetter(network, parameters);
     networkValueSetter.setConstantServerCapacity(Integer.MAX_VALUE, parameters.serverRatio);
     networkValueSetter.setRandomLinkCapacity(parameters.linkBWCapMin, parameters.linkBWCapMax);
+    networkValueSetter.setRandomLinkDelay(parameters.linkDelayMin, parameters.linkDelayMax);
     networkValueSetter.placeNFVs(parameters.nfvProb);
   }
 
   private static Network generateAndInitializeNetwork(int networkSize, int trial, Parameters parameters) {
-    Network network = new NetworkGenerator().generateRealNetworks(networkSize, String.valueOf(trial));
+    Network network = NetworkGenerator.generateRealNetworks(networkSize, String.valueOf(trial));
     initializeNetwork(network, parameters);
     return network;
   }
 
   private static Network generateAndInitializeNetwork(TopologyFile topologyFile, Parameters parameters) {
-    Network network = new NetworkGenerator().generateRealNetworks(topologyFile.getPrefix(), topologyFile.getSuffix());
+    Network network = NetworkGenerator.generateRealNetworks(topologyFile.getPrefix(), topologyFile.getSuffix());
     initializeNetwork(network, parameters);
     return network;
   }
