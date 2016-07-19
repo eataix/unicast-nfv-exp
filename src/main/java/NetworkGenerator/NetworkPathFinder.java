@@ -17,10 +17,10 @@ import Simulation.Parameters;
 public class NetworkPathFinder {
 
   /**
-   * Use Dijkstra to get shortest paths by @costFn. New Link takes the minimum bandwidth in shortest path.
+   * Use Dijkstra to get all-pair shortest paths with respect to cost function @costFn. New Link takes the minimum bandwidth in shortest path.
    */
   public static AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
-    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
+    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
     ArrayList<Server> auxServers = new ArrayList<Server>();
@@ -28,7 +28,7 @@ public class NetworkPathFinder {
       auxServers.add(new Server(s));
     }
 
-    for (Server src : network.getServers()) { //find shortest path from s to every other server in the network
+    for (Server src : network.getServers()) { //find shortest path from @src to every other server in the network
       HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
       HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
       pathCost.put(src, 0d);
@@ -44,10 +44,10 @@ public class NetworkPathFinder {
           if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * request.getSC().length) {
             continue;
           }
-          Double cost = pathCost.get(neighbour);
-          cost = (cost == null) ? Double.MAX_VALUE : cost;
-          if (pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters) < cost) {
-            pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters));
+          Double cost = pathCost.getOrDefault(neighbour, Double.MAX_VALUE);
+          double altCost = pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters);
+          if (altCost < cost) {
+            pathCost.put(neighbour, altCost);
             prevNode.put(neighbour, curr);
           }
           //add to priority queue using insertion sort
@@ -73,22 +73,20 @@ public class NetworkPathFinder {
           delay += l.getDelay();
           curr = prevNode.get(curr);
         }
-        //update all shortest paths map
-        HashMap<Integer, ArrayList<Link>> srcMap = (allShortestPaths.containsKey(src.getId())) ?
-            allShortestPaths.get(src.getId()) : new HashMap<Integer, ArrayList<Link>>();
+        HashMap<Integer, ArrayList<Link>> srcMap = allPairShortestPaths.getOrDefault(src.getId(), new HashMap<>());
         srcMap.put(dest.getId(), shortestPath);
-        allShortestPaths.put(src.getId(), srcMap);
+        allPairShortestPaths.put(src.getId(), srcMap);
         pathCosts[src.getId()][dest.getId()] = pathCost.get(dest);
         pathDelays[src.getId()][dest.getId()] = delay;
 
-/*				HashMap<Integer, ArrayList<Link>> destMap = (allShortestPaths.containsKey(dest.getId())) ?
-            allShortestPaths.get(dest.getId()) : new HashMap<Integer, ArrayList<Link>>();
+/*				HashMap<Integer, ArrayList<Link>> destMap = (allPairShortestPaths.containsKey(dest.getId())) ?
+            allPairShortestPaths.get(dest.getId()) : new HashMap<Integer, ArrayList<Link>>();
 				destMap.put(src.getId(), shortestPath);
-				allShortestPaths.put(dest.getId(), destMap);
+				allPairShortestPaths.put(dest.getId(), destMap);
 				pathCosts[dest.getId()][src.getId()] = pathCost.get(dest);*/
       }
     }
-    AuxiliaryNetwork auxnet = new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request, parameters);
+    AuxiliaryNetwork auxnet = new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters);
     return auxnet;
   }
 

@@ -7,11 +7,11 @@ public class Link {
   private int allocatedBandwidth; //bandwidth being used
   private int operationalCost; //operation cost
   private double delay; //delay
-  private double pathUtCost; //utilization cost of a link representing a shortest path.
+  private double weight;
 
-  public Link(Server svr1, Server svr2) {
-    s1 = svr1;
-    s2 = svr2;
+  public Link(Server s1, Server s2) {
+    this.s1 = s1;
+    this.s2 = s2;
     addLinkToServers();
   }
 
@@ -86,14 +86,6 @@ public class Link {
     }
   }
 
-  public double getPathCost() { //to be used in the algorithm section
-    return pathUtCost;
-  }
-
-  void setPathCost(double pathCost) {
-    this.pathUtCost = pathCost;
-  }
-
   public int getOperationalCost() {
     if (s1 == s2) {
       return 0;
@@ -128,8 +120,11 @@ public class Link {
     return bandwidthCapacity;
   }
 
-  public double getPathUtCost() {
-    return pathUtCost;
+  public double getWeight() {
+    return weight;
   }
-  
+
+  public void setWeight(double weight) {
+    this.weight = weight;
+  }
 }

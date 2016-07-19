@@ -8,12 +8,13 @@ import java.util.HashSet;
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
 
-public class AuxiliaryNetwork extends Network {
+@SuppressWarnings("Duplicates") public class AuxiliaryNetwork extends Network {
   private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
   private final double[][] pathCosts;
   private final double[][] pathDelays;
   public final ArrayList<HashSet<Server>> serviceLayers;
   private final Request request;
+
   private Server source;
   private Server destination;
   private final ArrayList<Server> auxServers;
@@ -21,7 +22,7 @@ public class AuxiliaryNetwork extends Network {
   private final Parameters parameters;
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
-      HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters) {
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters) {
     super(originalServers, originalLinks);
     this.pathCosts = pathCosts;
     this.pathDelays = pathDelays;
@@ -42,36 +43,44 @@ public class AuxiliaryNetwork extends Network {
     generateNetwork(true);
   }
 
-  private void generateNetwork(boolean offline) { //create network with auxServers and auxLinks
+  /**
+   * Create network with auxServers and auxLinks
+   */
+  private void generateNetwork(boolean offline) {
     source = new Server(request.getSource());
     destination = new Server(request.getDestination());
     auxServers.add(source);
     auxServers.add(destination);
+
+    // Layer 0, containing the source node only
     HashSet<Server> prevLayer = new HashSet<>();
     prevLayer.add(source);
+
     int[] SC = request.getSC();
-    //create service layers
+    // Layers 1, ..., L, where each layer contains all servers that either have implemented a given NFV or can initialize a VM instance for a given NFV
     for (int nfv : SC) {
       HashSet<Server> origLayer = getReusableServers(nfv);
       if (offline) {
         origLayer.addAll(getUnusedServers(nfv));
       }
-      HashSet<Server> currLayer = cloneServers(origLayer);
+      HashSet<Server> currLayer = cloneServers(origLayer); // we do not want to make changes on the original network
       for (Server curr : currLayer) {
-        for (Server prev : prevLayer) {
+        for (Server prev : prevLayer) { // Connect each server in the previous layer to an server in the current layer
           Link l = new Link(prev, curr);
           l.setDelay(pathDelays[curr.getId()][prev.getId()]);
-          l.setPathCost(pathCosts[curr.getId()][prev.getId()]);
+          l.setWeight(pathCosts[curr.getId()][prev.getId()]);
           this.auxLinks.add(l);
         }
       }
       serviceLayers.add(currLayer);
       prevLayer = currLayer;
     }
+    // Now we have added Layer 0 and Layers 1, ..., L, we now need to add the last layer containing the destination only, and link all servers in Layer L to the
+    // the destination
     for (Server prev : prevLayer) { //link this up to destination
       Link l = new Link(prev, destination);
       l.setDelay(pathDelays[destination.getId()][prev.getId()]);
-      l.setPathCost(pathCosts[destination.getId()][prev.getId()]);
+      l.setWeight(pathCosts[destination.getId()][prev.getId()]);
       this.auxLinks.add(l);
     }
   }
@@ -103,8 +112,13 @@ public class AuxiliaryNetwork extends Network {
     return allShortestPaths.get(s1.getId()).get(s2.getId());
   }
 
-  public double calculatePathCost(ArrayList<Server> servers, CostFunction costFunction) {
-    if (servers.size() != request.getSC().length + 2) { //No path was found
+  /**
+   * @param serversOnPath the list of servers on the path
+   * @param costFunction cost function
+   * @return * the cost of path @serversOnPath with respect to a given cost function @costFunction
+   */
+  public double calculatePathCost(ArrayList<Server> serversOnPath, CostFunction costFunction) {
+    if (serversOnPath.size() != request.getSC().length + 2) { //No path was found
       return Double.MAX_VALUE;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();
@@ -119,8 +133,8 @@ public class AuxiliaryNetwork extends Network {
     double cost = 0;
 
     //get server costs
-    for (int i = 1; i < servers.size() - 1; i++) {
-      Server cs = clonedServers.get(servers.get(i).getId());
+    for (int i = 1; i < serversOnPath.size() - 1; i++) {
+      Server cs = clonedServers.get(serversOnPath.get(i).getId());
       int nfv = request.getSC()[i - 1];
       cost += costFunction.getCost(cs, nfv, this.parameters);
       if (!cs.canCreateVM(nfv)) {
@@ -130,9 +144,9 @@ public class AuxiliaryNetwork extends Network {
     }
 
     //get link costs
-    for (int i = 0; i < servers.size() - 1; i++) {
-      Server s1 = servers.get(i);
-      Server s2 = servers.get(i + 1);
+    for (int i = 0; i < serversOnPath.size() - 1; i++) {
+      Server s1 = serversOnPath.get(i);
+      Server s2 = serversOnPath.get(i + 1);
       for (Link l : getLinkPath(s1, s2)) {
         Link cl = clonedLinks.get(l);
         cost += costFunction.getCost(cl, request.getBandwidth(), this.parameters);

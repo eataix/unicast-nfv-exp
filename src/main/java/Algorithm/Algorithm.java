@@ -15,7 +15,7 @@ import Network.Server;
 import NetworkGenerator.NetworkPathFinder;
 import Simulation.Parameters;
 
-public class Algorithm {
+@SuppressWarnings("Duplicates") public class Algorithm {
   private final Network originalNetwork;
   private final Request request;
   private final Parameters parameters;
@@ -34,7 +34,7 @@ public class Algorithm {
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOfflineNetwork();
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters, costFunction);
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters);
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
@@ -62,7 +62,7 @@ public class Algorithm {
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters, parameters.costFunc);
+    ArrayList<Server> path = shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters);
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
     boolean admit = admissionControl(finalPathCost);
     if (admit) {
@@ -105,8 +105,22 @@ public class Algorithm {
     return path;
   }
 
+  private static ArrayList<Server> shortestPathInAuxiliaryNetwork(AuxiliaryNetwork auxiliaryNetwork, Request request, Parameters parameters) {
+    return shortestPathInAuxiliaryNetwork(auxiliaryNetwork, request, parameters, new CostFunction() {
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return l.getWeight();
+      }
+
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+    });
+  }
+
   /**
    * @return A shortest path in @auxiliaryNetwork for @request with respect to @edgeWeightFunction
+   *
+   * Notice: - The auxiliary network is a DAG
    */
   private static ArrayList<Server> shortestPathInAuxiliaryNetwork(AuxiliaryNetwork auxiliaryNetwork, Request request, Parameters parameters,
                                                                   CostFunction edgeWeightFunction) {
@@ -117,19 +131,20 @@ public class Algorithm {
     prevLayer.add(src);
     pathCost.put(auxiliaryNetwork.getSource(), 0.0);
 
-    int l = request.getSC().length;
-    for (int i = 0; i < l; i++) {
-      int nfv = request.getSC()[i];
+    int L = request.getSC().length;
+    for (int i = 0; i < L; i++) {
       HashSet<Server> currLayer = auxiliaryNetwork.getServiceLayer(i);
       for (Server curr : currLayer) {
         double minCost = Double.MAX_VALUE;
         Server minPrev = null;
         for (Server prev : prevLayer) {
-          Link link = (prev.getId() == curr.getId()) ? new Link(curr) : prev.getLink(curr);
-          double cost = link.getPathCost() + edgeWeightFunction.getCost(curr, nfv, parameters) + pathCost.get(prev);
-          if (cost < minCost) {
-            minCost = cost;
-            minPrev = prev;
+          Link link = prev.getLink(curr);
+          if (link != null) {
+            double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+            if (cost < minCost) {
+              minCost = cost;
+              minPrev = prev;
+            }
           }
         }
         pathCost.put(curr, minCost);
@@ -140,18 +155,20 @@ public class Algorithm {
     //final layer to sink
     double minCost = Double.MAX_VALUE;
     Server minPrev = null;
-    Server dst = auxiliaryNetwork.getDestination();
+    Server dest = auxiliaryNetwork.getDestination();
     for (Server prev : prevLayer) {
-      Link link = (prev.getId() == dst.getId()) ? new Link(dst) : prev.getLink(dst);
-      double tempCost = link.getPathCost() + pathCost.get(prev);
-      if (tempCost < minCost) {
-        minCost = tempCost;
-        minPrev = prev;
+      Link link = prev.getLink(dest);
+      if (link != null) {
+        double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+        if (cost < minCost) {
+          minCost = cost;
+          minPrev = prev;
+        }
       }
     }
-    prevNode.put(dst, minPrev);
+    prevNode.put(dest, minPrev);
 
-    return extractPath(request, prevNode, dst);
+    return extractPath(request, prevNode, dest);
   }
 
   /**
@@ -161,11 +178,18 @@ public class Algorithm {
    * @return
    */
   private static ArrayList<Server> LARAC(AuxiliaryNetwork auxiliaryNetwork, Request request, Parameters parameters) {
+    CostFunction costOnly = new CostFunction() {
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return l.getWeight();
+      }
 
-    CostFunction costOnly = parameters.costFunc;
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+    };
     CostFunction delayOnly = new CostFunction() {
       @Override public double getCost(Server s, int nfv, Parameters parameters) {
-        return 0; // TODO
+        return 0;
       }
 
       @Override public double getCost(Link l, int b, Parameters parameters) {
@@ -199,11 +223,11 @@ public class Algorithm {
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
       CostFunction modifiedCostFunction = new CostFunction() {
         @Override public double getCost(Link l, int b, Parameters parameters) {
-          return costOnly.getCost(l, b, parameters) + lambda * delayOnly.getCost(l, b, parameters);
+          return l.getWeight() + lambda * l.getDelay();
         }
 
         @Override public double getCost(Server s, int nfv, Parameters parameters) {
-          return costOnly.getCost(s, nfv, parameters) + lambda * delayOnly.getCost(s, nfv, parameters);
+          return 0;
         }
       };
 

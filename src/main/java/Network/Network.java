@@ -11,11 +11,11 @@ public class Network {
   ArrayList<Link> links;
   private final HashMap<Integer, Server> serversById;
 
-  public Network(ArrayList<Server> svrs, ArrayList<Link> lnks) {
-    servers = svrs;
-    links = lnks;
+  public Network(ArrayList<Server> servers, ArrayList<Link> links) {
+    this.servers = servers;
+    this.links = links;
     serversById = new HashMap<Integer, Server>(); // this is a safer way of getting a server by Id than relying on the ordering of the arraylist.
-    for (Server s : servers) {
+    for (Server s : this.servers) {
       serversById.put(s.getId(), s);
     }
   }
@@ -101,7 +101,7 @@ public class Network {
 
   @Override
   public String toString() {
-	    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
+    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
   }
 }
 
