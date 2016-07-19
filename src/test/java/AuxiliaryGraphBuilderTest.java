@@ -6,14 +6,14 @@ import Network.Link;
 import Network.Network;
 import Network.Request;
 import Network.Server;
-import NetworkGenerator.NetworkPathFinder;
+import NetworkGenerator.AuxiliaryGraphBuilder;
 import Simulation.Parameters;
 import Simulation.Simulation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class NetworkPathFinderTest {
+public class AuxiliaryGraphBuilderTest {
   @Test
   public void testShortestPathsByCost() {
     //simple diamond shaped graph
@@ -46,8 +46,8 @@ public class NetworkPathFinderTest {
     l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
-    AuxiliaryNetwork auxnet = NetworkPathFinder.shortestPathsByCost(n, new Request(s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
-                                                                    Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
+                                                                        Simulation.defaultParameters);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());
     assertEquals(l0_2, path.get(0));

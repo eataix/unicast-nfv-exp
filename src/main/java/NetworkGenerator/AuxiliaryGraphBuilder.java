@@ -12,23 +12,27 @@ import Network.Server;
 import Simulation.Parameters;
 
 /**
- * Get shortest path from network to network
+ * Construct an auxiliary network
+ *
+ * As we need the information of all-pair shortest paths (APSP) to construct an auxiliary graph and putting the APSP procedure in the AuxiliaryNetwork class
+ * will make it too long, we put the code here.
  */
-public class NetworkPathFinder {
+public class AuxiliaryGraphBuilder {
 
   /**
    * Use Dijkstra to get all-pair shortest paths with respect to cost function @costFn. New Link takes the minimum bandwidth in shortest path.
    */
-  public static AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
+  public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFn, Parameters parameters) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
-    ArrayList<Server> auxServers = new ArrayList<Server>();
+    ArrayList<Server> auxServers = new ArrayList<Server>(); // TODO: Ask Mike what this variable does. It is only written but never read. Is this a typo?
     for (Server s : network.getServers()) {
       auxServers.add(new Server(s));
     }
 
-    for (Server src : network.getServers()) { //find shortest path from @src to every other server in the network
+    // The original code does not implement the Floyd–Warshall algorithm, so we simply find shortest path from @src to every other server in the network
+    for (Server src : network.getServers()) {
       HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
       HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
       pathCost.put(src, 0d);
@@ -86,8 +90,7 @@ public class NetworkPathFinder {
 				pathCosts[dest.getId()][src.getId()] = pathCost.get(dest);*/
       }
     }
-    AuxiliaryNetwork auxnet = new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters);
-    return auxnet;
+    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters);
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {

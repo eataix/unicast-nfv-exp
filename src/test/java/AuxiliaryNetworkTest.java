@@ -7,7 +7,7 @@ import Network.Link;
 import Network.Network;
 import Network.Request;
 import Network.Server;
-import NetworkGenerator.NetworkPathFinder;
+import NetworkGenerator.AuxiliaryGraphBuilder;
 import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 import Simulation.Simulation;
@@ -62,7 +62,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = NetworkPathFinder.shortestPathsByCost(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
     auxnet.generateOfflineNetwork();
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();

@@ -8,18 +8,30 @@ import java.util.HashSet;
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
 
+/**
+ * A layered directed acyclic graph (DAG)
+ *
+ * Each arc has a "weight" and a "delay"
+ *
+ * This class supports many operations on an auxiliary network, including finding a (delay-aware) shortest path, etc.
+ */
 @SuppressWarnings("Duplicates") public class AuxiliaryNetwork extends Network {
-  private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
+
   private final double[][] pathCosts;
   private final double[][] pathDelays;
-  public final ArrayList<HashSet<Server>> serviceLayers;
-  private final Request request;
+  private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
 
-  private Server source;
-  private Server destination;
-  private final ArrayList<Server> auxServers;
-  private final ArrayList<Link> auxLinks;
+  private final Request request;
   private final Parameters parameters;
+
+  private final Server source;
+  private final Server destination;
+
+  private final ArrayList<Server> auxServers; // TODO: Talk to Mike regarding what these variable does
+  private final ArrayList<Link> auxLinks;
+
+  // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
+  public final ArrayList<HashSet<Server>> serviceLayers;
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
                           HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters) {
@@ -29,6 +41,8 @@ import Simulation.Parameters;
     this.allShortestPaths = allShortestPaths;
     this.request = request;
     this.parameters = parameters;
+    this.source = request.getSource();
+    this.destination = request.getDestination();
 
     auxServers = new ArrayList<Server>();
     auxLinks = new ArrayList<Link>();
@@ -47,10 +61,8 @@ import Simulation.Parameters;
    * Create network with auxServers and auxLinks
    */
   private void generateNetwork(boolean offline) {
-    source = new Server(request.getSource());
-    destination = new Server(request.getDestination());
-    auxServers.add(source);
-    auxServers.add(destination);
+    auxServers.add(this.source);
+    auxServers.add(this.destination);
 
     // Layer 0, containing the source node only
     HashSet<Server> prevLayer = new HashSet<>();
@@ -85,7 +97,165 @@ import Simulation.Parameters;
     }
   }
 
-  public HashSet<Server> getServiceLayer(int index) {
+  /**
+   * This is what should be used, for most of the time
+   */
+  public ArrayList<Server> findShortestPath() {
+    return findShortestPath(new CostFunction() {
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return l.getWeight();
+      }
+
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+    });
+  }
+
+  /**
+   * @return A shortest path in this network with respect to @edgeWeightFunction
+   *
+   * Notice: - The auxiliary network is a DAG
+   */
+  private ArrayList<Server> findShortestPath(CostFunction edgeWeightFunction) {
+    HashMap<Server, Double> pathCost = new HashMap<>();
+    HashMap<Server, Server> prevNode = new HashMap<>();
+    HashSet<Server> prevLayer = new HashSet<>();
+    Server src = this.getSource();
+    prevLayer.add(src);
+    pathCost.put(this.getSource(), 0.0);
+
+    int L = request.getSC().length;
+    for (int i = 0; i < L; i++) {
+      HashSet<Server> currLayer = this.getServiceLayer(i);
+      for (Server curr : currLayer) {
+        double minCost = Double.MAX_VALUE;
+        Server minPrev = null;
+        for (Server prev : prevLayer) {
+          Link link = prev.getLink(curr);
+          if (link != null) {
+            double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+            if (cost < minCost) {
+              minCost = cost;
+              minPrev = prev;
+            }
+          }
+        }
+        pathCost.put(curr, minCost);
+        prevNode.put(curr, minPrev);
+      }
+      prevLayer = currLayer;
+    }
+    //final layer to sink
+    double minCost = Double.MAX_VALUE;
+    Server minPrev = null;
+    Server dest = this.getDestination();
+    for (Server prev : prevLayer) {
+      Link link = prev.getLink(dest);
+      if (link != null) {
+        double cost = edgeWeightFunction.getCost(link, request.getBandwidth(), parameters) + pathCost.get(prev);
+        if (cost < minCost) {
+          minCost = cost;
+          minPrev = prev;
+        }
+      }
+    }
+    prevNode.put(dest, minPrev);
+
+    return extractPath(request, prevNode, dest);
+  }
+
+  public ArrayList<Server> LARAC() {
+    CostFunction costOnly = new CostFunction() {
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return l.getWeight();
+      }
+
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+    };
+    CostFunction delayOnly = new CostFunction() {
+      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+        return 0;
+      }
+
+      @Override public double getCost(Link l, int b, Parameters parameters) {
+        return l.getDelay();
+      }
+    };
+
+    // PC is the shortest path on the original cost c
+    ArrayList<Server> pathC = findShortestPath(costOnly);
+    if (pathC == null) {
+      return null;
+    }
+
+    double pathCCost = this.calculatePathCost(pathC, costOnly);
+    double pathCDelay = this.calculatePathCost(pathC, delayOnly);
+    if (pathCDelay <= request.getDelayReq()) {
+      return pathC; // clearly no solution exists
+    }
+
+    ArrayList<Server> pathD = findShortestPath(delayOnly);
+    if (pathD == null) {
+      return null;
+    }
+    double pathDCost = this.calculatePathCost(pathD, costOnly);
+    double pathDDelay = this.calculatePathCost(pathD, delayOnly);
+    if (pathDDelay > request.getDelayReq()) {
+      return null;
+    }
+
+    while (true) {
+      final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
+      CostFunction modifiedCostFunction = new CostFunction() {
+        @Override public double getCost(Link l, int b, Parameters parameters) {
+          return l.getWeight() + lambda * l.getDelay();
+        }
+
+        @Override public double getCost(Server s, int nfv, Parameters parameters) {
+          return 0;
+        }
+      };
+
+      ArrayList<Server> pathR = findShortestPath(modifiedCostFunction);
+      if (pathR == null) {
+        return null;
+      }
+
+      double pathRCost = this.calculatePathCost(pathR, costOnly);
+      double pathRDelay = this.calculatePathCost(pathR, delayOnly);
+
+      if (pathRCost == pathCCost) {
+        return pathD;
+      }
+
+      if (this.calculatePathCost(pathR, modifiedCostFunction) == this.calculatePathCost(pathC, modifiedCostFunction)) {
+        pathD = pathR;
+        pathDCost = pathRCost;
+        pathDDelay = pathRDelay;
+      } else {
+        pathC = pathR;
+        pathCCost = pathRCost;
+        pathCDelay = pathRDelay;
+      }
+    }
+  }
+
+  private static ArrayList<Server> extractPath(Request request, HashMap<Server, Server> prevNode, Server destination) {
+    ArrayList<Server> path = new ArrayList<>();
+    Server curr = destination;
+    int i = request.getSC().length;
+    while (curr != null) {
+      path.add(0, curr);
+      curr = (i >= 0) ? prevNode.get(curr) : null;
+      i--;
+    }
+    return path;
+  }
+
+  private HashSet<Server> getServiceLayer(int index) {
     return serviceLayers.get(index);
   }
 
@@ -93,29 +263,12 @@ import Simulation.Parameters;
     return source;
   }
 
-  public Server getDestination() {
-    return destination;
-  }
-
-  private HashSet<Server> cloneServers(Collection<Server> svrs) {
-    HashSet<Server> clones = new HashSet<Server>();
-    for (Server s : svrs) {
-      clones.add(new Server(s));
-    }
-    return clones;
-  }
-
-  public ArrayList<Link> getLinkPath(Server s1, Server s2) {
-    if (s1.getId() == s2.getId()) {
-      return new ArrayList<Link>();
-    }
-    return allShortestPaths.get(s1.getId()).get(s2.getId());
-  }
-
   /**
+   * TODO: I don't know why we even need to re-calculate the cost of each edge and server. Haven't we done this during the construction of auxiliary graph?
+   *
    * @param serversOnPath the list of servers on the path
    * @param costFunction cost function
-   * @return * the cost of path @serversOnPath with respect to a given cost function @costFunction
+   * @return the cost of path @serversOnPath with respect to a given cost function @costFunction
    */
   public double calculatePathCost(ArrayList<Server> serversOnPath, CostFunction costFunction) {
     if (serversOnPath.size() != request.getSC().length + 2) { //No path was found
@@ -157,6 +310,25 @@ import Simulation.Parameters;
       }
     }
     return cost;
+  }
+
+  public Server getDestination() {
+    return destination;
+  }
+
+  private HashSet<Server> cloneServers(Collection<Server> svrs) {
+    HashSet<Server> clones = new HashSet<Server>();
+    for (Server s : svrs) {
+      clones.add(new Server(s));
+    }
+    return clones;
+  }
+
+  public ArrayList<Link> getLinkPath(Server s1, Server s2) {
+    if (s1.getId() == s2.getId()) {
+      return new ArrayList<Link>();
+    }
+    return allShortestPaths.get(s1.getId()).get(s2.getId());
   }
 
   public void admitRequestAndReserveResources(ArrayList<Server> path) {//assign network resources for request
