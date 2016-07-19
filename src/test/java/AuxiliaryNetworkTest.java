@@ -62,7 +62,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = new NetworkPathFinder().shortestPathsByCost(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = NetworkPathFinder.shortestPathsByCost(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
     auxnet.generateOfflineNetwork();
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();

@@ -1,5 +1,8 @@
 package NetworkGenerator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import Algorithm.CostFunctions.CostFunction;
 import Network.AuxiliaryNetwork;
 import Network.Link;
@@ -7,62 +10,63 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import Simulation.Parameters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
 
-public class NetworkPathFinder { //gets shortest path from network to network
+/**
+ * Get shortest path from network to network
+ */
+public class NetworkPathFinder {
 
   /**
-   * Use djikstra to get shortest paths by @costFn. New Link takes the minimum bandwidth in shortest path.
+   * Use Dijkstra to get shortest paths by @costFn. New Link takes the minimum bandwidth in shortest path.
    */
   public static AuxiliaryNetwork shortestPathsByCost(Network network, Request request, CostFunction costFn, Parameters parameters) {
-    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths = new HashMap<>();
-    final double[][] pathCosts = new double[network.size()][network.size()];
+    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
+    double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
+    ArrayList<Server> auxServers = new ArrayList<Server>();
+    for (Server s : network.getServers()) {
+      auxServers.add(new Server(s));
+    }
 
-    ArrayList<Server> auxServers = network.getServers().stream().map(s -> new Server(s)).collect(Collectors.toCollection(ArrayList::new));
-
-    for (Server server : network.getServers()) { //find shortest path from server to every other server in the network
-      final HashMap<Server, Double> pathCost = new HashMap<>(); // cost of path from @server to other servers
-      HashMap<Server, Server> prevNode = new HashMap<>();
-      pathCost.put(server, 0d);
-      PriorityQueue<Server> queue = new PriorityQueue<>(network.getServers().size(),
-          (s1, s2) -> pathCost.getOrDefault(s1, Double.POSITIVE_INFINITY).compareTo(pathCost.getOrDefault(s2, Double.POSITIVE_INFINITY))); //priority queue
-
-      ArrayList<Server> searched = new ArrayList<>();
-      queue.add(server);
+    for (Server src : network.getServers()) { //find shortest path from s to every other server in the network
+      HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
+      HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
+      pathCost.put(src, 0d);
+      ArrayList<Server> queue = new ArrayList<Server>();
+      ArrayList<Server> searched = new ArrayList<Server>();
+      queue.add(src);
       while (!queue.isEmpty()) {
-        Server curr = queue.poll();
+        //priority queue
+        Server curr = queue.remove(0);
         for (Server neighbour : curr.getAllNeighbours()) {
           Link l = curr.getLink(neighbour);
           //searched nodes and links without enough bandwidth
           if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * request.getSC().length) {
             continue;
           }
-          Double cost = pathCost.getOrDefault(neighbour, Double.POSITIVE_INFINITY);
+          Double cost = pathCost.get(neighbour);
+          cost = (cost == null) ? Double.MAX_VALUE : cost;
           if (pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters) < cost) {
             pathCost.put(neighbour, pathCost.get(curr) + costFn.getCost(l, request.getBandwidth(), parameters));
             prevNode.put(neighbour, curr);
           }
           //add to priority queue using insertion sort
-          queue.add(neighbour);
+          insertSort(queue, neighbour, pathCost);
         }
         searched.add(curr);
       }
 
       //update shortest paths
       for (Server dest : network.getServers()) {
-        if (dest == server) {
+        if (dest == src) {
           continue;
         }
         if (pathCost.get(dest) == null) {//Auxiliary graph could not be constructed (some destinations are not reachable with current residual bandwidth)
-          return null; // TODO: Zichuan, would you please check if we should really do this?
+          return null;
         }
         Server curr = dest;
         double delay = 0;
-        ArrayList<Link> shortestPath = new ArrayList<>();
+        ArrayList<Link> shortestPath = new ArrayList<Link>();
         while (prevNode.get(curr) != null) {
           Link l = curr.getLink(prevNode.get(curr));
           shortestPath.add(0, l);
@@ -70,14 +74,37 @@ public class NetworkPathFinder { //gets shortest path from network to network
           curr = prevNode.get(curr);
         }
         //update all shortest paths map
-        HashMap<Integer, ArrayList<Link>> srcMap =
-            (allShortestPaths.containsKey(server.getId())) ? allShortestPaths.get(server.getId()) : new HashMap<>();
+        HashMap<Integer, ArrayList<Link>> srcMap = (allShortestPaths.containsKey(src.getId())) ?
+            allShortestPaths.get(src.getId()) : new HashMap<Integer, ArrayList<Link>>();
         srcMap.put(dest.getId(), shortestPath);
-        allShortestPaths.put(server.getId(), srcMap);
-        pathCosts[server.getId()][dest.getId()] = pathCost.get(dest);
-        pathDelays[server.getId()][dest.getId()] = delay;
+        allShortestPaths.put(src.getId(), srcMap);
+        pathCosts[src.getId()][dest.getId()] = pathCost.get(dest);
+        pathDelays[src.getId()][dest.getId()] = delay;
+
+/*				HashMap<Integer, ArrayList<Link>> destMap = (allShortestPaths.containsKey(dest.getId())) ?
+            allShortestPaths.get(dest.getId()) : new HashMap<Integer, ArrayList<Link>>();
+				destMap.put(src.getId(), shortestPath);
+				allShortestPaths.put(dest.getId(), destMap);
+				pathCosts[dest.getId()][src.getId()] = pathCost.get(dest);*/
       }
     }
-    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request, parameters);
+    AuxiliaryNetwork auxnet = new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allShortestPaths, request, parameters);
+    return auxnet;
+  }
+
+  private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {
+    if (queue.isEmpty()) {
+      queue.add(s);
+    }
+    for (int i = 0; i < queue.size(); i++) {
+      Server q = queue.get(i);
+      if (pathCost.get(s) < pathCost.get(q)) {
+        queue.add(i, s);
+        break;
+      } else if (i == queue.size() - 1) {
+        queue.add(s);
+        break;
+      }
+    }
   }
 }
