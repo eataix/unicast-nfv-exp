@@ -96,18 +96,18 @@ public class AuxiliaryGraphBuilder {
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {
-    if (queue.isEmpty()) {
-      queue.add(s);
-    }
+//    if (queue.isEmpty()) {
+//      queue.add(s);
+//    }
+    queue.add(s);
+    
     for (int i = 0; i < queue.size(); i++) {
       Server q = queue.get(i);
       if (pathCost.get(s) < pathCost.get(q)) {
-        queue.add(i, s);
+    	queue.set(i, s);
+        queue.set(queue.size() - 1, q);
         break;
-      } else if (i == queue.size() - 1) {
-        queue.add(s);
-        break;
-      }
+      }    
     }
   }
 }

@@ -31,7 +31,7 @@ public class Benchmark {
 
   public Result benchmarkNFVUnicast() {
 
-    CostFunction costFunction = new OperationalCostFunction();
+    //CostFunction costFunction = new OperationalCostFunction();
 
     Server source = this.request.getSource();
     Server destination = this.request.getDestination();
@@ -43,15 +43,15 @@ public class Benchmark {
         continue;
       }
 
-      ArrayList<Link> linksSToS = this.shortestPath(source, potentialServer, costFunction);
-      ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination, costFunction);
+      ArrayList<Link> linksSToS = this.shortestPath(source, potentialServer);
+      ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination);
       double path1Cost = 0d;
       for (Link link : linksSToS)
-        path1Cost += costFunction.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
 
       double path2Cost = 0d;
       for (Link link : linksSToD)
-        path2Cost += costFunction.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
 
       double serverCost = 0d;
       for (int nfv : this.request.getSC()) {
@@ -70,7 +70,7 @@ public class Benchmark {
         .build();
   }
 
-  private ArrayList<Link> shortestPath(Server source, Server destination, CostFunction costFunction) {
+  private ArrayList<Link> shortestPath(Server source, Server destination) {
 
     if (source.equals(destination)) {
       return new ArrayList<Link>();
@@ -87,7 +87,7 @@ public class Benchmark {
         Server s1 = link.getS1();
         Server s2 = link.getS2();
         DefaultWeightedEdge edge = this.weightedGraph.addEdge(s1, s2);
-        this.weightedGraph.setEdgeWeight(edge, costFunction.getCost(link, this.request.getBandwidth(), parameters));//TODO Meitian, please check this.
+        this.weightedGraph.setEdgeWeight(edge, parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters));//TODO Meitian, please check this.
         linkEdgeMap.put(edge, link);
       }
     }
@@ -122,8 +122,8 @@ public class Benchmark {
         continue;
       }
 
-      ArrayList<Link> linksSToS = this.shortestPath(source, potentialServer, costFunction);
-      ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination, costFunction);
+      ArrayList<Link> linksSToS = this.shortestPath(source, potentialServer);
+      ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination);
       double path1Cost = 0d;
       double path1Delay = 0d;
       for (Link link : linksSToS) {

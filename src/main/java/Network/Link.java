@@ -3,8 +3,8 @@ package Network;
 public class Link {
   private final Server s1;
   private final Server s2;
-  private int bandwidthCapacity; //bandwidth capacity
-  private int allocatedBandwidth; //bandwidth being used
+  private double bandwidthCapacity; //bandwidth capacity
+  private double allocatedBandwidth; //bandwidth being used
   private int operationalCost; //operation cost
   private double delay; //delay
   private double weight;
@@ -20,7 +20,7 @@ public class Link {
     s2.addLink(this);
   }
 
-  private Link(Server s1, Server s2, int bandwidthCapacity, int allocatedBandwidth, double delay, int operationalCost) {
+  private Link(Server s1, Server s2, double bandwidthCapacity, double allocatedBandwidth, double delay, int operationalCost) {
     this.s1 = s1;
     this.s2 = s2;
     this.bandwidthCapacity = bandwidthCapacity;
@@ -48,15 +48,15 @@ public class Link {
     return this.s1.getId() + "<->" + this.s2.getId();
   }
 
-  public int getResidualBandwidth() {
+  public double getResidualBandwidth() {
     return bandwidthCapacity - allocatedBandwidth;
   }
 
-  public int getBandwidth() {
+  public double getBandwidth() {
     return bandwidthCapacity;
   }
 
-  public int getAllocatedBandwidth() {
+  public double getAllocatedBandwidth() {
     return allocatedBandwidth;
   }
 
@@ -116,7 +116,7 @@ public class Link {
     return s2;
   }
 
-  public int getBandwidthCapacity() {
+  public double getBandwidthCapacity() {
     return bandwidthCapacity;
   }
 

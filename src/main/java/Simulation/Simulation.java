@@ -403,7 +403,8 @@ import NetworkGenerator.NetworkValueSetter;
 
       System.out.println("L:" + L);
 
-      Parameters parameters = new Parameters.Builder().L(L).build();
+      //Parameters parameters = new Parameters.Builder().L(L).build();
+      Parameters parameters = new Parameters.Builder().L(L).costFunc(new LinCostFunction()).build();
 
       int accepted = 0; //number of accepted requests
       int acceptedBenchmark = 0;
