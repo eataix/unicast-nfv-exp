@@ -163,7 +163,7 @@ import Simulation.Parameters;
         return costFunction.getCost(server, nfv, parameters);
       }
 
-      @Override public double getCost(Link l, int b, Parameters parameters) {
+      @Override public double getCost(Link l, double b, Parameters parameters) {
         return costFunction.getCost(l, b, parameters);
       }
     };
@@ -173,7 +173,7 @@ import Simulation.Parameters;
         return 0;
       }
 
-      @Override public double getCost(Link l, int b, Parameters parameters) {
+      @Override public double getCost(Link l, double b, Parameters parameters) {
         return l.getDelay();
       }
     };
@@ -203,7 +203,7 @@ import Simulation.Parameters;
     while (true) {
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
       CostFunction modifiedCostFunction = new CostFunction() {
-        @Override public double getCost(Link l, int b, Parameters parameters) {
+        @Override public double getCost(Link l, double b, Parameters parameters) {
           return costFunction.getCost(l, b, parameters) + lambda * l.getDelay();
         }
 
