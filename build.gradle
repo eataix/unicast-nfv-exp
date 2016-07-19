@@ -48,4 +48,3 @@ task fatJar(type: Jar) {
   with jar
 }
 
-buildDir = '/tmp/u4700480/sdn'
