@@ -12,15 +12,15 @@ public class Parameters {
   public final int[] networkSizes; //initialization cost of vnf service
 
   public final int alpha;
-  public final int beta;
-  public final int linkBWCapMin;
-  public final int linkBWCapMax;
+  public final int beta; // Multiply of beta, i.e., the value of beta would be "beta * |V|"
+  public final int linkBWCapMin; // minimum link bandwidth capacity
+  public final int linkBWCapMax; // maximum link bandwidth capacity
   public final int numRequest;
   public final int L;
-  public final int reqBWReqMin;
-  public final int reqBWReqMax;
-  public final int reqDelayReqMin;
-  public final int reqDelayReqMax;
+  public final int reqBWReqMin; // minimum request bandwidth requirement
+  public final int reqBWReqMax; // maximum request bandwidth requirement
+  public final int reqDelayReqMin; // minimum request delay requirement
+  public final int reqDelayReqMax; // maximum request delay requirement
   public final int numTrials;
   public final int linkDelayReqMin;
   public final int linkDelayReqMax;
@@ -31,10 +31,10 @@ public class Parameters {
   public final double nfvProb;
   public final boolean online;
 
-  Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] networkSizes, int alpha, int beta, int linkBWCapMin,
-             int linkBWCapMax, int numRequest, int L, int reqBWReqMin, int reqBWReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
-             int linkDelayReqMin, int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
-             boolean online) {
+  private Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] networkSizes, int alpha, int beta, int linkBWCapMin,
+                     int linkBWCapMax, int numRequest, int L, int reqBWReqMin, int reqBWReqMax, int reqDelayReqMin, int reqDelayReqMax, int numTrials,
+                     int linkDelayReqMin, int linkDelayReqMax, int threshold, int networkSize, double serverRatio, CostFunction costFunc, double nfvProb,
+                     boolean online) {
     this.networkSizes = networkSizes;
     this.alpha = alpha;
     this.beta = beta;

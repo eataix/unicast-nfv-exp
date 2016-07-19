@@ -1,5 +1,11 @@
 package Simulation;
 
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import Algorithm.Algorithm;
 import Algorithm.Benchmark;
 import Algorithm.CostFunctions.ExponentialCostFunction;
@@ -10,11 +16,6 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkGenerator;
 import NetworkGenerator.NetworkValueSetter;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
@@ -397,7 +398,7 @@ import java.util.concurrent.TimeUnit;
   }
 
   private static void LEffectWithoutDelays() {
-	
+
     for (int L = 2; L <= 6; L += 2) {
 
       System.out.println("L:" + L);
@@ -411,7 +412,7 @@ import java.util.concurrent.TimeUnit;
       Result[] resultsBenchmark = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
-    	
+
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
@@ -428,13 +429,13 @@ import java.util.concurrent.TimeUnit;
               averageCostReq += results[i].getPathCost();
             }
           }
-          
+
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostReq / defaultParameters.numTrials);
           expSum += accepted;
 
           network.wipeLinks();
-          
+
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
             Benchmark benchmark = new Benchmark(network, requests.get(i), parameters);
@@ -444,7 +445,7 @@ import java.util.concurrent.TimeUnit;
               averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
             }
           }
-          
+
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
           averageCostNetBenchmark += (averageCostReqBenchmark / defaultParameters.numTrials);
         }
@@ -453,60 +454,60 @@ import java.util.concurrent.TimeUnit;
     }
   }
 
-	private static void LEffectWithDelays() {
-		for (int L = 2; L <= 6; L += 2) {
+  private static void LEffectWithDelays() {
+    for (int L = 2; L <= 6; L += 2) {
 
-			System.out.println("L:" + L);
+      System.out.println("L:" + L);
 
-			Parameters parameters = new Parameters.Builder().L(L).build();
+      Parameters parameters = new Parameters.Builder().L(L).build();
 
-			int accepted = 0; // number of accepted requests
-			int acceptedBenchmark = 0;
-			int expSum = 0; // sum of all exponential cost accepted requests
-			Result[] results = new Result[parameters.numRequest];
-			Result[] resultsBenchmark = new Result[parameters.numRequest];
+      int accepted = 0; // number of accepted requests
+      int acceptedBenchmark = 0;
+      int expSum = 0; // sum of all exponential cost accepted requests
+      Result[] results = new Result[parameters.numRequest];
+      Result[] resultsBenchmark = new Result[parameters.numRequest];
 
-			for (int networkSize : defaultParameters.networkSizes) {
-				double averageCostNet = 0d;
-				double averageCostNetBenchmark = 0d;
-				for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
-					Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
-					ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
-					network.wipeLinks();
+      for (int networkSize : defaultParameters.networkSizes) {
+        double averageCostNet = 0d;
+        double averageCostNetBenchmark = 0d;
+        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+          Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
+          ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
+          network.wipeLinks();
 
-					double averageCostReq = 0d;
-					for (int i = 0; i < parameters.numRequest; i++) {
-						Algorithm alg = new Algorithm(network, requests.get(i), parameters);
-						results[i] = alg.minOpCostWithDelay();
-						if (results[i].isAdmitted()) {
-							accepted++;
-							averageCostReq += results[i].getPathCost();
-						}
-					}
+          double averageCostReq = 0d;
+          for (int i = 0; i < parameters.numRequest; i++) {
+            Algorithm alg = new Algorithm(network, requests.get(i), parameters);
+            results[i] = alg.minOpCostWithDelay();
+            if (results[i].isAdmitted()) {
+              accepted++;
+              averageCostReq += results[i].getPathCost();
+            }
+          }
 
-					averageCostReq = averageCostReq / accepted;
-					averageCostNet += (averageCostReq / defaultParameters.numTrials);
-					expSum += accepted;
+          averageCostReq = averageCostReq / accepted;
+          averageCostNet += (averageCostReq / defaultParameters.numTrials);
+          expSum += accepted;
 
-					network.wipeLinks();
+          network.wipeLinks();
 
-					double averageCostReqBenchmark = 0d;
-					for (int i = 0; i < parameters.numRequest; i++) {
-						Benchmark benchmark = new Benchmark(network, requests.get(i), parameters);
-						resultsBenchmark[i] = benchmark.benchmarkNFVUnicastDelay();
-						if (resultsBenchmark[i].isAdmitted()) {
-							acceptedBenchmark++;
-							averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
-						}
-					}
+          double averageCostReqBenchmark = 0d;
+          for (int i = 0; i < parameters.numRequest; i++) {
+            Benchmark benchmark = new Benchmark(network, requests.get(i), parameters);
+            resultsBenchmark[i] = benchmark.benchmarkNFVUnicastDelay();
+            if (resultsBenchmark[i].isAdmitted()) {
+              acceptedBenchmark++;
+              averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
+            }
+          }
 
-					averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
-					averageCostNetBenchmark += (averageCostReqBenchmark / defaultParameters.numTrials);
-				}
-				System.out.println(networkSize + " " + averageCostNet + " " + averageCostNetBenchmark);
-			}
-		}
-	}
+          averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
+          averageCostNetBenchmark += (averageCostReqBenchmark / defaultParameters.numTrials);
+        }
+        System.out.println(networkSize + " " + averageCostNet + " " + averageCostNetBenchmark);
+      }
+    }
+  }
 
   private static ArrayList<Request> generateRequests(Parameters parameters, Network network, int numRequests) {
     ArrayList<Request> requests = new ArrayList<>();

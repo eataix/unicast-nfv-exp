@@ -13,7 +13,7 @@ import Simulation.Parameters;
 
 /**
  * Construct an auxiliary network
- *
+ * <p>
  * As we need the information of all-pair shortest paths (APSP) to construct an auxiliary graph and putting the APSP procedure in the AuxiliaryNetwork class
  * will make it too long, we put the code here.
  */
@@ -23,18 +23,18 @@ public class AuxiliaryGraphBuilder {
    * Use Dijkstra to get all-pair shortest paths with respect to cost function @costFn. New Link takes the minimum bandwidth in shortest path.
    */
   public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFn, Parameters parameters, boolean online) {
-    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
+    HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
-    ArrayList<Server> auxServers = new ArrayList<Server>(); // TODO: Ask Mike what this variable does. It is only written but never read. Is this a typo?
+    ArrayList<Server> auxServers = new ArrayList<>(); // TODO: Ask Mike what this variable does. It is only written but never read. Is this a typo?
     for (Server s : network.getServers()) {
       auxServers.add(new Server(s));
     }
 
     // The original code does not implement the Floyd–Warshall algorithm, so we simply find shortest path from @src to every other server in the network
     for (Server src : network.getServers()) {
-      HashMap<Server, Double> pathCost = new HashMap<Server, Double>();
-      HashMap<Server, Server> prevNode = new HashMap<Server, Server>();
+      HashMap<Server, Double> pathCost = new HashMap<>();
+      HashMap<Server, Server> prevNode = new HashMap<>();
       pathCost.put(src, 0d);
       ArrayList<Server> queue = new ArrayList<Server>();
       ArrayList<Server> searched = new ArrayList<Server>();

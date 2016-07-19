@@ -62,8 +62,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
-    auxnet.generateOfflineNetwork();
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters, false);
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();
     ArrayList<HashSet<Server>> serviceLayers = auxnet.serviceLayers;
@@ -75,13 +74,13 @@ public class AuxiliaryNetworkTest {
 
     //each link represents shortest path between 2 nodes
     Server s3_0 = getServer(layer0, 3);
-    assertEquals(13.0, s3_0.getLink(src).getPathCost(), 0.001);
+    assertEquals(13.0, s3_0.getLink(src).getWeight(), 0.001);
     Server s0_0 = getServer(layer0, 0);
-    assertEquals(0, s0_0.getLink(src).getPathCost(), 0.001);
+    assertEquals(0, s0_0.getLink(src).getWeight(), 0.001);
     Server s1_0 = getServer(layer0, 1);
     Server s2_1 = getServer(layer1, 2);
-    assertEquals(17, s1_0.getLink(s2_1).getPathCost(), 0.001);
-    assertEquals(2, s2_1.getLink(dest).getPathCost(), 0.001);
+    assertEquals(17, s1_0.getLink(s2_1).getWeight(), 0.001);
+    assertEquals(2, s2_1.getLink(dest).getWeight(), 0.001);
   }
 
   private Server getServer(HashSet<Server> servers, int id) {

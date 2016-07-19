@@ -47,7 +47,7 @@ public class AuxiliaryGraphBuilderTest {
 
     Network n = new Network(servers, links);
     AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
-                                                                        Simulation.defaultParameters);
+                                                                        Simulation.defaultParameters, false);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());
     assertEquals(l0_2, path.get(0));
