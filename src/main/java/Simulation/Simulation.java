@@ -396,9 +396,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   private static void LEffectWithoutDelays() {
-
     for (int L = 2; L <= 6; L += 2) {
-
       System.out.println("L:" + L);
 
       //Parameters parameters = new Parameters.Builder().L(L).build();

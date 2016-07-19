@@ -26,7 +26,7 @@ public class AuxiliaryGraphBuilder {
    * @param request the request to admit
    * @param costFunction a cost function
    * @param parameters parameters
-   * @param online true if the request is an online request
+   * @param offline true if the request is an online request
    */
   public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFunction, Parameters parameters, boolean offline) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<>();

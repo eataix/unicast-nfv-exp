@@ -35,6 +35,8 @@ import Simulation.Parameters;
   // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
   public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<HashSet<Server>>();
 
+  private final boolean offline;
+
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
                           HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters, boolean offline,
                           CostFunction costFunction) {
@@ -47,14 +49,15 @@ import Simulation.Parameters;
     this.source = request.getSource();
     this.destination = request.getDestination();
     this.costFunction = costFunction;
+    this.offline = offline;
 
-    generateNetwork(offline);
+    generateNetwork();
   }
 
   /**
    * Create network with auxServers and auxLinks
    */
-  private void generateNetwork(boolean offline) {
+  private void generateNetwork() {
     auxServers.add(this.source);
     auxServers.add(this.destination);
 
@@ -66,7 +69,7 @@ import Simulation.Parameters;
     // Layers 1, ..., L, where each layer contains all servers that either have implemented a given NFV or can initialize a VM instance for a given NFV
     for (int nfv : SC) {
       HashSet<Server> origLayer = getReusableServers(nfv);
-      if (offline) {
+      if (this.offline) {
         origLayer.addAll(getUnusedServers(nfv));
       }
       HashSet<Server> currLayer = cloneServers(origLayer); // we do not want to make changes on the original network
@@ -74,7 +77,12 @@ import Simulation.Parameters;
         for (Server prev : prevLayer) { // Connect each server in the previous layer to an server in the current layer
           Link l = new Link(prev, curr);
           l.setDelay(pathDelays[curr.getId()][prev.getId()]);
-          l.setWeight(pathCosts[curr.getId()][prev.getId()]); // NOTE: We here set the weight of each edge as the cost of the path between two servers
+
+          double pathCost = pathCosts[curr.getId()][prev.getId()];
+          if (this.offline) {
+            pathCost += this.costFunction.getCost(curr, nfv, parameters);
+          }
+          l.setWeight(pathCost); // NOTE: We here set the weight of each edge as the cost of the path between two servers
           this.auxLinks.add(l);
         }
       }
