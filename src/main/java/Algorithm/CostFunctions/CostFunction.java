@@ -5,7 +5,7 @@ import Network.Server;
 import Simulation.Parameters;
 
 public interface CostFunction {
-  double getCost(Link l, int b, Parameters parameters);
+  double getCost(Link link, double bandwidth, Parameters parameters);
 
-  double getCost(Server s, int nfv, Parameters parameters);
+  double getCost(Server server, int nfv, Parameters parameters);
 }

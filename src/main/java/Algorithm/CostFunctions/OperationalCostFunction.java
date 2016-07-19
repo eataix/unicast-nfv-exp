@@ -6,13 +6,12 @@ import Simulation.Parameters;
 
 public class OperationalCostFunction implements CostFunction {
 
-  @Override
-  public double getCost(Link l, int b, Parameters parameters) {
-    return l.getOperationalCost();
+  @Override public double getCost(Link link, double bandwidth, Parameters parameters) {
+    return link.getOperationalCost();
   }
 
   @Override
-  public double getCost(Server s, int nfv, Parameters parameters) {
-    return s.getOperationalCost(nfv);
+  public double getCost(Server server, int nfv, Parameters parameters) {
+    return server.getOperationalCost(nfv);
   }
 }

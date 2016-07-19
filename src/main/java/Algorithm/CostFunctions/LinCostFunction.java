@@ -6,16 +6,16 @@ import Simulation.Parameters;
 
 public class LinCostFunction implements CostFunction {
   @Override
-  public double getCost(Link l, int b, Parameters parameters) {
-    return (l.getBandwidth() - l.getResidualBandwidth() + b) / l.getBandwidth();
+  public double getCost(Link link, double bandwidth, Parameters parameters) {
+    return (link.getBandwidth() - link.getResidualBandwidth() + bandwidth) / link.getBandwidth();
   }
 
   @Override
-  public double getCost(Server s, int nfv, Parameters parameters) {
-    if (s.canReuseVM(nfv)) {
-      return (s.getCapacity() - s.remainingCapacity()) / s.getCapacity();
+  public double getCost(Server server, int nfv, Parameters parameters) {
+    if (server.canReuseVM(nfv)) {
+      return ((double) server.getCapacity() - (double) server.remainingCapacity()) / (double) server.getCapacity();
     } else {
-      return (s.getCapacity() - s.remainingCapacity() - parameters.nfvReqs[nfv]) / s.getCapacity();
+      return ((double) server.getCapacity() - (double) server.remainingCapacity() - (double) parameters.nfvReqs[nfv]) / (double) server.getCapacity();
     }
   }
 }

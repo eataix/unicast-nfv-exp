@@ -6,12 +6,14 @@ import Simulation.Parameters;
 
 public class ExponentialCostFunction implements CostFunction {
   @Override
-  public double getCost(Link l, int b, Parameters parameters) {
-    return Math.pow(parameters.beta * parameters.networkSize, (l.getAllocatedBandwidth() + b) / l.getBandwidth()) - 1;
+  public double getCost(Link link, double bandwidth, Parameters parameters) {
+    return Math.pow(parameters.beta * parameters.networkSize, (link.getAllocatedBandwidth() + bandwidth) / link.getBandwidth()) - 1;
   }
 
   @Override
-  public double getCost(Server s, int nfv, Parameters parameters) {
-    return Math.pow(parameters.alpha * parameters.networkSize, (s.getCapacity() - s.remainingCapacity() - parameters.nfvReqs[nfv]) / s.getCapacity()) - 1;
+  public double getCost(Server server, int nfv, Parameters parameters) {
+    return Math.pow(parameters.alpha * parameters.networkSize,
+                    ((double) server.getCapacity() - (double) server.remainingCapacity() - (double) parameters.nfvReqs[nfv]) / (double) server.getCapacity())
+        - 1;
   }
 }

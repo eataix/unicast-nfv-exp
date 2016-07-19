@@ -159,8 +159,8 @@ import Simulation.Parameters;
 
   public ArrayList<Server> findDelayAwareShortestPath() {
     CostFunction costOnly = new CostFunction() {
-      @Override public double getCost(Server s, int nfv, Parameters parameters) {
-        return costFunction.getCost(s, nfv, parameters);
+      @Override public double getCost(Server server, int nfv, Parameters parameters) {
+        return costFunction.getCost(server, nfv, parameters);
       }
 
       @Override public double getCost(Link l, int b, Parameters parameters) {
@@ -169,7 +169,7 @@ import Simulation.Parameters;
     };
 
     CostFunction delayOnly = new CostFunction() {
-      @Override public double getCost(Server s, int nfv, Parameters parameters) {
+      @Override public double getCost(Server server, int nfv, Parameters parameters) {
         return 0;
       }
 
@@ -207,8 +207,8 @@ import Simulation.Parameters;
           return costFunction.getCost(l, b, parameters) + lambda * l.getDelay();
         }
 
-        @Override public double getCost(Server s, int nfv, Parameters parameters) {
-          return costFunction.getCost(s, nfv, parameters);
+        @Override public double getCost(Server server, int nfv, Parameters parameters) {
+          return costFunction.getCost(server, nfv, parameters);
         }
       };
 
