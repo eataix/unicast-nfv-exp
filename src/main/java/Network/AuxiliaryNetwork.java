@@ -10,9 +10,9 @@ import Simulation.Parameters;
 
 /**
  * A layered directed acyclic graph (DAG)
- *
+ * <p>
  * Each arc has a "weight" and a "delay"
- *
+ * <p>
  * This class supports many operations on an auxiliary network, including finding a (delay-aware) shortest path, etc.
  */
 @SuppressWarnings("Duplicates") public class AuxiliaryNetwork extends Network {
@@ -27,14 +27,14 @@ import Simulation.Parameters;
   private final Server source;
   private final Server destination;
 
-  private final ArrayList<Server> auxServers; // TODO: Talk to Mike regarding what these variable does
-  private final ArrayList<Link> auxLinks;
+  private final ArrayList<Server> auxServers = new ArrayList<Server>(); // TODO: Talk to Mike regarding what these variable does
+  private final ArrayList<Link> auxLinks = new ArrayList<Link>();
 
   // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
-  public final ArrayList<HashSet<Server>> serviceLayers;
+  public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<HashSet<Server>>();
 
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters) {
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters, boolean online) {
     super(originalServers, originalLinks);
     this.pathCosts = pathCosts;
     this.pathDelays = pathDelays;
@@ -44,17 +44,7 @@ import Simulation.Parameters;
     this.source = request.getSource();
     this.destination = request.getDestination();
 
-    auxServers = new ArrayList<Server>();
-    auxLinks = new ArrayList<Link>();
-    serviceLayers = new ArrayList<HashSet<Server>>();
-  }
-
-  public void generateOnlineNetwork() {
-    generateNetwork(false);
-  }
-
-  public void generateOfflineNetwork() {
-    generateNetwork(true);
+    generateNetwork(online);
   }
 
   /**
@@ -80,7 +70,7 @@ import Simulation.Parameters;
         for (Server prev : prevLayer) { // Connect each server in the previous layer to an server in the current layer
           Link l = new Link(prev, curr);
           l.setDelay(pathDelays[curr.getId()][prev.getId()]);
-          l.setWeight(pathCosts[curr.getId()][prev.getId()]);
+          l.setWeight(pathCosts[curr.getId()][prev.getId()]); // NOTE: We here set the weight of each edge as the cost of the path between two servers
           this.auxLinks.add(l);
         }
       }
@@ -91,7 +81,7 @@ import Simulation.Parameters;
     // the destination
     for (Server prev : prevLayer) { //link this up to destination
       Link l = new Link(prev, destination);
-      l.setDelay(pathDelays[destination.getId()][prev.getId()]);
+      l.setDelay(pathDelays[destination.getId()][prev.getId()]); // NOTE: We here set the weight of each edge as the cost of the path between two servers
       l.setWeight(pathCosts[destination.getId()][prev.getId()]);
       this.auxLinks.add(l);
     }
@@ -99,6 +89,12 @@ import Simulation.Parameters;
 
   /**
    * This is what should be used, for most of the time
+   * <p>
+   * The set of links in this network are virtual links, each of which corresponds to a shortest path between its two endpoints. We have previously set the
+   * weight of each edge to the cost of its corresponding shortest path in terms of the weighted sum of edges, which has already used the user-specified cost
+   * function.
+   *
+   * @return a shortest path for the request, which was given to the constructor of this class.
    */
   public ArrayList<Server> findShortestPath() {
     return findShortestPath(new CostFunction() {
@@ -114,8 +110,8 @@ import Simulation.Parameters;
 
   /**
    * @return A shortest path in this network with respect to @edgeWeightFunction
-   *
-   * Notice: - The auxiliary network is a DAG
+   * <p>
+   * Notice: The auxiliary network is a DAG
    */
   private ArrayList<Server> findShortestPath(CostFunction edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
@@ -165,7 +161,7 @@ import Simulation.Parameters;
     return extractPath(request, prevNode, dest);
   }
 
-  public ArrayList<Server> LARAC() {
+  public ArrayList<Server> findDelayAwareShortestPath() {
     CostFunction costOnly = new CostFunction() {
       @Override public double getCost(Link l, int b, Parameters parameters) {
         return l.getWeight();

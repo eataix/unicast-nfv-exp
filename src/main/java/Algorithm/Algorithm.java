@@ -26,11 +26,10 @@ import Simulation.Parameters;
 
   public Result minOpCostWithoutDelay() {
     CostFunction costFunction = new OperationalCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, this.parameters);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateOfflineNetwork();
     ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
@@ -41,24 +40,23 @@ import Simulation.Parameters;
 
   public Result minOpCostWithDelay() {
     CostFunction costFunction = new ExponentialCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, this.parameters);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Server> path = auxiliaryNetwork.LARAC();
+    ArrayList<Server> path = auxiliaryNetwork.findDelayAwareShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
     return new Result.Builder().path(path)
                                .pathCost(finalPathCost)
+                               .admit(true)
                                .build();
   }
 
   public Result maxThroughputWithoutDelay() { //s is source, t is sink
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, this.parameters);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateOnlineNetwork();
     ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
     boolean admit = admissionControl(finalPathCost);
@@ -72,12 +70,11 @@ import Simulation.Parameters;
   }
 
   public Result maxThroughputWithDelay() { //s is source, t is sink
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, this.parameters);
+    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       return new Result.Builder().build(); //this generates a no-admittance result
     }
-    auxiliaryNetwork.generateOnlineNetwork();
-    ArrayList<Server> path = auxiliaryNetwork.LARAC();
+    ArrayList<Server> path = auxiliaryNetwork.findDelayAwareShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
     boolean admit = admissionControl(finalPathCost);
     if (admit) {

@@ -22,7 +22,7 @@ public class AuxiliaryGraphBuilder {
   /**
    * Use Dijkstra to get all-pair shortest paths with respect to cost function @costFn. New Link takes the minimum bandwidth in shortest path.
    */
-  public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFn, Parameters parameters) {
+  public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFn, Parameters parameters, boolean online) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<Integer, HashMap<Integer, ArrayList<Link>>>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
@@ -60,6 +60,8 @@ public class AuxiliaryGraphBuilder {
         searched.add(curr);
       }
 
+      // At this point, the queue is empty and we have calculated the shortest path from @src to every other server in the network.
+
       //update shortest paths
       for (Server dest : network.getServers()) {
         if (dest == src) {
@@ -90,7 +92,7 @@ public class AuxiliaryGraphBuilder {
 				pathCosts[dest.getId()][src.getId()] = pathCost.get(dest);*/
       }
     }
-    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters);
+    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, online);
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {
