@@ -132,7 +132,6 @@ import static com.google.common.base.Preconditions.checkState;
   private ArrayList<Server> findShortestPath(Function<Link, Double> edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
-    HashMap<Server, Link> prevEdge = new HashMap<>();
 
     HashSet<Server> prevLayer = new HashSet<>();
     Server src = this.getSource();
@@ -206,6 +205,7 @@ import static com.google.common.base.Preconditions.checkState;
       map.put(edge, link);
     }
 
+    // Doing this is perfectly fine because auxServers only contain the source and the destination
     Optional<Server> sourceAlt = auxServers.stream().filter(server -> server.getId() == source.getId()).findAny();
     checkState(sourceAlt.isPresent());
     Optional<Server> destinationAlt = auxServers.stream().filter(server -> server.getId() == destination.getId()).findAny();
