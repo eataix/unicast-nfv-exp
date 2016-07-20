@@ -31,13 +31,10 @@ public class Benchmark {
 
   public Result benchmarkNFVUnicast() {
 
-    //CostFunction costFunction = new OperationalCostFunction();
-
     Server source = this.request.getSource();
     Server destination = this.request.getDestination();
 
     double minCost = Double.MAX_VALUE;
-    Server minCostServer = null;
     for (Server potentialServer : this.originalNetwork.getServers()) {
       if (0 == potentialServer.getCapacity()) {
         continue;
@@ -47,12 +44,12 @@ public class Benchmark {
       ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination);
       double path1Cost = 0d;
       for (Link link : linksSToS) {
-        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
       }
 
       double path2Cost = 0d;
       for (Link link : linksSToD) {
-        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
       }
 
       double serverCost = 0d;
@@ -62,7 +59,6 @@ public class Benchmark {
 
       if ((path1Cost + path2Cost + serverCost) < minCost) {
         minCost = path1Cost + path2Cost + serverCost;
-        minCostServer = potentialServer;
       }
     }
 
@@ -90,7 +86,7 @@ public class Benchmark {
         Server s1 = link.getS1();
         Server s2 = link.getS2();
         DefaultWeightedEdge edge = this.weightedGraph.addEdge(s1, s2);
-        this.weightedGraph.setEdgeWeight(edge, parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters));//TODO Meitian, please check this.
+        this.weightedGraph.setEdgeWeight(edge, parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters));
         linkEdgeMap.put(edge, link);
       }
     }
@@ -113,8 +109,6 @@ public class Benchmark {
 
   public Result benchmarkNFVUnicastDelay() {
 
-    CostFunction costFunction = new OperationalCostFunction();
-
     Server source = this.request.getSource();
     Server destination = this.request.getDestination();
 
@@ -131,22 +125,26 @@ public class Benchmark {
       double path1Cost = 0d;
       double path1Delay = 0d;
       for (Link link : linksSToS) {
-        path1Cost += costFunction.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
         path1Delay += link.getDelay();
       }
 
       double path2Cost = 0d;
       double path2Delay = 0d;
       for (Link link : linksSToD) {
-        path2Cost += costFunction.getCost(link, this.request.getBandwidth(), parameters);//TODO Meitian, please check whether the cost is calculated correctly.
+        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
         path2Delay += link.getDelay();
       }
 
       double serverCost = 0d;
       double processingDelay = 0d;
       for (int nfv : this.request.getSC()) {
-        serverCost += potentialServer.getOperationalCost(nfv);//costFunction.getCost(potentialServer, nfv, parameters);
-        //TODO add processing delay
+        serverCost += potentialServer.getOperationalCost(nfv);
+        
+        processingDelay += parameters.nfvProcessingDelays[nfv];
+        if (!potentialServer.canReuseVM(nfv)) {
+        	processingDelay += parameters.nfvInitDelays[nfv];
+        }
       }
 
       if ((path1Delay + path2Delay + processingDelay) <= this.request.getDelayReq()) {
