@@ -51,4 +51,12 @@ public class Result {
       return new Result(path, pathCost, admit);
     }
   }
+
+  @Override public String toString() {
+    return "Result{" +
+        "path=" + path +
+        ", pathCost=" + pathCost +
+        ", admit=" + admit +
+        '}';
+  }
 }

@@ -114,7 +114,7 @@ import Simulation.Parameters;
 
   /**
    * @return A shortest path in this network with respect to @edgeWeightFunction
-   *
+   * <p>
    * Notice: The auxiliary network is a DAG
    */
   private ArrayList<Server> findShortestPath(Function<Link, Double> edgeWeightFunction) {
@@ -272,7 +272,7 @@ import Simulation.Parameters;
    * @return the cost of path @serversOnPath with respect to a given cost function @costFunction
    */
   public double calculatePathCost(ArrayList<Server> serversOnPath, CostFunction costFunction) {
-    if (serversOnPath.size() != request.getSC().length + 2) { //No path was found
+    if (serversOnPath == null || serversOnPath.size() != request.getSC().length + 2) { //No path was found
       return Double.MAX_VALUE;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();

@@ -11,6 +11,7 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.AuxiliaryGraphBuilder;
 import Simulation.Parameters;
+import Simulation.Simulation;
 
 @SuppressWarnings("Duplicates") public class Algorithm {
   private final Network originalNetwork;
@@ -31,14 +32,17 @@ import Simulation.Parameters;
     CostFunction costFunction = new OperationalCostFunction();
     auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      Simulation.getLogger().trace("No bandwidth");
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
-    return new Result.Builder().path(path)
-                               .pathCost(finalPathCost)
-                               .admit(true)
-                               .build();
+    Result result = new Result.Builder().path(path)
+                                        .pathCost(finalPathCost)
+                                        .admit(true)
+                                        .build();
+    Simulation.getLogger().trace(result.toString());
+    return result;
   }
 
   /**
@@ -48,14 +52,17 @@ import Simulation.Parameters;
     CostFunction costFunction = new ExponentialCostFunction();
     auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters, true);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      Simulation.getLogger().trace("No bandwidth");
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     ArrayList<Server> path = auxiliaryNetwork.findDelayAwareShortestPath();
     double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
-    return new Result.Builder().path(path)
-                               .pathCost(finalPathCost)
-                               .admit(true)
-                               .build();
+    Result result = new Result.Builder().path(path)
+                                        .pathCost(finalPathCost)
+                                        .admit(true)
+                                        .build();
+    Simulation.getLogger().trace(result.toString());
+    return result;
   }
 
   /**
@@ -64,6 +71,7 @@ import Simulation.Parameters;
   public Result maxThroughputWithoutDelay() { //s is source, t is sink
     auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      Simulation.getLogger().trace("No bandwidth");
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
@@ -72,10 +80,12 @@ import Simulation.Parameters;
     if (admit) {
       auxiliaryNetwork.admitRequestAndReserveResources(path);
     }
-    return new Result.Builder().path(path)
-                               .pathCost(finalPathCost)
-                               .admit(admit)
-                               .build();
+    Result result = new Result.Builder().path(path)
+                                        .pathCost(finalPathCost)
+                                        .admit(admit)
+                                        .build();
+    Simulation.getLogger().trace(result.toString());
+    return result;
   }
 
   /**
@@ -84,6 +94,7 @@ import Simulation.Parameters;
   public Result maxThroughputWithDelay() { //s is source, t is sink
     auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters, false);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
+      Simulation.getLogger().trace("No bandwidth");
       return new Result.Builder().build(); //this generates a no-admittance result
     }
     ArrayList<Server> path = auxiliaryNetwork.findDelayAwareShortestPath();
@@ -92,7 +103,12 @@ import Simulation.Parameters;
     if (admit) {
       auxiliaryNetwork.admitRequestAndReserveResources(path);
     }
-    return new Result.Builder().build();
+    Result result = new Result.Builder().path(path)
+                                        .pathCost(finalPathCost)
+                                        .admit(admit)
+                                        .build();
+    Simulation.getLogger().trace(result.toString());
+    return result;
   }
 
   private boolean admissionControl(double pathCost) {

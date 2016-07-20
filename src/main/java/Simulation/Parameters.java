@@ -1,5 +1,7 @@
 package Simulation;
 
+import java.util.Arrays;
+
 import Algorithm.CostFunctions.CostFunction;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 
@@ -61,6 +63,35 @@ public class Parameters {
     this.online = online;
   }
 
+  @Override public String toString() {
+    return "Parameters{" +
+        "nfvReqs=" + Arrays.toString(nfvReqs) +
+        ", nfvRates=" + Arrays.toString(nfvRates) +
+        ", nfvOperationalCosts=" + Arrays.toString(nfvOperationalCosts) +
+        ", nfvInitCosts=" + Arrays.toString(nfvInitCosts) +
+        ", networkSizes=" + Arrays.toString(networkSizes) +
+        ", alpha=" + alpha +
+        ", beta=" + beta +
+        ", linkBWCapMin=" + linkBWCapMin +
+        ", linkBWCapMax=" + linkBWCapMax +
+        ", numRequest=" + numRequest +
+        ", L=" + L +
+        ", reqBWReqMin=" + reqBWReqMin +
+        ", reqBWReqMax=" + reqBWReqMax +
+        ", reqDelayReqMin=" + reqDelayReqMin +
+        ", reqDelayReqMax=" + reqDelayReqMax +
+        ", numTrials=" + numTrials +
+        ", linkDelayMin=" + linkDelayMin +
+        ", linkDelayMax=" + linkDelayMax +
+        ", threshold=" + threshold +
+        ", networkSize=" + networkSize +
+        ", serverRatio=" + serverRatio +
+        ", costFunc=" + costFunc +
+        ", nfvProb=" + nfvProb +
+        ", online=" + online +
+        '}';
+  }
+
   public static class Builder {
     private int alpha = 2;
     private int beta = 2;
@@ -75,7 +106,7 @@ public class Parameters {
     private int reqDelayMin = 10;
     private int reqDelayMax = 100;
     private int numTrials = 10;
-    private int threshold;
+    private int threshold = 2;
     private double serverRatio = 0.2;
     private int networkSize = 50;
 

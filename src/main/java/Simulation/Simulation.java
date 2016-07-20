@@ -16,12 +16,16 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.NetworkGenerator;
 import NetworkGenerator.NetworkValueSetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
   public static final Parameters defaultParameters = new Parameters.Builder().build();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
+  private static final Logger logger = LoggerFactory.getLogger(Simulation.class);
 
   public static void main(String[] args) {
     ArrayList<Runnable> listOfTasks = new ArrayList<>();
@@ -84,6 +88,7 @@ import NetworkGenerator.NetworkValueSetter;
    * function
    */
   private static void CompareCostFnsWithoutDelays() {
+    prepareLogging();
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
@@ -98,16 +103,20 @@ import NetworkGenerator.NetworkValueSetter;
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
+        logger.debug("Network size: " + networkSize + "\texp cost" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
+        logger.debug("Network size: " + networkSize + "\texp cost" + "\ttrial: " + trial + " finished");
 
         network.wipeLinks();
+        logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
+        logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " finished");
       }
 
       for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
@@ -138,6 +147,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   private static void CompareCostFnsWithDelays() {
+    prepareLogging();
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
@@ -149,16 +159,20 @@ import NetworkGenerator.NetworkValueSetter;
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
+        logger.debug("Network size: " + networkSize + "\texp cost" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[trial][i] = alg.maxThroughputWithDelay();
         }
+        logger.debug("Network size: " + networkSize + "\texp cost" + "\ttrial: " + trial + " finished");
 
         network.wipeLinks();
+        logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithDelay();
         }
+        logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " finished");
       }
 
       for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
@@ -189,6 +203,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   private static void betaImpactWithoutDelays() {
+    prepareLogging();
     int[] betas = new int[] {2, 4, 6};
     for (int networkSize : defaultParameters.networkSizes) {
       Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequest];
@@ -202,10 +217,12 @@ import NetworkGenerator.NetworkValueSetter;
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
+          logger.debug("Network size: " + networkSize + "\tbeta: " + beta + "\t\ttrial: " + trial + " started");
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[betaIdx][trial][i] = alg.maxThroughputWithoutDelay();
           }
+          logger.debug("Network size: " + networkSize + "\tbeta: " + beta + "\t\ttrial: " + trial + " finished");
         }
       }
 
@@ -238,6 +255,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   private static void betaImpactWithDelays() {
+    prepareLogging();
     int[] betas = new int[] {2, 4, 6};
     for (int networkSize : defaultParameters.networkSizes) {
       Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequest];
@@ -251,10 +269,12 @@ import NetworkGenerator.NetworkValueSetter;
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
+          logger.debug("Network size: " + networkSize + "\tbeta: " + beta + "\t\ttrial: " + trial + " started");
           for (int i = 0; i < parameters.numRequest; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[betaIdx][trial][i] = alg.maxThroughputWithDelay();
           }
+          logger.debug("Network size: " + networkSize + "\tbeta: " + beta + "\t\ttrial: " + trial + " finished");
         }
       }
 
@@ -290,6 +310,7 @@ import NetworkGenerator.NetworkValueSetter;
    * We test the impact of threshold on the performance of the proposed online algorithms by running the algorithms with and without the threshold
    */
   private static void ThresholdEffectWithoutDelays() {
+    prepareLogging();
     Parameters parametersWithThreshold = new Parameters.Builder().build();
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
                                                                     .build();
@@ -303,16 +324,20 @@ import NetworkGenerator.NetworkValueSetter;
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
+        logger.debug("Network Size: " + networkSize + "\tw/ threshold" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
           withThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
+        logger.debug("Network Size: " + networkSize + "\tw/ threshold" + "\ttrial: " + trial + " finished");
 
         network.wipeLinks();
+        logger.debug("Network Size: " + networkSize + "\tw/o threshold" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
+        logger.debug("Network Size: " + networkSize + "\tw/o threshold" + "\ttrial: " + trial + " finished");
       }
 
       for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
@@ -343,6 +368,7 @@ import NetworkGenerator.NetworkValueSetter;
   }
 
   private static void ThresholdEffectWithDelays() {
+    prepareLogging();
     Parameters parametersWithThreshold = new Parameters.Builder().build();
     Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
                                                                     .build();
@@ -356,16 +382,20 @@ import NetworkGenerator.NetworkValueSetter;
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
+        logger.debug("Network Size: " + networkSize + "\tw/ threshold" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
           withThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
+        logger.debug("Network Size: " + networkSize + "\tw/ threshold" + "\ttrial: " + trial + " started");
 
         network.wipeLinks();
+        logger.debug("Network Size: " + networkSize + "\tw/o threshold" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
+        logger.debug("Network Size: " + networkSize + "\tw/o threshold" + "\ttrial: " + trial + " started");
       }
 
       for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
@@ -397,7 +427,7 @@ import NetworkGenerator.NetworkValueSetter;
 
   private static void LEffectWithoutDelays() {
     for (int L = 2; L <= 6; L += 2) {
-      System.out.println("L:" + L);
+      System.out.println("L: " + L);
 
       //Parameters parameters = new Parameters.Builder().L(L).build();
       Parameters parameters = new Parameters.Builder().L(L).costFunc(new LinCostFunction()).build();
@@ -454,7 +484,7 @@ import NetworkGenerator.NetworkValueSetter;
   private static void LEffectWithDelays() {
     for (int L = 2; L <= 6; L += 2) {
 
-      System.out.println("L:" + L);
+      System.out.println("L: " + L);
 
       Parameters parameters = new Parameters.Builder().L(L).build();
 
@@ -520,6 +550,12 @@ import NetworkGenerator.NetworkValueSetter;
     return requests;
   }
 
+  private static void prepareLogging() {
+    String functionName = Thread.currentThread().getStackTrace()[2].getMethodName();
+    MDC.put("exp", functionName);
+    logger.debug(functionName + " started");
+  }
+
   private static void initializeNetwork(Network network, Parameters parameters) {
     NetworkValueSetter networkValueSetter = new NetworkValueSetter(network, parameters);
     networkValueSetter.setConstantServerCapacity(Integer.MAX_VALUE, parameters.serverRatio);
@@ -538,6 +574,10 @@ import NetworkGenerator.NetworkValueSetter;
     Network network = NetworkGenerator.generateRealNetworks(topologyFile.getPrefix(), topologyFile.getSuffix());
     initializeNetwork(network, parameters);
     return network;
+  }
+
+  public static Logger getLogger() {
+    return logger;
   }
 
   private static class TopologyFile {
