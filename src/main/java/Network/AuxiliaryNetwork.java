@@ -345,7 +345,9 @@ import Simulation.Parameters;
       Server s1 = path.get(i);
       Server s2 = path.get(i + 1);
       //The links in the allShortestPaths mapping are from the original network.
-      allocateBandwidthOnPath(allShortestPaths.get(s1.getId()).get(s2.getId()), request.getBandwidth());
+      if (s1.getId() != s2.getId()) {
+        allocateBandwidthOnPath(allShortestPaths.get(s1.getId()).get(s2.getId()), request.getBandwidth());
+      }
     }
   }
 }

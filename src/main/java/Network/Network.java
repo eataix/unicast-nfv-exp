@@ -6,6 +6,8 @@ import java.util.HashSet;
 
 import Algorithm.CostFunctions.CostFunction;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class Network {
   final ArrayList<Server> servers;
   private final HashMap<Integer, Server> serversById;
@@ -88,6 +90,7 @@ public class Network {
   }
 
   void allocateBandwidthOnPath(ArrayList<Link> path, int b) {
+    checkNotNull(path);
     for (Link l : path) {
       l.allocateBandwidth(b);
     }
