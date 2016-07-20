@@ -5,14 +5,23 @@ import java.util.ArrayList;
 import Network.Server;
 
 public class Result {
+  enum Reason {
+    OK,
+    FAILED_TO_CONSTRUCT_AUX_GRAPH,
+    NO_PATH_AUX_GRAPH,
+    FAILED_ADMISSION_CONTROL
+  }
+
   private final ArrayList<Server> path;
   private final double pathCost;
   private final boolean admit;
+  private final Result.Reason rejectionReason;
 
-  private Result(ArrayList<Server> p, double pc, boolean a) {
+  private Result(ArrayList<Server> p, double pc, boolean a, Result.Reason reason) {
     path = p;
     pathCost = pc;
     admit = a;
+    this.rejectionReason = reason;
   }
 
   public ArrayList<Server> getPath() {
@@ -31,24 +40,30 @@ public class Result {
     private ArrayList<Server> path = null;
     private double pathCost = Double.MAX_VALUE;
     private boolean admit = false;
+    private Result.Reason rejectionReason = Reason.OK;
 
-    public Builder path(ArrayList<Server> path) {
+    Builder path(ArrayList<Server> path) {
       this.path = path;
       return this;
     }
 
-    public Builder pathCost(double pathCost) {
+    Builder pathCost(double pathCost) {
       this.pathCost = pathCost;
       return this;
     }
 
-    public Builder admit(boolean admit) {
+    Builder admit(boolean admit) {
       this.admit = admit;
       return this;
     }
 
-    public Result build() {
-      return new Result(path, pathCost, admit);
+    Builder rejectionReason(Result.Reason rejectionReason) {
+      this.rejectionReason = rejectionReason;
+      return this;
+    }
+
+    Result build() {
+      return new Result(path, pathCost, admit, rejectionReason);
     }
   }
 
@@ -57,6 +72,7 @@ public class Result {
         "path=" + path +
         ", pathCost=" + pathCost +
         ", admit=" + admit +
+        ", rejectionReason=" + rejectionReason +
         '}';
   }
 }

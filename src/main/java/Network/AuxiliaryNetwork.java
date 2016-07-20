@@ -76,11 +76,17 @@ import Simulation.Parameters;
       for (Server curr : currLayer) {
         for (Server prev : prevLayer) { // Connect each server in the previous layer to an server in the current layer
           Link l = new Link(prev, curr);
-          l.setDelay(pathDelays[curr.getId()][prev.getId()]);
+          double delay = pathDelays[curr.getId()][prev.getId()] + parameters.nfvProcessingDelays[nfv];
+          if (!curr.canReuseVM(nfv)) {
+            delay += parameters.nfvInitDelays[nfv];
+          }
+          l.setDelay(delay);
 
           double pathCost = pathCosts[curr.getId()][prev.getId()];
           if (this.offline) {
             pathCost += this.costFunction.getCost(curr, nfv, parameters);
+          } else {
+            // We do not need to do anything here because in the online case, the weight at node is zero.
           }
           l.setWeight(pathCost); // NOTE: We here set the weight of each edge as the cost of the path between two servers
           this.auxLinks.add(l);

@@ -78,7 +78,7 @@ public class AuxiliaryGraphBuilder {
         }
         Server curr = dest;
         double delay = 0;
-        ArrayList<Link> shortestPath = new ArrayList<Link>();
+        ArrayList<Link> shortestPath = new ArrayList<>();
         while (prevNode.get(curr) != null) {
           Link l = curr.getLink(prevNode.get(curr));
           shortestPath.add(0, l);

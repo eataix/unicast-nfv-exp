@@ -26,21 +26,29 @@ public class AuxiliaryNetworkTest {
     Parameters parameters = new Parameters.Builder().L(2).build();
 
     Server s0 = new Server(0);
+    s0.setCapacity(Integer.MAX_VALUE);
     servers.add(s0);
     Server s1 = new Server(1);
+    s1.setCapacity(Integer.MAX_VALUE);
     servers.add(s1);
     Server s2 = new Server(2);
+    s2.setCapacity(Integer.MAX_VALUE);
     servers.add(s2);
     Server s3 = new Server(3);
+    s3.setCapacity(Integer.MAX_VALUE);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
+    l0_1.setBandwidth(Integer.MAX_VALUE);
     links.add(l0_1);
     Link l0_2 = new Link(s0, s2);
+    l0_2.setBandwidth(Integer.MAX_VALUE);
     links.add(l0_2);
     Link l1_3 = new Link(s1, s3);
+    l1_3.setBandwidth(Integer.MAX_VALUE);
     links.add(l1_3);
     Link l2_3 = new Link(s2, s3);
+    l2_3.setBandwidth(Integer.MAX_VALUE);
     links.add(l2_3);
 
     l0_1.setOperationalCost(8);
@@ -50,13 +58,14 @@ public class AuxiliaryNetworkTest {
 
     Network n = new Network(servers, links);
     NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.defaultParameters);
+    nvs.placeNFVs(1d);
     nvs.setConstantLinkCapacity(1000);
     nvs.setConstantServerCapacity(10000, 1);
 
     s1.addVM(0);
     s3.addVM(1);
 
-    Request r = new Request(s0, s3, new Parameters.Builder().build());
+    Request r = new Request(s0, s3, new Parameters.Builder().reqBWReqMax(0).reqBWReqMin(0).build());
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}
@@ -69,7 +78,7 @@ public class AuxiliaryNetworkTest {
     assertEquals(2, serviceLayers.size());
     HashSet<Server> layer0 = serviceLayers.get(0);
     HashSet<Server> layer1 = serviceLayers.get(1);
-    assertEquals(4, layer0.size());
+    assertEquals(1, layer0.size());
     assertEquals(4, layer1.size());
 
     //each link represents shortest path between 2 nodes

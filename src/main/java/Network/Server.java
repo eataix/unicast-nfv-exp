@@ -6,6 +6,8 @@ import java.util.HashSet;
 
 import Simulation.Simulation;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class Server {
   private final int id;
   private final ArrayList<Link> links;
@@ -124,6 +126,7 @@ public class Server {
   }
 
   public boolean addVM(int nfv) { //add VM for nfv to server. Server can contain multiple VMs with same NFV to serve higher demand.
+    checkArgument(capacity > 0 || canCreateVM(nfv));
     if (capacity == 0 || !canCreateVM(nfv)) {
       return false;
     }

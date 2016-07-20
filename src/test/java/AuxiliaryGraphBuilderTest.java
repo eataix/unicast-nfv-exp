@@ -8,7 +8,6 @@ import Network.Request;
 import Network.Server;
 import NetworkGenerator.AuxiliaryGraphBuilder;
 import Simulation.Parameters;
-import Simulation.Simulation;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +19,10 @@ public class AuxiliaryGraphBuilderTest {
     ArrayList<Server> servers = new ArrayList<>();
     ArrayList<Link> links = new ArrayList<>();
 
-    Parameters parameters = new Parameters.Builder().L(2).build();
+    Parameters parameters = new Parameters.Builder().L(2)
+                                                    .reqBWReqMin(2)
+                                                    .reqBWReqMax(2)
+                                                    .build();
 
     Server s0 = new Server(0);
     servers.add(s0);
@@ -32,12 +34,16 @@ public class AuxiliaryGraphBuilderTest {
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
+    l0_1.setBandwidth(Integer.MAX_VALUE);
     links.add(l0_1);
     Link l0_2 = new Link(s0, s2);
+    l0_2.setBandwidth(Integer.MAX_VALUE);
     links.add(l0_2);
     Link l1_3 = new Link(s1, s3);
+    l1_3.setBandwidth(Integer.MAX_VALUE);
     links.add(l1_3);
     Link l2_3 = new Link(s2, s3);
+    l2_3.setBandwidth(Integer.MAX_VALUE);
     links.add(l2_3);
 
     l0_1.setOperationalCost(8);
@@ -46,8 +52,7 @@ public class AuxiliaryGraphBuilderTest {
     l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
-    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, Simulation.defaultParameters), new OperationalCostFunction(),
-                                                                        Simulation.defaultParameters, false);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, parameters), new OperationalCostFunction(), parameters, false);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());
     assertEquals(l0_2, path.get(0));
