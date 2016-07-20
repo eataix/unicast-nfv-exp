@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import Algorithm.CostFunctions.CostFunction;
@@ -13,7 +14,8 @@ import Simulation.Simulation;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleWeightedGraph;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A layered directed acyclic graph (DAG)
@@ -193,23 +195,28 @@ import org.jgrapht.graph.SimpleWeightedGraph;
       return null;
     }
 
-    SimpleWeightedGraph<Server, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
-
-    this.getServers().forEach(graph::addVertex);
-
-    for (Link link : this.getLinks()) {
+    SimpleDirectedWeightedGraph<Server, DefaultWeightedEdge> graph = new SimpleDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+    for (Link link : auxLinks) {
       Server s1 = link.getS1();
       Server s2 = link.getS2();
-
+      graph.addVertex(s1);
+      graph.addVertex(s2);
       DefaultWeightedEdge edge = graph.addEdge(s1, s2);
       graph.setEdgeWeight(edge, costFunction.apply(link));
       map.put(edge, link);
     }
-    DijkstraShortestPath<Server, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<Server, DefaultWeightedEdge>(graph, source, destination);
+
+    Optional<Server> sourceAlt = auxServers.stream().filter(server -> server.getId() == source.getId()).findAny();
+    checkState(sourceAlt.isPresent());
+    Optional<Server> destinationAlt = auxServers.stream().filter(server -> server.getId() == destination.getId()).findAny();
+    checkState(destinationAlt.isPresent());
+    assert sourceAlt.isPresent() && destinationAlt.isPresent();
+    DijkstraShortestPath<Server, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph, sourceAlt.get(), destinationAlt.get());
+
     return new ShortestPathResult(shortestPath, map);
   }
 
-  public double calculatePathCost(ShortestPathResult result, Function<Link, Double> edgeWeightFunction) {
+  private double calculatePathCost(ShortestPathResult result, Function<Link, Double> edgeWeightFunction) {
     List<DefaultWeightedEdge> edgesList = result.dijkstraShortestPath.getPathEdgeList();
     if (edgesList == null) {
       return Double.POSITIVE_INFINITY;
