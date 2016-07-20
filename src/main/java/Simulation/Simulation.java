@@ -432,14 +432,15 @@ import org.slf4j.MDC;
       //Parameters parameters = new Parameters.Builder().L(L).build();
       Parameters parameters = new Parameters.Builder().L(L).costFunc(new LinCostFunction()).build();
 
-      int accepted = 0; //number of accepted requests
-      int acceptedBenchmark = 0;
+     
       int expSum = 0; //sum of all exponential cost accepted requests
       Result[] results = new Result[parameters.numRequest];
       Result[] resultsBenchmark = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
-
+        int accepted = 0; //number of accepted requests
+        int acceptedBenchmark = 0;
+          
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
@@ -487,14 +488,15 @@ import org.slf4j.MDC;
       System.out.println("L: " + L);
 
       Parameters parameters = new Parameters.Builder().L(L).build();
-
-      int accepted = 0; // number of accepted requests
-      int acceptedBenchmark = 0;
+      
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[parameters.numRequest];
       Result[] resultsBenchmark = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
+    	int accepted = 0; // number of accepted requests
+        int acceptedBenchmark = 0;
+        
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {

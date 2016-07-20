@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import Algorithm.CostFunctions.CostFunction;
-import Algorithm.CostFunctions.OperationalCostFunction;
 import Network.Link;
 import Network.Network;
 import Network.Request;
@@ -99,7 +97,6 @@ public class Benchmark {
     }
 
     ArrayList<Link> linksInSPath = new ArrayList<Link>();
-    //double pathCost = 0d;
     for (DefaultWeightedEdge edge : sLinks) {
       linksInSPath.add(this.linkEdgeMap.get(edge));
     }
