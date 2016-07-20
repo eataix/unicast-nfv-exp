@@ -85,17 +85,18 @@ import Simulation.Simulation;
       ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
       if (path == null) {
         builder.rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
-      }
-      double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
-      boolean passAdmissionControl = admissionControlTest(finalPathCost);
-      if (passAdmissionControl) {
-        auxiliaryNetwork.admitRequestAndReserveResources(path);
       } else {
-        builder.rejectionReason(Result.Reason.FAILED_ADMISSION_CONTROL);
+        double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
+        boolean passAdmissionControl = admissionControlTest(finalPathCost);
+        if (passAdmissionControl) {
+          auxiliaryNetwork.admitRequestAndReserveResources(path);
+        } else {
+          builder.rejectionReason(Result.Reason.FAILED_ADMISSION_CONTROL);
+        }
+        builder.path(path)
+               .pathCost(finalPathCost)
+               .admit(passAdmissionControl);
       }
-      builder.path(path)
-             .pathCost(finalPathCost)
-             .admit(passAdmissionControl);
     }
     Result result = builder.build();
     Simulation.getLogger().trace(result.toString());
@@ -114,17 +115,18 @@ import Simulation.Simulation;
       ArrayList<Server> path = auxiliaryNetwork.findDelayAwareShortestPath();
       if (path == null) {
         builder.rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
-      }
-      double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
-      boolean admit = admissionControlTest(finalPathCost);
-      if (admit) {
-        auxiliaryNetwork.admitRequestAndReserveResources(path);
       } else {
-        builder.rejectionReason(Result.Reason.FAILED_ADMISSION_CONTROL);
+        double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
+        boolean admit = admissionControlTest(finalPathCost);
+        if (admit) {
+          auxiliaryNetwork.admitRequestAndReserveResources(path);
+        } else {
+          builder.rejectionReason(Result.Reason.FAILED_ADMISSION_CONTROL);
+        }
+        builder.path(path)
+               .pathCost(finalPathCost)
+               .admit(admit);
       }
-      builder.path(path)
-             .pathCost(finalPathCost)
-             .admit(admit);
     }
     Result result = builder.build();
     Simulation.getLogger().trace(result.toString());
