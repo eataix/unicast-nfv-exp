@@ -100,6 +100,7 @@ import org.slf4j.MDC;
 
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
+        Network networkAlt = new Network(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
@@ -113,7 +114,7 @@ import org.slf4j.MDC;
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d started", networkSize, trial));
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
+          Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d finished", networkSize, trial));
@@ -156,6 +157,7 @@ import org.slf4j.MDC;
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
+        Network networkAlt = new Network(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
@@ -169,7 +171,7 @@ import org.slf4j.MDC;
         network.wipeLinks();
         logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " started");
         for (int i = 0; i < parametersWithExpCostFn.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithLinearCostFn);
+          Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithDelay();
         }
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d finished", networkSize, trial));
@@ -321,6 +323,7 @@ import org.slf4j.MDC;
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
+        Network networkAlt = new Network(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
@@ -334,7 +337,7 @@ import org.slf4j.MDC;
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d started", networkSize, trial));
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
+          Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d finished", networkSize, trial));
@@ -379,6 +382,7 @@ import org.slf4j.MDC;
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
+        Network networkAlt = new Network(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
@@ -392,7 +396,7 @@ import org.slf4j.MDC;
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d started", networkSize, trial));
         for (int i = 0; i < parametersWithThreshold.numRequest; ++i) {
-          Algorithm alg = new Algorithm(network, requests.get(i), parametersWithOutThreshold);
+          Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d started", networkSize, trial));
@@ -445,6 +449,7 @@ import org.slf4j.MDC;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
+          Network networkAlt = new Network(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
@@ -466,7 +471,7 @@ import org.slf4j.MDC;
 
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
-            Benchmark benchmark = new Benchmark(network, requests.get(i), parameters);
+            Benchmark benchmark = new Benchmark(networkAlt, requests.get(i), parameters);
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicast();
             if (resultsBenchmark[i].isAdmitted()) {
               acceptedBenchmark++;
@@ -501,6 +506,7 @@ import org.slf4j.MDC;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
+          Network networkAlt = new Network(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
@@ -522,7 +528,7 @@ import org.slf4j.MDC;
 
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < parameters.numRequest; i++) {
-            Benchmark benchmark = new Benchmark(network, requests.get(i), parameters);
+            Benchmark benchmark = new Benchmark(networkAlt, requests.get(i), parameters);
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicastDelay();
             if (resultsBenchmark[i].isAdmitted()) {
               acceptedBenchmark++;

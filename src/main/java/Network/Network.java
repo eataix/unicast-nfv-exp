@@ -3,8 +3,7 @@ package Network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import Algorithm.CostFunctions.CostFunction;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -16,14 +15,19 @@ public class Network {
   public Network(ArrayList<Server> servers, ArrayList<Link> links) {
     this.servers = servers;
     this.links = links;
-    serversById = new HashMap<Integer, Server>(); // this is a safer way of getting a server by Id than relying on the ordering of the arraylist.
-    for (Server s : this.servers) {
+
+    serversById = new HashMap<>(); // this is a safer way of getting a server by Id than relying on the ordering of the arraylist.
+    for (Server s : servers) {
       serversById.put(s.getId(), s);
     }
   }
 
-  public void findAllShortestPaths(Request r, CostFunction fun) {
-    //fill up shortestpaths
+  /**
+   * TODO: I am aware of the problems with this code. In particular, it does not perform deep copy. I will solve it tomorrow.
+   */
+  public Network(Network oNetwork) {
+    this(oNetwork.getServers().stream().map(server -> new Server(server)).collect(Collectors.toCollection(ArrayList::new)),
+         oNetwork.getLinks().stream().map(link -> new Link(link)).collect(Collectors.toCollection(ArrayList::new)));
   }
 
   public int size() {
@@ -103,9 +107,8 @@ public class Network {
     }
   }
 
-  @Override
-  public String toString() {
-    return "Nodes: '" + this.servers + "\nLinks: '" + this.links;
+  @Override public String toString() {
+    return String.format("Network{servers=%s, links=%s}", servers, links);
   }
 }
 
