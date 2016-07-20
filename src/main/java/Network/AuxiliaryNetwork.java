@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Function;
 
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
+import Simulation.Simulation;
+import org.jgrapht.Graphs;
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 
 /**
  * A layered directed acyclic graph (DAG)
@@ -119,13 +125,13 @@ import Simulation.Parameters;
   }
 
   /**
-   * @return A shortest path in this network with respect to @edgeWeightFunction
-   * <p>
-   * Notice: The auxiliary network is a DAG
+   * @return A shortest path in this network with respect to @edgeWeightFunction <p> Notice: The auxiliary network is a DAG
    */
   private ArrayList<Server> findShortestPath(Function<Link, Double> edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
+    HashMap<Server, Link> prevEdge = new HashMap<>();
+
     HashSet<Server> prevLayer = new HashSet<>();
     Server src = this.getSource();
     prevLayer.add(src);
@@ -171,71 +177,93 @@ import Simulation.Parameters;
     return extractPath(request, prevNode, dest);
   }
 
+  private class ShortestPathResult {
+    DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath;
+    HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap;
+
+    ShortestPathResult(DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath, HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap) {
+      this.dijkstraShortestPath = dijkstraShortestPath;
+      this.virtualEdgeToLinkMap = virtualEdgeToLinkMap;
+    }
+  }
+
+  private ShortestPathResult shortestPath(Server source, Server destination, Function<Link, Double> costFunction) {
+    HashMap<DefaultWeightedEdge, Link> map = new HashMap<>();
+    if (source.getId() == destination.getId()) {
+      return null;
+    }
+
+    SimpleWeightedGraph<Server, DefaultWeightedEdge> graph = new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+
+    this.getServers().forEach(graph::addVertex);
+
+    for (Link link : this.getLinks()) {
+      Server s1 = link.getS1();
+      Server s2 = link.getS2();
+
+      DefaultWeightedEdge edge = graph.addEdge(s1, s2);
+      graph.setEdgeWeight(edge, costFunction.apply(link));
+      map.put(edge, link);
+    }
+    DijkstraShortestPath<Server, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<Server, DefaultWeightedEdge>(graph, source, destination);
+    return new ShortestPathResult(shortestPath, map);
+  }
+
+  public double calculatePathCost(ShortestPathResult result, Function<Link, Double> edgeWeightFunction) {
+    List<DefaultWeightedEdge> edgesList = result.dijkstraShortestPath.getPathEdgeList();
+    if (edgesList == null) {
+      return Double.POSITIVE_INFINITY;
+    }
+    double ret = 0d;
+    for (DefaultWeightedEdge edge : edgesList) {
+      ret += edgeWeightFunction.apply(result.virtualEdgeToLinkMap.get(edge));
+    }
+    return ret;
+  }
+
   public ArrayList<Server> findDelayAwareShortestPath() {
-    CostFunction costOnly = new CostFunction() {
-      @Override public double getCost(Server server, int nfv, Parameters parameters) {
-        return costFunction.getCost(server, nfv, parameters);
-      }
-
-      @Override public double getCost(Link l, double b, Parameters parameters) {
-        return costFunction.getCost(l, b, parameters);
-      }
-    };
-
-    CostFunction delayOnly = new CostFunction() {
-      @Override public double getCost(Server server, int nfv, Parameters parameters) {
-        return 0;
-      }
-
-      @Override public double getCost(Link l, double b, Parameters parameters) {
-        return l.getDelay();
-      }
-    };
-
     // PC is the shortest path on the original cost c
-    ArrayList<Server> pathC = findShortestPath(l -> l.getWeight());
+    ShortestPathResult pathC = shortestPath(source, destination, l -> l.getWeight());
     if (pathC == null) {
+      Simulation.getLogger().trace("Cannot find a shortest path based on the original cost");
       return null;
     }
 
-    double pathCCost = this.calculatePathCost(pathC, costOnly);
-    double pathCDelay = this.calculatePathCost(pathC, delayOnly);
+    double pathCCost = this.calculatePathCost(pathC, l -> l.getWeight());
+    double pathCDelay = this.calculatePathCost(pathC, l -> l.getDelay());
     if (pathCDelay <= request.getDelayReq()) {
-      return pathC; // clearly no solution exists
+      Simulation.getLogger().trace("Found a shortest path based on delays");
+      return new ArrayList<Server>(Graphs.getPathVertexList(pathC.dijkstraShortestPath.getPath())); // clearly no solution exists
     }
 
-    ArrayList<Server> pathD = findShortestPath(l -> l.getDelay());
+    ShortestPathResult pathD = shortestPath(source, destination, l -> l.getDelay());
     if (pathD == null) {
+      Simulation.getLogger().trace("Cannot find a shortest path based on delays");
       return null;
     }
-    double pathDCost = this.calculatePathCost(pathD, costOnly);
-    double pathDDelay = this.calculatePathCost(pathD, delayOnly);
+    double pathDCost = this.calculatePathCost(pathD, l -> l.getWeight());
+    double pathDDelay = this.calculatePathCost(pathD, l -> l.getDelay());
     if (pathDDelay > request.getDelayReq()) {
+      Simulation.getLogger().trace("The shortest path based on delays has too large delay");
       return null;
     }
 
+    int iteration = 0;
     while (true) {
+      Simulation.getLogger().trace("iteration: " + iteration);
+      iteration++;
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
-      CostFunction modifiedCostFunction = new CostFunction() {
-        @Override public double getCost(Link l, double b, Parameters parameters) {
-          return costFunction.getCost(l, b, parameters) + lambda * l.getDelay();
-        }
-
-        @Override public double getCost(Server server, int nfv, Parameters parameters) {
-          return costFunction.getCost(server, nfv, parameters);
-        }
-      };
-
-      ArrayList<Server> pathR = findShortestPath(l -> l.getWeight() + lambda * l.getDelay());
+      Function<Link, Double> modifiedCostFunction = l -> l.getWeight() + lambda * l.getDelay();
+      ShortestPathResult pathR = shortestPath(this.source, this.destination, l -> l.getWeight() + lambda * l.getDelay());
       if (pathR == null) {
         return null;
       }
 
-      double pathRCost = this.calculatePathCost(pathR, costOnly);
-      double pathRDelay = this.calculatePathCost(pathR, delayOnly);
+      double pathRCost = this.calculatePathCost(pathR, l -> l.getWeight());
+      double pathRDelay = this.calculatePathCost(pathR, l -> l.getDelay());
 
       if (pathRCost == pathCCost) {
-        return pathD;
+        return new ArrayList<>(Graphs.getPathVertexList(pathD.dijkstraShortestPath.getPath()));
       }
 
       if (this.calculatePathCost(pathR, modifiedCostFunction) == this.calculatePathCost(pathC, modifiedCostFunction)) {

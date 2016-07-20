@@ -108,8 +108,8 @@ public class Parameters {
     private int L = 4;
     private int reqBWReqMin = 10;
     private int reqBWReqMax = 100;
-    private int reqDelayMin = 10;
-    private int reqDelayMax = 100;
+    private int reqDelayMin = 500;
+    private int reqDelayMax = 1000;
     private int numTrials = 3;
     private int threshold = 2;
     private double serverRatio = 0.2;
