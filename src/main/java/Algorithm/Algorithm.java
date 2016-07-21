@@ -63,12 +63,12 @@ import Simulation.Simulation;
       if (path == null) {
         builder.path(null).pathCost(Double.MAX_VALUE).rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
       } else {
-          double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
-          if (Double.MAX_VALUE == finalPathCost){
-              builder.path(null).pathCost(Double.MAX_VALUE).rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
-          } else {
-        	  builder.path(path).pathCost(finalPathCost).admit(true);
-          }  
+        double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
+        if (Double.MAX_VALUE == finalPathCost) {
+          builder.path(null).pathCost(Double.MAX_VALUE).rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
+        } else {
+          builder.path(path).pathCost(finalPathCost).admit(true);
+        }
       }
     }
     Result result = builder.build();

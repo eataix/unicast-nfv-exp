@@ -13,7 +13,7 @@ public class ExponentialCostFunction implements CostFunction {
   @Override
   public double getCost(Server server, int nfv, Parameters parameters) {
     return Math.pow(parameters.alpha * parameters.networkSize,
-                    ((double) server.getCapacity() - (double) server.remainingCapacity() - (double) parameters.nfvReqs[nfv]) / (double) server.getCapacity())
+                    ((double) server.getCapacity() - (double) server.remainingCapacity() - (double) parameters.nfvComputingReq[nfv]) / (double) server.getCapacity())
         - 1;
   }
 }

@@ -15,6 +15,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -318,15 +319,21 @@ import static com.google.common.base.Preconditions.checkState;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();
     HashMap<Integer, Server> clonedServers = new HashMap<>();
-    for (Link l : links) {
-      clonedLinks.put(l, new Link(l));
-    }
     for (Server s : this.servers) {
       clonedServers.put(s.getId(), new Server(s));
     }
 
-    double cost = 0;
+    for (Link oldLink : links) {
+      Server newS1 = clonedServers.get(oldLink.getS1().getId());
+      Server newS2 = clonedServers.get(oldLink.getS2().getId());
+      Link clonedLink = new Link(newS1, newS2, oldLink.getBandwidth(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
+      links.add(clonedLink);
+      newS1.addLink(clonedLink);
+      newS1.addLink(clonedLink);
+      clonedLinks.put(oldLink, clonedLink);
+    }
 
+    double cost = 0;
     //get server costs
     for (int i = 1; i < serversOnPath.size() - 1; i++) {
       Server cs = clonedServers.get(serversOnPath.get(i).getId());

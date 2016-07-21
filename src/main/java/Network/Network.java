@@ -3,7 +3,6 @@ package Network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -22,12 +21,24 @@ public class Network {
     }
   }
 
-  /**
-   * TODO: I am aware of the problems with this code. In particular, it does not perform deep copy. I will solve it tomorrow.
-   */
-  public Network(Network oNetwork) {
-    this(oNetwork.getServers().stream().map(server -> new Server(server)).collect(Collectors.toCollection(ArrayList::new)),
-         oNetwork.getLinks().stream().map(link -> new Link(link)).collect(Collectors.toCollection(ArrayList::new)));
+  public static Network newNetwork(Network oNetwork) {
+    ArrayList<Server> servers = new ArrayList<>();
+    HashMap<Server, Server> serverMap = new HashMap<>();
+    for (Server oldServer : oNetwork.getServers()) {
+      Server newServer = new Server(oldServer);
+      serverMap.put(oldServer, newServer);
+    }
+    ArrayList<Link> links = new ArrayList<>();
+    for (Link oldLink : oNetwork.getLinks()) {
+      Server newS1 = serverMap.get(oldLink.getS1());
+      Server newS2 = serverMap.get(oldLink.getS2());
+      Link link = new Link(newS1, newS2, oldLink.getBandwidth(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
+      links.add(link);
+      newS1.addLink(link);
+      newS1.addLink(link);
+    }
+
+    return new Network(servers, links);
   }
 
   public int size() {

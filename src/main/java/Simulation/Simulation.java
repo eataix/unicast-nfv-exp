@@ -100,7 +100,7 @@ import org.slf4j.MDC;
 
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
-        Network networkAlt = new Network(network);
+        Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
@@ -157,7 +157,7 @@ import org.slf4j.MDC;
     for (int networkSize : defaultParameters.networkSizes) {
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
-        Network networkAlt = new Network(network);
+        Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequest);
 
         network.wipeLinks();
@@ -212,7 +212,9 @@ import org.slf4j.MDC;
 
       for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
         int beta = betas[betaIdx];
-        Parameters parameters = new Parameters.Builder().beta(beta).build();
+        Parameters parameters = new Parameters.Builder().networkSize(networkSize)
+                                                        .beta(beta)
+                                                        .build();
 
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
@@ -264,7 +266,9 @@ import org.slf4j.MDC;
 
       for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
         int beta = betas[betaIdx];
-        Parameters parameters = new Parameters.Builder().beta(beta).build();
+        Parameters parameters = new Parameters.Builder().networkSize(networkSize)
+                                                        .beta(beta)
+                                                        .build();
 
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
@@ -313,17 +317,19 @@ import org.slf4j.MDC;
    */
   private static void ThresholdEffectWithoutDelays() {
     prepareLogging();
-    Parameters parametersWithThreshold = new Parameters.Builder().build();
-    Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
-                                                                    .build();
-
-    Result[][] withThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
-    Result[][] withoutThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
+    Result[][] withThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
+    Result[][] withoutThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
 
     for (int networkSize : defaultParameters.networkSizes) {
+      Parameters parametersWithThreshold = new Parameters.Builder().networkSize(networkSize)
+                                                                   .build();
+      Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
+                                                                      .networkSize(networkSize)
+                                                                      .build();
+
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
-        Network networkAlt = new Network(network);
+        Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
@@ -372,17 +378,20 @@ import org.slf4j.MDC;
 
   private static void ThresholdEffectWithDelays() {
     prepareLogging();
-    Parameters parametersWithThreshold = new Parameters.Builder().build();
-    Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
-                                                                    .build();
 
-    Result[][] withThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
-    Result[][] withoutThresholdResults = new Result[parametersWithThreshold.numTrials][parametersWithThreshold.numRequest];
+    Result[][] withThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
+    Result[][] withoutThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequest];
 
     for (int networkSize : defaultParameters.networkSizes) {
+      Parameters parametersWithThreshold = new Parameters.Builder().networkSize(networkSize)
+                                                                   .build();
+      Parameters parametersWithOutThreshold = new Parameters.Builder().threshold(Integer.MAX_VALUE)
+                                                                      .networkSize(networkSize)
+                                                                      .build();
+
       for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
-        Network networkAlt = new Network(network);
+        Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequest);
 
         network.wipeLinks();
@@ -436,7 +445,6 @@ import org.slf4j.MDC;
       //Parameters parameters = new Parameters.Builder().L(L).build();
       Parameters parameters = new Parameters.Builder().L(L).costFunc(new LinCostFunction()).build();
 
-     
       int expSum = 0; //sum of all exponential cost accepted requests
       Result[] results = new Result[parameters.numRequest];
       Result[] resultsBenchmark = new Result[parameters.numRequest];
@@ -444,12 +452,12 @@ import org.slf4j.MDC;
       for (int networkSize : defaultParameters.networkSizes) {
         int accepted = 0; //number of accepted requests
         int acceptedBenchmark = 0;
-          
+
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
-          Network networkAlt = new Network(network);
+          Network networkAlt = Network.newNetwork(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 
@@ -493,20 +501,20 @@ import org.slf4j.MDC;
       System.out.println("L: " + L);
 
       Parameters parameters = new Parameters.Builder().L(L).build();
-      
+
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[parameters.numRequest];
       Result[] resultsBenchmark = new Result[parameters.numRequest];
 
       for (int networkSize : defaultParameters.networkSizes) {
-    	int accepted = 0; // number of accepted requests
+        int accepted = 0; // number of accepted requests
         int acceptedBenchmark = 0;
-        
+
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
         for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
-          Network networkAlt = new Network(network);
+          Network networkAlt = Network.newNetwork(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequest);
           network.wipeLinks();
 

@@ -10,8 +10,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public class Server {
   private final int id;
-  private final ArrayList<Link> links;
   private int capacity; //some servers have 0 capacity as they are switches
+  private final ArrayList<Link> links;
   private HashMap<Integer, VM> NFVs;
 
   public Server(Server server) {
@@ -121,7 +121,7 @@ public class Server {
   }
 
   public boolean canCreateVM(int nfv) { //has spare capacity to create enough VMs to handle rate
-    int serviceReq = Simulation.defaultParameters.nfvReqs[nfv];
+    int serviceReq = Simulation.defaultParameters.nfvComputingReq[nfv];
     return serviceReq < remainingCapacity();
   }
 
@@ -156,7 +156,7 @@ public class Server {
     }
 
     int resourceAllocated() {
-      return Simulation.defaultParameters.nfvReqs[serviceType];
+      return Simulation.defaultParameters.nfvComputingReq[serviceType];
     }
   }
 
@@ -185,7 +185,7 @@ public class Server {
 		}
 
 		public int resourceAllocated(){
-			return instances*parameters.nfvReqs[serviceType];
+			return instances*parameters.nfvComputingReq[serviceType];
 		}
 
 		public int ceilingIntDivision(int num, int divisor) {

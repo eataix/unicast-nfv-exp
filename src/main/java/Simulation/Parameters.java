@@ -6,7 +6,7 @@ import Algorithm.CostFunctions.CostFunction;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 
 public class Parameters {
-  public final int[] nfvReqs; //nfv vm resource requirements
+  public final int[] nfvComputingReq; //nfv vm resource requirements
   public final int[] nfvRates; //nfv vm service rate
   public final int[] nfvOperationalCosts; //operating cost of providing an vnf service
   public final int[] nfvInitCosts; //initialization cost of vnf service
@@ -14,7 +14,8 @@ public class Parameters {
   public final int[] nfvInitDelays; //initialization cost of vnf service
   public final int[] nfvProcessingDelays; //initialization cost of vnf service
 
-  public final int[] networkSizes; //initialization cost of vnf service
+  public final int networkSize;
+  public final int[] networkSizes;
 
   public final int alpha;
   public final int beta; // Multiply of beta, i.e., the value of beta would be "beta * |V|"
@@ -30,18 +31,19 @@ public class Parameters {
   public final int linkDelayMin;
   public final int linkDelayMax;
   public final int threshold;
-  public final int networkSize;
-  public final double serverRatio;
+  public final double serverRatio; // Server to Node Ratio
   public final CostFunction costFunc;
   public final double nfvProb;
   public final boolean online;
 
-  private Parameters(int[] nfvReqs, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] nfvInitDelays, int[] nfvProcessingDelays,
-                     int[] networkSizes, int alpha, int beta, int linkBWCapMin, int linkBWCapMax, int numRequest, int L, int reqBWReqMin, int reqBWReqMax,
-                     int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayMin, int linkDelayMax, int threshold, int networkSize,
-                     double serverRatio, CostFunction costFunc, double nfvProb, boolean online) {
+  private Parameters(int[] nfvComputingReq, int[] nfvRates, int[] nfvOperationalCosts, int[] nfvInitCosts, int[] nfvInitDelays, int[] nfvProcessingDelays,
+                     int networkSize, int[] networkSizes, int alpha, int beta, int linkBWCapMin, int linkBWCapMax, int numRequest, int L, int reqBWReqMin,
+                     int reqBWReqMax,
+                     int reqDelayReqMin, int reqDelayReqMax, int numTrials, int linkDelayMin, int linkDelayMax, int threshold, double serverRatio,
+                     CostFunction costFunc, double nfvProb, boolean online) {
     this.nfvInitDelays = nfvInitDelays;
     this.nfvProcessingDelays = nfvProcessingDelays;
+    this.networkSize = networkSize;
     this.networkSizes = networkSizes;
     this.alpha = alpha;
     this.beta = beta;
@@ -57,9 +59,8 @@ public class Parameters {
     this.linkDelayMin = linkDelayMin;
     this.linkDelayMax = linkDelayMax;
     this.threshold = threshold;
-    this.networkSize = networkSize;
     this.serverRatio = serverRatio;
-    this.nfvReqs = nfvReqs;
+    this.nfvComputingReq = nfvComputingReq;
     this.nfvRates = nfvRates;
     this.nfvOperationalCosts = nfvOperationalCosts;
     this.nfvInitCosts = nfvInitCosts;
@@ -70,7 +71,7 @@ public class Parameters {
 
   @Override public String toString() {
     return "Parameters{" +
-        "nfvReqs=" + Arrays.toString(nfvReqs) +
+        "nfvComputingReq=" + Arrays.toString(nfvComputingReq) +
         ", nfvRates=" + Arrays.toString(nfvRates) +
         ", nfvOperationalCosts=" + Arrays.toString(nfvOperationalCosts) +
         ", nfvInitCosts=" + Arrays.toString(nfvInitCosts) +
@@ -89,7 +90,6 @@ public class Parameters {
         ", linkDelayMin=" + linkDelayMin +
         ", linkDelayMax=" + linkDelayMax +
         ", threshold=" + threshold +
-        ", networkSize=" + networkSize +
         ", serverRatio=" + serverRatio +
         ", costFunc=" + costFunc +
         ", nfvProb=" + nfvProb +
@@ -98,34 +98,49 @@ public class Parameters {
   }
 
   public static class Builder {
+    /**
+     * Algorithm related parameters
+     */
     private int alpha = 2;
     private int beta = 2;
+    private int threshold = 2;
+
+    /**
+     * Network related parameters
+     */
+    private int numTrials = 3;
+
+    private double serverRatio = 0.2;
     private int linkBWCapMin = 1000;
     private int linkBWCapMax = 10000;
     private int linkDelayReqMin = 10;
     private int linkDelayReqMax = 100;
-    private int numRequest = 500;
+
+    private int numRequest = 1000;
     private int L = 4;
     private int reqBWReqMin = 10;
     private int reqBWReqMax = 100;
     private int reqDelayMin = 500;
     private int reqDelayMax = 1000;
-    private int numTrials = 3;
-    private int threshold = 2;
-    private double serverRatio = 0.2;
-    private int networkSize = 50;
 
+    /**
+     * NFV parameters
+     */
+    private double nfvProb = 0.1;   //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
     private int[] nfvReqs = new int[] {2, 3, 5, 2, 6, 4};
     private int[] nfvRates = new int[] {3, 5, 6, 7, 8, 5};
     private int[] nfvOperationalCosts = new int[] {2, 3, 5, 2, 6, 4};
     private int[] nfvInitCosts = new int[] {5, 6, 7, 4, 8, 5};
-
-    private int[] networkSizes = new int[] {50, 100, 200, 300, 400, 500, 600, 800, 1000};
-    private CostFunction costFunc = new ExponentialCostFunction();
-    private double nfvProb = 0.1;
-    private boolean online = false;
     private int[] nfvInitDelays = new int[] {5, 6, 7, 4, 8, 5}; // TODO I just copy the code from nfvInitCosts
     private int[] nfvProcessingDelays = new int[] {3, 5, 6, 7, 8, 5}; // TODO I just copy the code from nfvRates
+
+    /**
+     * Experiment parameters
+     */
+    private int networkSize = 50;
+    private int[] networkSizes = new int[] {50, 100, 200, 300, 400, 500, 600, 800, 1000};
+    private CostFunction costFunc = new ExponentialCostFunction();
+    private boolean online = false;
 
     Builder alpha(int alpha) {
       this.alpha = alpha;
@@ -222,6 +237,11 @@ public class Parameters {
       return this;
     }
 
+    public Builder networkSize(int networkSizes) {
+      this.networkSize = networkSize;
+      return this;
+    }
+
     public Builder networkSizes(int[] networkSizes) {
       this.networkSizes = networkSizes;
       return this;
@@ -253,9 +273,10 @@ public class Parameters {
     }
 
     public Parameters build() {
-      return new Parameters(nfvReqs, nfvRates, nfvOperationalCosts, nfvInitCosts, nfvInitDelays, nfvProcessingDelays, networkSizes, alpha, beta, linkBWCapMin,
+      return new Parameters(nfvReqs, nfvRates, nfvOperationalCosts, nfvInitCosts, nfvInitDelays, nfvProcessingDelays, networkSize, networkSizes, alpha, beta,
+                            linkBWCapMin,
                             linkBWCapMax, numRequest, L, reqBWReqMin, reqBWReqMax, reqDelayMin, reqDelayMax, numTrials, linkDelayReqMin, linkDelayReqMax,
-                            threshold, networkSize, serverRatio, costFunc, nfvProb, online);
+                            threshold, serverRatio, costFunc, nfvProb, online);
     }
   }
 }

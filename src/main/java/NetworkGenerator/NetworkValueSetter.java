@@ -121,19 +121,19 @@ public class NetworkValueSetter { //sets the parameters of a given network
 
   public void setConstantNFVRequirements(int cap) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvReqs[nfv] = cap;
+      parameters.nfvComputingReq[nfv] = cap;
     }
   }
 
   public void setNormalNFVRequirements(int mean, int weight) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvReqs[nfv] = getNormal(mean, weight);
+      parameters.nfvComputingReq[nfv] = getNormal(mean, weight);
     }
   }
 
   public void setRandomNFVRequirements(int low, int high) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvReqs[nfv] = getUniform(low, high);
+      parameters.nfvComputingReq[nfv] = getUniform(low, high);
     }
   }
 
