@@ -531,6 +531,7 @@ import org.slf4j.MDC;
   }
 
   private static void LEffectWithDelays() {
+    prepareLogging();
     for (int L = 2; L <= 6; L += 2) {
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[baseParameters.numRequests];
