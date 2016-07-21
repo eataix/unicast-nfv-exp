@@ -5,24 +5,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import Simulation.Simulation;
-
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Server {
   private final int id;
-  private int capacity; //some servers have 0 capacity as they are switches
+  private double computingCapacity; //some servers have 0 computingCapacity as they are switches
   private final ArrayList<Link> links;
   private HashMap<Integer, VM> NFVs;
 
   public Server(Server server) {
-    this(server.getId(), server.getCapacity(), new ArrayList<>(), copyVMs(server.NFVs));
+    this(server.getId(), server.getComputingCapacity(), new ArrayList<>(), copyVMs(server.NFVs));
   }
 
-  private Server(int Id, int c, ArrayList<Link> l, HashMap<Integer, VM> nfvs) {
+  private Server(int Id, double computingCapacity, ArrayList<Link> links, HashMap<Integer, VM> NFVs) {
     this.id = Id;
-    this.capacity = c;
-    this.links = l;
-    this.NFVs = nfvs;
+    this.computingCapacity = computingCapacity;
+    this.links = links;
+    this.NFVs = NFVs;
   }
 
   public Server(int Id) {
@@ -43,12 +42,12 @@ public class Server {
     return id;
   }
 
-  public int getCapacity() {
-    return capacity;
+  public double getComputingCapacity() {
+    return computingCapacity;
   }
 
-  public void setCapacity(int c) {
-    capacity = c;
+  public void setComputingCapacity(double computingCapacity) {
+    this.computingCapacity = computingCapacity;
   }
 
   public void wipe() {
@@ -108,26 +107,26 @@ public class Server {
     return neighbours;
   }
 
-  public int remainingCapacity() {
-    int sum = 0;
+  public double remainingCapacity() {
+    double sum = 0;
     for (VM vm : NFVs.values()) {
       sum += vm.resourceAllocated();
     }
-    return capacity - sum;
+    return computingCapacity - sum;
   }
 
   public boolean canReuseVM(int nfv) { //will need to check whether service rate of VM exceeds arrival rate of packets
     return NFVs.containsKey(nfv);
   }
 
-  public boolean canCreateVM(int nfv) { //has spare capacity to create enough VMs to handle rate
-    int serviceReq = Simulation.defaultParameters.nfvComputingReq[nfv];
+  public boolean canCreateVM(int nfv) { //has spare computingCapacity to create enough VMs to handle rate
+    double serviceReq = Simulation.defaultParameters.nfvComputingReqs[nfv];
     return serviceReq < remainingCapacity();
   }
 
   public boolean addVM(int nfv) { //add VM for nfv to server. Server can contain multiple VMs with same NFV to serve higher demand.
-    checkArgument(capacity > 0 || canCreateVM(nfv));
-    if (capacity == 0 || !canCreateVM(nfv)) {
+    checkArgument(computingCapacity > 0 || canCreateVM(nfv));
+    if (computingCapacity == 0 || !canCreateVM(nfv)) {
       return false;
     }
     if (!NFVs.containsKey(nfv)) {
@@ -145,7 +144,7 @@ public class Server {
 
   @Override
   public String toString() {
-    return "Server: " + this.id + " Capacity: " + this.capacity;
+    return "Server: " + this.id + " Capacity: " + this.computingCapacity;
   }
 
   private static class VM {
@@ -155,42 +154,8 @@ public class Server {
       serviceType = nfv;
     }
 
-    int resourceAllocated() {
-      return Simulation.defaultParameters.nfvComputingReq[serviceType];
+    double resourceAllocated() {
+      return Simulation.defaultParameters.nfvComputingReqs[serviceType];
     }
   }
-
-/*
-  private class VM { //service rate must exceed arrival rate.
-		int arrivalRate;
-		int serviceType;
-		int instances; //you can have multiple VM instances that run the same service to meet higher arrival rate of packets.
-
-		public VM(int nfv, int arr){
-			serviceType = nfv;
-			arrivalRate = arr;
-			instances = ceilingIntDivision(arr, parameters.nfvRates[serviceType]);
-		}
-
-		public void createMoreInstances(int arr){ //create enough instances to meet demand of additional arrival rate arr.
-			instances += additionalInstancesRequired(arr);
-			arrivalRate += arr;
-		}
-
-		public int additionalInstancesRequired(int arr){ //number of additional VMs required to service arrival rate arr.
-			int serviceRate = instances*parameters.nfvRates[serviceType];
-			int diff = arrivalRate + arr - serviceRate;
-			if(diff<0) return 0;
-			else	   return ceilingIntDivision(diff, serviceRate);
-		}
-
-		public int resourceAllocated(){
-			return instances*parameters.nfvComputingReq[serviceType];
-		}
-
-		public int ceilingIntDivision(int num, int divisor) {
-		    return (num + divisor - 1) / divisor;
-		}
-
-	}*/
 }

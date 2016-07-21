@@ -26,9 +26,8 @@ public class AuxiliaryGraphBuilder {
    * @param request the request to admit
    * @param costFunction a cost function
    * @param parameters parameters
-   * @param offline true if the request is an online request
    */
-  public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFunction, Parameters parameters, boolean offline) {
+  public static AuxiliaryNetwork buildAuxiliaryGraph(Network network, Request request, CostFunction costFunction, Parameters parameters) {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
@@ -51,7 +50,7 @@ public class AuxiliaryGraphBuilder {
         for (Server neighbour : curr.getAllNeighbours()) {
           Link l = curr.getLink(neighbour);
           //searched nodes and links without enough bandwidth
-          if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * request.getSC().length) {
+          if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth() * (double) request.getSC().length) {
             continue;
           }
           Double cost = pathCost.getOrDefault(neighbour, Double.MAX_VALUE);
@@ -77,7 +76,7 @@ public class AuxiliaryGraphBuilder {
           return null;
         }
         Server curr = dest;
-        double delay = 0;
+        double delay = 0d;
         ArrayList<Link> shortestPath = new ArrayList<>();
         while (prevNode.get(curr) != null) {
           Link l = curr.getLink(prevNode.get(curr));
@@ -92,8 +91,7 @@ public class AuxiliaryGraphBuilder {
         pathDelays[src.getId()][dest.getId()] = delay;
       }
     }
-    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, offline,
-                                costFunction);
+    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {

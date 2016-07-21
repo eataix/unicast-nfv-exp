@@ -9,7 +9,6 @@ import Network.Server;
 import NetworkGenerator.AuxiliaryGraphBuilder;
 import Simulation.Parameters;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 public class AuxiliaryGraphBuilderTest {
@@ -52,7 +51,7 @@ public class AuxiliaryGraphBuilderTest {
     l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
-    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, parameters), new OperationalCostFunction(), parameters, false);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, new Request(s0, s3, parameters), new OperationalCostFunction(), parameters);
     ArrayList<Link> path = auxnet.getLinkPath(s0, s3);
     assertEquals(2, path.size());
     assertEquals(l0_2, path.get(0));

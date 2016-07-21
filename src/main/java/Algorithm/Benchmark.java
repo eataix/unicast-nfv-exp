@@ -34,7 +34,7 @@ public class Benchmark {
 
     double minCost = Double.MAX_VALUE;
     for (Server potentialServer : this.originalNetwork.getServers()) {
-      if (0 == potentialServer.getCapacity()) {
+      if (0 == potentialServer.getComputingCapacity()) {
         continue;
       }
 
@@ -113,7 +113,7 @@ public class Benchmark {
     Server minCostServer = null;
 
     for (Server potentialServer : this.originalNetwork.getServers()) {
-      if (0 == potentialServer.getCapacity()) {
+      if (0 == potentialServer.getComputingCapacity()) {
         continue;
       }
 
@@ -137,7 +137,7 @@ public class Benchmark {
       double processingDelay = 0d;
       for (int nfv : this.request.getSC()) {
         serverCost += potentialServer.getOperationalCost(nfv);
-        
+
         processingDelay += parameters.nfvProcessingDelays[nfv];
         if (!potentialServer.canReuseVM(nfv)) {
         	processingDelay += parameters.nfvInitDelays[nfv];

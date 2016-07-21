@@ -12,7 +12,6 @@ import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 import Simulation.Simulation;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 public class AuxiliaryNetworkTest {
@@ -26,29 +25,29 @@ public class AuxiliaryNetworkTest {
     Parameters parameters = new Parameters.Builder().L(2).build();
 
     Server s0 = new Server(0);
-    s0.setCapacity(Integer.MAX_VALUE);
+    s0.setComputingCapacity(Double.MAX_VALUE);
     servers.add(s0);
     Server s1 = new Server(1);
-    s1.setCapacity(Integer.MAX_VALUE);
+    s1.setComputingCapacity(Double.MAX_VALUE);
     servers.add(s1);
     Server s2 = new Server(2);
-    s2.setCapacity(Integer.MAX_VALUE);
+    s2.setComputingCapacity(Double.MAX_VALUE);
     servers.add(s2);
     Server s3 = new Server(3);
-    s3.setCapacity(Integer.MAX_VALUE);
+    s3.setComputingCapacity(Double.MAX_VALUE);
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
-    l0_1.setBandwidth(Integer.MAX_VALUE);
+    l0_1.setBandwidth(Double.MAX_VALUE);
     links.add(l0_1);
     Link l0_2 = new Link(s0, s2);
-    l0_2.setBandwidth(Integer.MAX_VALUE);
+    l0_2.setBandwidth(Double.MAX_VALUE);
     links.add(l0_2);
     Link l1_3 = new Link(s1, s3);
-    l1_3.setBandwidth(Integer.MAX_VALUE);
+    l1_3.setBandwidth(Double.MAX_VALUE);
     links.add(l1_3);
     Link l2_3 = new Link(s2, s3);
-    l2_3.setBandwidth(Integer.MAX_VALUE);
+    l2_3.setBandwidth(Double.MAX_VALUE);
     links.add(l2_3);
 
     l0_1.setOperationalCost(8);
@@ -71,7 +70,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters, false);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();
     ArrayList<HashSet<Server>> serviceLayers = auxnet.serviceLayers;

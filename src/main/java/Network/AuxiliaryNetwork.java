@@ -15,7 +15,6 @@ import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
-
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -44,10 +43,8 @@ import static com.google.common.base.Preconditions.checkState;
   // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
   public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<HashSet<Server>>();
 
-  private final boolean offline;
-
   public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters, boolean offline,
+                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters,
                           CostFunction costFunction) {
     super(originalServers, originalLinks);
     this.pathCosts = pathCosts;
@@ -58,7 +55,6 @@ import static com.google.common.base.Preconditions.checkState;
     this.source = request.getSource();
     this.destination = request.getDestination();
     this.costFunction = costFunction;
-    this.offline = offline;
 
     generateNetwork();
   }
@@ -78,7 +74,7 @@ import static com.google.common.base.Preconditions.checkState;
     // Layers 1, ..., L, where each layer contains all servers that either have implemented a given NFV or can initialize a VM instance for a given NFV
     for (int nfv : SC) {
       HashSet<Server> origLayer = getReusableServers(nfv);
-      if (this.offline) {
+      if (this.parameters.offline) {
         origLayer.addAll(getUnusedServers(nfv));
       }
       HashSet<Server> currLayer = cloneServers(origLayer); // we do not want to make changes on the original network
@@ -92,10 +88,10 @@ import static com.google.common.base.Preconditions.checkState;
           l.setDelay(delay);
 
           double pathCost = pathCosts[curr.getId()][prev.getId()];
-          if (this.offline) {
+          if (this.parameters.offline) {
             pathCost += this.costFunction.getCost(curr, nfv, parameters);
           } else {
-            // We do not need to do anything here because in the online case, the weight at node is zero.
+            // We do not need to do anything here because in the offline case, the weight at node is zero.
           }
           l.setWeight(pathCost); // NOTE: We here set the weight of each edge as the cost of the path between two servers
           this.auxLinks.add(l);
@@ -319,21 +315,21 @@ import static com.google.common.base.Preconditions.checkState;
     }
     HashMap<Link, Link> clonedLinks = new HashMap<>();
     HashMap<Integer, Server> clonedServers = new HashMap<>();
-    for (Server s : this.servers) {
+    for (Server s : getServers()) {
       clonedServers.put(s.getId(), new Server(s));
     }
 
-    for (Link oldLink : links) {
+    for (Link oldLink : getLinks()) {
       Server newS1 = clonedServers.get(oldLink.getS1().getId());
       Server newS2 = clonedServers.get(oldLink.getS2().getId());
-      Link clonedLink = new Link(newS1, newS2, oldLink.getBandwidth(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
-      links.add(clonedLink);
+      Link clonedLink = new Link(newS1, newS2, oldLink.getBandwidthCapacity(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(),
+                                 oldLink.getOperationalCost());
       newS1.addLink(clonedLink);
       newS1.addLink(clonedLink);
       clonedLinks.put(oldLink, clonedLink);
     }
 
-    double cost = 0;
+    double cost = 0d;
     //get server costs
     for (int i = 1; i < serversOnPath.size() - 1; i++) {
       Server cs = clonedServers.get(serversOnPath.get(i).getId());

@@ -5,7 +5,7 @@ public class Link {
   private final Server s2;
   private double bandwidthCapacity; //bandwidth capacity
   private double allocatedBandwidth; //bandwidth being used
-  private int operationalCost; //operation cost
+  private double operationalCost; //operation cost
   private double delay; //delay
   private double weight;
 
@@ -20,7 +20,7 @@ public class Link {
     s2.addLink(this);
   }
 
-  Link(Server s1, Server s2, double bandwidthCapacity, double allocatedBandwidth, double delay, int operationalCost) {
+  Link(Server s1, Server s2, double bandwidthCapacity, double allocatedBandwidth, double delay, double operationalCost) {
     this.s1 = s1;
     this.s2 = s2;
     this.bandwidthCapacity = bandwidthCapacity;
@@ -29,14 +29,15 @@ public class Link {
     this.operationalCost = operationalCost;
   }
 
+  // TODO Why do we even have this?
   public Link(Server s) { //use this constructor to create a self link
-    bandwidthCapacity = 20; //default value
+    bandwidthCapacity = 20d; //default value
     s1 = s;
     s2 = s;
   }
 
   void wipe() {
-    allocatedBandwidth = 0;
+    allocatedBandwidth = 0d;
   }
 
   @Override
@@ -48,49 +49,45 @@ public class Link {
     return bandwidthCapacity - allocatedBandwidth;
   }
 
-  public double getBandwidth() {
-    return bandwidthCapacity;
-  }
-
   public double getAllocatedBandwidth() {
     return allocatedBandwidth;
   }
 
-  public void setDelay(double D) {
-    delay = D;
+  public void setDelay(double delay) {
+    this.delay = delay;
   }
 
   public double getDelay() {
     return delay;
   }
 
-  public void setBandwidth(int bw) {
-    bandwidthCapacity = bw;
+  public void setBandwidth(double bandwidthCapacity) {
+    this.bandwidthCapacity = bandwidthCapacity;
   }
 
-  boolean canSupportBandwidth(double d) {
-    return allocatedBandwidth + d < bandwidthCapacity;
+  boolean canSupportBandwidth(double demand) {
+    return allocatedBandwidth + demand < bandwidthCapacity;
   }
 
   private boolean selfLink() {
     return s1 == s2;
   }
 
-  void allocateBandwidth(double d) {
-    if (allocatedBandwidth + d < bandwidthCapacity) {
-      allocatedBandwidth += d;
+  void allocateBandwidth(double demand) {
+    if (allocatedBandwidth + demand < bandwidthCapacity) {
+      allocatedBandwidth += demand;
     }
   }
 
-  public int getOperationalCost() {
+  public double getOperationalCost() {
     if (s1 == s2) {
-      return 0;
+      return 0d;
     }
     return operationalCost;
   }
 
-  public void setOperationalCost(int cost) {
-    operationalCost = cost;
+  public void setOperationalCost(double operationalCost) {
+    this.operationalCost = operationalCost;
   }
 
   Server getLinkedServer(Server s) {
@@ -120,7 +117,7 @@ public class Link {
     return weight;
   }
 
-  public void setWeight(double weight) {
+  void setWeight(double weight) {
     this.weight = weight;
   }
 }

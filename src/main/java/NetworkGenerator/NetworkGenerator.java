@@ -105,7 +105,7 @@ public class NetworkGenerator {
       servers.add(next);
       for (int i = 0; i < l; i++) { //each new server links to L other servers.
         int degrees = (links.size() - next.getDegree()) * 2; // total number of node degrees
-        int index = (int) Math.floor(Math.random() * degrees);
+        int index = (int) Math.floor(Math.random() * (double) degrees);
         boolean addedLink = false;
         for (Server s : servers) {
           if (s == next) {
@@ -120,7 +120,7 @@ public class NetworkGenerator {
           }
         }
         if (!addedLink) { //add a link to a random server
-          Server s = servers.get((int) Math.floor(Math.random() * servers.size()));
+          Server s = servers.get((int) Math.floor(Math.random() * (double) servers.size()));
           Link link = new Link(next, s);
           links.add(link);
         }
@@ -146,7 +146,7 @@ public class NetworkGenerator {
         if (s1 == s2 || traversed.contains(s1)) {
           continue;
         }
-        if (Math.random() < k / (n - 1)) {//we create a link between these two servers
+        if (Math.random() < k / (double) (n - 1)) {//we create a link between these two servers
           Link l = new Link(s1, s2);
           links.add(l);
         }
@@ -168,7 +168,7 @@ public class NetworkGenerator {
       }
       //connect a server from disconnected to a random connected server
       Server s1 = disconnected.remove(0);
-      int index = (int) Math.floor(Math.random() * connected.size());
+      int index = (int) Math.floor(Math.random() * (double) connected.size());
       Server s2 = connected.get(index);
       Link l = new Link(s1, s2);
       links.add(l);
@@ -201,10 +201,10 @@ public class NetworkGenerator {
     Link l2_3 = new Link(s2, s3);
     links.add(l2_3);
 
-    l0_1.setOperationalCost(8);
-    l0_2.setOperationalCost(10);
-    l1_3.setOperationalCost(15);
-    l2_3.setOperationalCost(2);
+    l0_1.setOperationalCost(8d);
+    l0_2.setOperationalCost(10d);
+    l1_3.setOperationalCost(15d);
+    l2_3.setOperationalCost(2d);
 
     return new Network(servers, links);
   }

@@ -10,7 +10,6 @@ import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 import Simulation.Simulation;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 public class AlgorithmTest {
@@ -50,7 +49,7 @@ public class AlgorithmTest {
     Network n = new Network(servers, links);
     NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.defaultParameters);
     nvs.setConstantLinkCapacity(1000);
-    nvs.setConstantServerCapacity(10000, 1);
+    nvs.setConstantServerCapacity(10000, 1d);
 
     s1.addVM(0);
     s0.addVM(1);

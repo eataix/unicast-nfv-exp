@@ -7,9 +7,9 @@ import java.util.HashSet;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Network {
-  final ArrayList<Server> servers;
+  private final ArrayList<Server> servers;
   private final HashMap<Integer, Server> serversById;
-  ArrayList<Link> links;
+  private ArrayList<Link> links;
 
   public Network(ArrayList<Server> servers, ArrayList<Link> links) {
     this.servers = servers;
@@ -32,7 +32,7 @@ public class Network {
     for (Link oldLink : oNetwork.getLinks()) {
       Server newS1 = serverMap.get(oldLink.getS1());
       Server newS2 = serverMap.get(oldLink.getS2());
-      Link link = new Link(newS1, newS2, oldLink.getBandwidth(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
+      Link link = new Link(newS1, newS2, oldLink.getBandwidthCapacity(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
       links.add(link);
       newS1.addLink(link);
       newS1.addLink(link);
@@ -58,7 +58,7 @@ public class Network {
   }
 
   public Server getRandomServer() {
-    int i = (int) (Math.random() * servers.size());
+    int i = (int) (Math.random() * (double) servers.size());
     return servers.get(i);
   }
 
@@ -104,7 +104,7 @@ public class Network {
     }
   }
 
-  void allocateBandwidthOnPath(ArrayList<Link> path, int b) {
+  void allocateBandwidthOnPath(ArrayList<Link> path, double b) {
     checkNotNull(path);
     for (Link l : path) {
       l.allocateBandwidth(b);

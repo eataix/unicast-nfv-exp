@@ -18,16 +18,16 @@ public class NetworkValueSetter { //sets the parameters of a given network
     this.parameters = parameters;
   }
 
-  private static int getNormal(int mean, int weight) {
+  private static double getNormal(double mean, double weight) {
     int cap = -1;
     while (cap < 0) {
       cap = (int) Math.round(Simulation.random.nextGaussian() * weight + mean);
     }
-    return cap;
+    return (double) cap;
   }
 
-  public static int getUniform(int low, int high) {
-    return (int) (low + Math.random() * (high - low));
+  public static double getUniform(double low, double high) {
+    return low + Math.random() * (high - low);
   }
 
   public Network getNetwork() {
@@ -45,111 +45,111 @@ public class NetworkValueSetter { //sets the parameters of a given network
       }
       HashSet<Server> layer = network.getReusableServers(nfv);
       if (layer.isEmpty()) { //ensure there is at least one server with nfv
-        Server s = servers.get((int) Math.floor(Math.random() * servers.size()));
+        Server s = servers.get((int) Math.floor(Math.random() * (double) servers.size()));
         s.addVM(nfv);
       }
     }
   }
 
-  public void setConstantServerCapacity(int cap, double serverRatio) {
+  public void setConstantServerCapacity(double cap, double serverRatio) {
     for (Server s : network.getServers()) {
       if (Math.random() < serverRatio) {
-        s.setCapacity(cap);
+        s.setComputingCapacity(cap);
       } else {
-        s.setCapacity(0);
+        s.setComputingCapacity(0d);
       }
     }
     Server s = network.getRandomServer();
-    s.setCapacity(cap); //ensure there is at least one server with capacity
+    s.setComputingCapacity(cap); //ensure there is at least one server with capacity
   }
 
-  public void setNormalServerCapacity(int mean, int weight, double serverRatio) {
+  public void setNormalServerCapacity(double mean, double weight, double serverRatio) {
     for (Server s : network.getServers()) {
       if (Math.random() < serverRatio) {
-        s.setCapacity(getNormal(mean, weight));
+        s.setComputingCapacity(getNormal(mean, weight));
       } else {
-        s.setCapacity(0);
+        s.setComputingCapacity(0d);
       }
     }
   }
 
-  public void setRandomServerCapacity(int low, int high, double serverRatio) {
+  public void setRandomServerCapacity(double low, double high, double serverRatio) {
     for (Server s : network.getServers()) {
       if (Math.random() < serverRatio) {
-        s.setCapacity(getUniform(low, high));
+        s.setComputingCapacity(getUniform(low, high));
       } else {
-        s.setCapacity(0);
+        s.setComputingCapacity(0d);
       }
     }
   }
 
-  public void setConstantLinkCapacity(int cap) {
+  public void setConstantLinkCapacity(double cap) {
     for (Link l : network.getLinks()) {
       l.setBandwidth(cap);
     }
   }
 
-  public void setNormalLinkCapacity(int mean, int weight) {
+  public void setNormalLinkCapacity(double mean, double weight) {
     for (Link l : network.getLinks()) {
       l.setBandwidth(getNormal(mean, weight));
     }
   }
 
-  public void setRandomLinkCapacity(int low, int high) {
+  public void setRandomLinkCapacity(double low, double high) {
     for (Link l : network.getLinks()) {
       l.setBandwidth(getUniform(low, high));
     }
   }
 
-  public void setConstantLinkDelay(int cap) {
+  public void setConstantLinkDelay(double cap) {
     for (Link l : network.getLinks()) {
       l.setDelay(cap);
     }
   }
 
-  public void setNormalLinkDelay(int mean, int weight) {
+  public void setNormalLinkDelay(double mean, double weight) {
     for (Link l : network.getLinks()) {
       l.setDelay(getNormal(mean, weight));
     }
   }
 
-  public void setRandomLinkDelay(int low, int high) {
+  public void setRandomLinkDelay(double low, double high) {
     for (Link l : network.getLinks()) {
       l.setDelay(getUniform(low, high));
     }
   }
 
-  public void setConstantNFVRequirements(int cap) {
+  public void setConstantNFVRequirements(double cap) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvComputingReq[nfv] = cap;
+      parameters.nfvComputingReqs[nfv] = cap;
     }
   }
 
-  public void setNormalNFVRequirements(int mean, int weight) {
+  public void setNormalNFVRequirements(double mean, double weight) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvComputingReq[nfv] = getNormal(mean, weight);
+      parameters.nfvComputingReqs[nfv] = getNormal(mean, weight);
     }
   }
 
-  public void setRandomNFVRequirements(int low, int high) {
+  public void setRandomNFVRequirements(double low, double high) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
-      parameters.nfvComputingReq[nfv] = getUniform(low, high);
+      parameters.nfvComputingReqs[nfv] = getUniform(low, high);
     }
   }
 
-  public void setConstantNFVServiceRate(int cap) {
+  public void setConstantNFVServiceRate(double cap) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       parameters.nfvRates[nfv] = cap;
     }
   }
 
-  public void setNormalNFVServiceRate(int mean, int weight) {
+  public void setNormalNFVServiceRate(double mean, double weight) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       parameters.nfvRates[nfv] = getNormal(mean, weight);
     }
   }
 
-  public void setRandomNFVServiceRate(int low, int high) {
+  public void setRandomNFVServiceRate(double low, double high) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       parameters.nfvRates[nfv] = getUniform(low, high);
     }

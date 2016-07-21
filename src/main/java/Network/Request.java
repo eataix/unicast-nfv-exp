@@ -6,9 +6,9 @@ import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
 
 public class Request {
-  private final int bandwidth;
   private final Server source;
   private final Server destination;
+  private final double bandwidth;
   private final Parameters parameters;
   private int[] SC; //each number points to index of nfv in Parameters
   private double delayReq; //delayReq bound requirement
@@ -20,20 +20,6 @@ public class Request {
     this.bandwidth = NetworkValueSetter.getUniform(parameters.reqBWReqMin, parameters.reqBWReqMax);
     this.delayReq = NetworkValueSetter.getUniform(parameters.reqDelayReqMin, parameters.reqDelayReqMax);
     generateServiceChain();
-  }
-
-  public boolean setServiceChain(int[] sc) {
-    //make sure all elements are valid nfv ids, and there are no repeats.
-    HashSet<Integer> nfvs = new HashSet<>();
-    for (int aSc : sc) {
-      if (aSc >= parameters.L || nfvs.contains(aSc)) {
-        return false;
-      } else {
-        nfvs.add(aSc);
-      }
-    }
-    SC = sc;
-    return true;
   }
 
   private void generateServiceChain() {
@@ -56,11 +42,25 @@ public class Request {
     System.arraycopy(nfvs, 0, SC, 0, l);
   }
 
+  public boolean setServiceChain(int[] sc) {
+    //make sure all elements are valid nfv ids, and there are no repeats.
+    HashSet<Integer> nfvs = new HashSet<>();
+    for (int aSc : sc) {
+      if (aSc >= parameters.L || nfvs.contains(aSc)) {
+        return false;
+      } else {
+        nfvs.add(aSc);
+      }
+    }
+    SC = sc;
+    return true;
+  }
+
   public int[] getSC() {
     return SC;
   }
 
-  public int getBandwidth() {
+  public double getBandwidth() {
     return bandwidth;
   }
 
