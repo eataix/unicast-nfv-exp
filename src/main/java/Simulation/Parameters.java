@@ -88,17 +88,23 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     /**
      * Network related parameters
      */
+
+    // The following three settings are adopted from Zichuan's multicast paper
     private double serverRatio = 0.1; // Server to Node Ratio
     private double linkBWCapMin = 1000; // 1,000 Mbps, minimum link bandwidth capacity
     private double linkBWCapMax = 10000; // 10,000 Mbps maximum link bandwidth capacity
+
+    // The following two settings are from our paper on consolidated middleboxes
     private double linkDelayReqMin = 2; // minimum link delay
     private double linkDelayReqMax = 5; // maximum link delay
 
     /**
      * Request related parameters
      */
-    private int numRequests = 100; // number of requests
+    private int numRequests = 1000; // number of requests
     private int L = 4; // the maximum service chain length
+
+    // These following four are from our paper on consolidated middleboxes
     private double reqBWReqMin = 10; // minimum request bandwidth requirement
     private double reqBWReqMax = 120; // maximum request bandwidth requirement
     private double reqDelayMin = 40; // minimum request delay requirement
@@ -108,8 +114,12 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
      * NFV parameters
      */
     private double nfvProb = 0.1;   //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
+    // Computing resource requirement is irrelevant
     private double[] nfvComputingReqs = new double[] {2, 3, 5, 2, 6, 4}; //nfv vm resource requirements
+    // I don't think rate is considered in this paper
     private double[] nfvRates = new double[] {3, 5, 6, 7, 8, 5};  //nfv vm service rate
+
+    // TODO find values for the following four
     private double[] nfvOperationalCosts = new double[] {2, 3, 5, 2, 6, 4};//operating cost of providing an vnf service
     private double[] nfvInitCosts = new double[] {5, 6, 7, 4, 8, 5}; //initialization cost of vnf service
     private double[] nfvInitDelays = new double[] {5, 6, 7, 4, 8, 5}; //initialization cost of vnf service // TODO I just copy the code from nfvInitCosts
