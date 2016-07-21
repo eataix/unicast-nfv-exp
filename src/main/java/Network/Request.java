@@ -1,17 +1,20 @@
 package Network;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
+import static com.google.common.base.Preconditions.checkState;
 
 public class Request {
   private final Server source;
   private final Server destination;
-  private final double bandwidth;
+  private double bandwidth;
+  private double delayReq; //delayReq bound requirement
   private final Parameters parameters;
   private int[] SC; //each number points to index of nfv in Parameters
-  private double delayReq; //delayReq bound requirement
 
   public Request(Server source, Server destination, Parameters parameters) {
     this.source = source;
@@ -20,6 +23,24 @@ public class Request {
     this.bandwidth = NetworkValueSetter.getUniform(parameters.reqBWReqMin, parameters.reqBWReqMax);
     this.delayReq = NetworkValueSetter.getUniform(parameters.reqDelayReqMin, parameters.reqDelayReqMax);
     generateServiceChain();
+  }
+
+  public Request newRequest(HashMap<Server, Server> serverMap) {
+    checkState(serverMap.containsKey(this.getSource()) && serverMap.containsKey(this.getDestination()));
+    Request newRequest = new Request(serverMap.get(this.getSource()), serverMap.get(this.getDestination()), this.parameters);
+    newRequest.setDelayReq(this.getDelayReq());
+    newRequest.setBandwidth(this.getBandwidth());
+    newRequest.setServiceChain(Arrays.copyOf(this.getSC(), this.getSC().length));
+    checkState(this.getSource().getId() == newRequest.getSource().getId() && this.getDestination().getId() == newRequest.getDestination().getId());
+    return newRequest;
+  }
+
+  public void setBandwidth(double bandwidth) {
+    this.bandwidth = bandwidth;
+  }
+
+  public void setDelayReq(double delayReq) {
+    this.delayReq = delayReq;
   }
 
   private void generateServiceChain() {
