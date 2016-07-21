@@ -464,9 +464,8 @@ import org.slf4j.MDC;
   }
 
   private static void LEffectWithoutDelays() {
+    prepareLogging();
     for (int L = 2; L <= 6; L += 2) {
-      System.out.println("L: " + L);
-
       //Parameters parameters = new Parameters.Builder().L(L).build();
 
       int expSum = 0; //sum of all exponential cost accepted requests
@@ -493,6 +492,7 @@ import org.slf4j.MDC;
           Network networkAlt = network.newNetwork(serverMap);
           ArrayList<Request> requestsAlt = mapRequestsToNewNetwork(requests, serverMap);
 
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm started", networkSize, L, trial));
           double averageCostReq = 0d;
           for (int i = 0; i < parameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
@@ -502,6 +502,7 @@ import org.slf4j.MDC;
               averageCostReq += results[i].getPathCost();
             }
           }
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm finished", networkSize, L, trial));
 
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostReq / baseParameters.numTrials);
@@ -509,6 +510,7 @@ import org.slf4j.MDC;
 
           network.wipeLinks();
 
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark started", networkSize, L, trial));
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < parameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
@@ -518,6 +520,7 @@ import org.slf4j.MDC;
               averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
             }
           }
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark finished", networkSize, L, trial));
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
           averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
@@ -528,9 +531,8 @@ import org.slf4j.MDC;
   }
 
   private static void LEffectWithDelays() {
+    prepareLogging();
     for (int L = 2; L <= 6; L += 2) {
-      System.out.println("L: " + L);
-
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[baseParameters.numRequests];
       Result[] resultsBenchmark = new Result[baseParameters.numRequests];
@@ -555,6 +557,7 @@ import org.slf4j.MDC;
           Network networkAlt = network.newNetwork(serverMap);
           ArrayList<Request> requestsAlt = mapRequestsToNewNetwork(requests, serverMap);
 
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm started", networkSize, L, trial));
           double averageCostReq = 0d;
           for (int i = 0; i < parameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
@@ -564,6 +567,7 @@ import org.slf4j.MDC;
               averageCostReq += results[i].getPathCost();
             }
           }
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm finished", networkSize, L, trial));
 
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostReq / baseParameters.numTrials);
@@ -571,6 +575,7 @@ import org.slf4j.MDC;
 
           network.wipeLinks();
 
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark started", networkSize, L, trial));
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < parameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
@@ -580,6 +585,7 @@ import org.slf4j.MDC;
               averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
             }
           }
+          logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark finished", networkSize, L, trial));
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
           averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
