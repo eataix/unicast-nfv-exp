@@ -199,7 +199,7 @@ import static com.google.common.base.Preconditions.checkState;
       graph.addVertex(s2);
       DefaultWeightedEdge edge = graph.addEdge(s1, s2);
       double weight = costFunction.apply(link);
-      com.google.common.base.Preconditions.checkState(weight > 0d);
+      checkState(weight >= 0d);
       graph.setEdgeWeight(edge, weight);
       map.put(edge, link);
     }

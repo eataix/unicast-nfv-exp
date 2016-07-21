@@ -22,18 +22,17 @@ public class Network {
     }
   }
 
-  public static Network newNetwork(Network oNetwork) {
+  public Network newNetwork(HashMap<Server, Server> serverMap) {
     ArrayList<Server> servers = new ArrayList<>();
-    HashMap<Server, Server> serverMap = new HashMap<>();
 
-    for (Server oldServer : oNetwork.getServers()) {
+    for (Server oldServer : this.getServers()) {
       Server newServer = new Server(oldServer);
       servers.add(newServer);
       serverMap.put(oldServer, newServer);
     }
 
     ArrayList<Link> links = new ArrayList<>();
-    for (Link oldLink : oNetwork.getLinks()) {
+    for (Link oldLink : this.getLinks()) {
       Server newS1 = serverMap.get(oldLink.getS1());
       Server newS2 = serverMap.get(oldLink.getS2());
       Link link = new Link(newS1, newS2, oldLink.getBandwidthCapacity(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
@@ -41,7 +40,8 @@ public class Network {
     }
 
     Network newNetwork = new Network(servers, links);
-    checkState(newNetwork.getLinks().size() == oNetwork.getLinks().size() && newNetwork.getServers().size() == oNetwork.getServers().size());
+    checkState(newNetwork.getLinks().size() == this.getLinks().size() && newNetwork.getServers().size() == this.getServers().size());
+
     return newNetwork;
   }
 

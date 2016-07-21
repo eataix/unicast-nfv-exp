@@ -81,10 +81,6 @@ public class AuxiliaryGraphBuilder {
         ArrayList<Link> shortestPath = new ArrayList<>();
         while (prevNode.get(curr) != null) {
           Link l = curr.getLink(prevNode.get(curr));
-          if (l == null) {
-            System.out.println("curr: " + curr + "prev: " + prevNode.get(curr));
-            System.out.println("Here");
-          }
           checkState(l != null);
           shortestPath.add(0, l);
           delay += l.getDelay();
@@ -97,7 +93,11 @@ public class AuxiliaryGraphBuilder {
         pathDelays[src.getId()][dest.getId()] = delay;
       }
     }
-    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
+    return new
+
+        AuxiliaryNetwork(network.getServers(), network.
+
+                                                          getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {
