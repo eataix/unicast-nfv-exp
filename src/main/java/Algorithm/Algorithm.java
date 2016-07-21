@@ -137,6 +137,9 @@ import Simulation.Simulation;
   }
 
   private boolean admissionControlTest(double pathCost) {
+    if (pathCost == Double.MAX_VALUE || pathCost == Double.POSITIVE_INFINITY) {
+      return false;
+    }
     return pathCost < (double) auxiliaryNetwork.size() * parameters.threshold - 1d;
   }
 }

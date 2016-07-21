@@ -259,7 +259,6 @@ import org.slf4j.MDC;
         double expAdmittedCount = 0d;
         double expPathCost = 0d;
         for (int i = 0; i < baseParameters.numRequests; ++i) {
-
           for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
             if (results[betaIdx][trial][i].isAdmitted()) {
               ++expAdmittedCount;
@@ -374,13 +373,12 @@ import org.slf4j.MDC;
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d finished", networkSize, trial));
       }
 
-      for (int i = 0; i < baseParameters.numRequests; ++i) {
-        double withThresholdAdmissionCount = 0d;
-        double withThresholdPathCost = 0d;
-        double withoutThresholdAdmissionCount = 0d;
-        double withoutThresholdPathCost = 0d;
-
-        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+      double withThresholdAdmissionCount = 0d;
+      double withThresholdPathCost = 0d;
+      double withoutThresholdAdmissionCount = 0d;
+      double withoutThresholdPathCost = 0d;
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           if (withThresholdResults[trial][i].isAdmitted()) {
             ++withThresholdAdmissionCount;
             withThresholdPathCost += withThresholdResults[trial][i].getPathCost();
@@ -390,14 +388,13 @@ import org.slf4j.MDC;
             withoutThresholdPathCost += withoutThresholdResults[trial][i].getPathCost();
           }
         }
-
-        withThresholdAdmissionCount /= (double) baseParameters.numTrials;
-        withThresholdPathCost /= (double) baseParameters.numTrials;
-        withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
-        withoutThresholdPathCost /= (double) baseParameters.numTrials;
-        logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
-        logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
       }
+      withThresholdAdmissionCount /= (double) baseParameters.numTrials;
+      withThresholdPathCost /= (double) baseParameters.numTrials;
+      withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
+      withoutThresholdPathCost /= (double) baseParameters.numTrials;
+      logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
+      logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
     }
   }
 
@@ -441,13 +438,12 @@ import org.slf4j.MDC;
         logger.debug(String.format("Network size: %d\tw/o threshold\ttrial: %d started", networkSize, trial));
       }
 
-      for (int i = 0; i < baseParameters.numRequests; ++i) {
-        double withThresholdAdmissionCount = 0d;
-        double withThresholdPathCost = 0d;
-        double withoutThresholdAdmissionCount = 0d;
-        double withoutThresholdPathCost = 0d;
-
-        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+      double withThresholdAdmissionCount = 0d;
+      double withThresholdPathCost = 0d;
+      double withoutThresholdAdmissionCount = 0d;
+      double withoutThresholdPathCost = 0d;
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           if (withThresholdResults[trial][i].isAdmitted()) {
             ++withThresholdAdmissionCount;
             withThresholdPathCost += withThresholdResults[trial][i].getPathCost();
@@ -457,14 +453,13 @@ import org.slf4j.MDC;
             withoutThresholdPathCost += withoutThresholdResults[trial][i].getPathCost();
           }
         }
-
-        withThresholdAdmissionCount /= (double) baseParameters.numTrials;
-        withThresholdPathCost /= (double) baseParameters.numTrials;
-        withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
-        withoutThresholdPathCost /= (double) baseParameters.numTrials;
-        logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
-        logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
       }
+      withThresholdAdmissionCount /= (double) baseParameters.numTrials;
+      withThresholdPathCost /= (double) baseParameters.numTrials;
+      withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
+      withoutThresholdPathCost /= (double) baseParameters.numTrials;
+      logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
+      logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
     }
   }
 
