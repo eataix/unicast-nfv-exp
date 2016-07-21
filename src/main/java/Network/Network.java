@@ -24,10 +24,13 @@ public class Network {
   public static Network newNetwork(Network oNetwork) {
     ArrayList<Server> servers = new ArrayList<>();
     HashMap<Server, Server> serverMap = new HashMap<>();
+    
     for (Server oldServer : oNetwork.getServers()) {
       Server newServer = new Server(oldServer);
+      servers.add(newServer);
       serverMap.put(oldServer, newServer);
     }
+    
     ArrayList<Link> links = new ArrayList<>();
     for (Link oldLink : oNetwork.getLinks()) {
       Server newS1 = serverMap.get(oldLink.getS1());
