@@ -64,9 +64,9 @@ public class Server {
 
   public double getOperationalCost(int nfv) { //operational cost
     if (NFVs.get(nfv) == null) {
-      return Simulation.defaultParameters.nfvOperationalCosts[nfv] + Simulation.defaultParameters.nfvInitCosts[nfv];
+      return Simulation.baseParameters.nfvOperationalCosts[nfv] + Simulation.baseParameters.nfvInitCosts[nfv];
     }
-    return Simulation.defaultParameters.nfvOperationalCosts[nfv];
+    return Simulation.baseParameters.nfvOperationalCosts[nfv];
   }
 
   public Link getLink(Server s) {//returns link that connects "this" to Server s
@@ -120,7 +120,7 @@ public class Server {
   }
 
   public boolean canCreateVM(int nfv) { //has spare computingCapacity to create enough VMs to handle rate
-    double serviceReq = Simulation.defaultParameters.nfvComputingReqs[nfv];
+    double serviceReq = Simulation.baseParameters.nfvComputingReqs[nfv];
     return serviceReq < remainingCapacity();
   }
 
@@ -155,7 +155,7 @@ public class Server {
     }
 
     double resourceAllocated() {
-      return Simulation.defaultParameters.nfvComputingReqs[serviceType];
+      return Simulation.baseParameters.nfvComputingReqs[serviceType];
     }
   }
 }

@@ -27,6 +27,7 @@ public class Link {
     this.allocatedBandwidth = allocatedBandwidth;
     this.delay = delay;
     this.operationalCost = operationalCost;
+    addLinkToServers();
   }
 
   // TODO Why do we even have this?

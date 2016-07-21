@@ -198,7 +198,9 @@ import static com.google.common.base.Preconditions.checkState;
       graph.addVertex(s1);
       graph.addVertex(s2);
       DefaultWeightedEdge edge = graph.addEdge(s1, s2);
-      graph.setEdgeWeight(edge, costFunction.apply(link));
+      double weight = costFunction.apply(link);
+      com.google.common.base.Preconditions.checkState(weight > 0d);
+      graph.setEdgeWeight(edge, weight);
       map.put(edge, link);
     }
 
@@ -208,8 +210,10 @@ import static com.google.common.base.Preconditions.checkState;
     Optional<Server> destinationAlt = auxServers.stream().filter(server -> server.getId() == destination.getId()).findAny();
     checkState(destinationAlt.isPresent());
     assert sourceAlt.isPresent() && destinationAlt.isPresent();
+    if (!graph.containsVertex(sourceAlt.get()) || !graph.containsVertex(destinationAlt.get())) {
+      return null;
+    }
     DijkstraShortestPath<Server, DefaultWeightedEdge> shortestPath = new DijkstraShortestPath<>(graph, sourceAlt.get(), destinationAlt.get());
-
     return new ShortestPathResult(shortestPath, map);
   }
 

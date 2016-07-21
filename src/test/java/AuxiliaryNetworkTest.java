@@ -56,7 +56,7 @@ public class AuxiliaryNetworkTest {
     l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
-    NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.defaultParameters);
+    NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.baseParameters);
     nvs.placeNFVs(1d);
     nvs.setConstantLinkCapacity(1000);
     nvs.setConstantServerCapacity(10000, 1);
@@ -70,7 +70,7 @@ public class AuxiliaryNetworkTest {
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.defaultParameters);
+    AuxiliaryNetwork auxnet = AuxiliaryGraphBuilder.buildAuxiliaryGraph(n, r, new OperationalCostFunction(), Simulation.baseParameters);
     Server src = auxnet.getSource();
     Server dest = auxnet.getDestination();
     ArrayList<HashSet<Server>> serviceLayers = auxnet.serviceLayers;

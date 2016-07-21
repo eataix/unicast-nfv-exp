@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class Network {
   private final ArrayList<Server> servers;
@@ -24,24 +25,24 @@ public class Network {
   public static Network newNetwork(Network oNetwork) {
     ArrayList<Server> servers = new ArrayList<>();
     HashMap<Server, Server> serverMap = new HashMap<>();
-    
+
     for (Server oldServer : oNetwork.getServers()) {
       Server newServer = new Server(oldServer);
       servers.add(newServer);
       serverMap.put(oldServer, newServer);
     }
-    
+
     ArrayList<Link> links = new ArrayList<>();
     for (Link oldLink : oNetwork.getLinks()) {
       Server newS1 = serverMap.get(oldLink.getS1());
       Server newS2 = serverMap.get(oldLink.getS2());
       Link link = new Link(newS1, newS2, oldLink.getBandwidthCapacity(), oldLink.getAllocatedBandwidth(), oldLink.getDelay(), oldLink.getOperationalCost());
       links.add(link);
-      newS1.addLink(link);
-      newS1.addLink(link);
     }
 
-    return new Network(servers, links);
+    Network newNetwork = new Network(servers, links);
+    checkState(newNetwork.getLinks().size() == oNetwork.getLinks().size() && newNetwork.getServers().size() == oNetwork.getServers().size());
+    return newNetwork;
   }
 
   public int size() {

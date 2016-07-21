@@ -47,20 +47,20 @@ public class AlgorithmTest {
     l2_3.setOperationalCost(2);
 
     Network n = new Network(servers, links);
-    NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.defaultParameters);
+    NetworkValueSetter nvs = new NetworkValueSetter(n, Simulation.baseParameters);
     nvs.setConstantLinkCapacity(1000);
     nvs.setConstantServerCapacity(10000, 1d);
 
     s1.addVM(0);
     s0.addVM(1);
 
-    Request r = new Request(s0, s3, Simulation.defaultParameters);
+    Request r = new Request(s0, s3, Simulation.baseParameters);
     r.setServiceChain(new int[] {0, 1});
 
     //nfvreq = {2, 3}
     //nfvcost = {2, 3}
     //nfvinit cost = {5, 6}
-    Algorithm alg = new Algorithm(n, r, Simulation.defaultParameters);
+    Algorithm alg = new Algorithm(n, r, Simulation.baseParameters);
     Result res = alg.minOpCostWithoutDelay();
     ArrayList<Server> path = res.getPath();
     assertEquals(0, path.get(0).getId());

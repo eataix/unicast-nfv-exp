@@ -22,7 +22,7 @@ import org.slf4j.MDC;
 
 @SuppressWarnings({"Duplicates", "unused"}) public class Simulation {
   public static final Random random = new Random();
-  public static Parameters defaultParameters = new Parameters.Builder().build();
+  public static Parameters baseParameters = new Parameters.Builder().build();
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
   private static final Logger logger = LoggerFactory.getLogger(Simulation.class);
@@ -33,10 +33,10 @@ import org.slf4j.MDC;
       switch (arg) {
         case "d":
           logger.info("Enabled debugging profile");
-          defaultParameters = new Parameters.Builder().networkSizes(new int[] {50, 100})
-                                                      .numRequests(100)
-                                                      .numTrials(3)
-                                                      .build();
+          baseParameters = new Parameters.Builder().networkSizes(new int[] {50, 100})
+                                                   .numRequests(100)
+                                                   .numTrials(3)
+                                                   .build();
           break;
         case "0":
           listOfTasks.add(new Thread(() -> LEffectWithoutDelays()));
@@ -79,8 +79,8 @@ import org.slf4j.MDC;
   }
 
   public static void prepareTopologies() {
-    for (int networkSize : defaultParameters.networkSizes) {
-      for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+    for (int networkSize : baseParameters.networkSizes) {
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         topologyFiles.add(new TopologyFile(networkSize, String.valueOf(trial)));
       }
     }
@@ -103,13 +103,13 @@ import org.slf4j.MDC;
                                                                     .offline(false)
                                                                     .build();
 
-    Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
-    Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
+    Result[][] expResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
+    Result[][] linearResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
 
-    for (int nSizeIndex = 0; nSizeIndex < defaultParameters.networkSizes.length; nSizeIndex++) {
-      int networkSize = defaultParameters.networkSizes[nSizeIndex];
+    for (int nSizeIndex = 0; nSizeIndex < baseParameters.networkSizes.length; nSizeIndex++) {
+      int networkSize = baseParameters.networkSizes[nSizeIndex];
 
-      for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
         Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequests);
@@ -163,10 +163,10 @@ import org.slf4j.MDC;
     Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
     Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
 
-    Result[][] expResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
-    Result[][] linearResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
-    for (int networkSize : defaultParameters.networkSizes) {
-      for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+    Result[][] expResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
+    Result[][] linearResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
+    for (int networkSize : baseParameters.networkSizes) {
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
         Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequests);
@@ -218,8 +218,8 @@ import org.slf4j.MDC;
   private static void betaImpactWithoutDelays() {
     prepareLogging();
     double[] betas = new double[] {2d, 4d, 6d, 8d};
-    for (int networkSize : defaultParameters.networkSizes) {
-      Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequests];
+    for (int networkSize : baseParameters.networkSizes) {
+      Result[][][] results = new Result[betas.length][baseParameters.numTrials][baseParameters.numRequests];
 
       for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
         double beta = betas[betaIdx];
@@ -228,7 +228,7 @@ import org.slf4j.MDC;
                                                         .offline(false)
                                                         .build();
 
-        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
 
@@ -250,18 +250,18 @@ import org.slf4j.MDC;
         double beta = betas[betaIdx];
         double expAdmittedCount = 0d;
         double expPathCost = 0d;
-        for (int i = 0; i < defaultParameters.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
 
-          for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+          for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
             if (results[betaIdx][trial][i].isAdmitted()) {
               ++expAdmittedCount;
               expPathCost += results[betaIdx][trial][i].getPathCost();
             }
           }
         }
-        expAdmittedCount /= (double) defaultParameters.numTrials;
+        expAdmittedCount /= (double) baseParameters.numTrials;
         count.append(expAdmittedCount).append(" ");
-        expPathCost /= (double) defaultParameters.numTrials;
+        expPathCost /= (double) baseParameters.numTrials;
         cost.append(expPathCost).append(" ");
       }
       logger.info(count.toString());
@@ -272,8 +272,8 @@ import org.slf4j.MDC;
   private static void betaImpactWithDelays() {
     prepareLogging();
     double[] betas = new double[] {2d, 4d, 6d};
-    for (int networkSize : defaultParameters.networkSizes) {
-      Result[][][] results = new Result[betas.length][defaultParameters.numTrials][defaultParameters.numRequests];
+    for (int networkSize : baseParameters.networkSizes) {
+      Result[][][] results = new Result[betas.length][baseParameters.numTrials][baseParameters.numRequests];
 
       for (int betaIdx = 0; betaIdx < betas.length; ++betaIdx) {
         double beta = betas[betaIdx];
@@ -282,7 +282,7 @@ import org.slf4j.MDC;
                                                         .offline(false)
                                                         .build();
 
-        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
           network.wipeLinks();
@@ -305,18 +305,18 @@ import org.slf4j.MDC;
 
         double expAdmittedCount = 0d;
         double expPathCost = 0d;
-        for (int i = 0; i < defaultParameters.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
 
-          for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+          for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
             if (results[betaIdx][trial][i].isAdmitted()) {
               ++expAdmittedCount;
               expPathCost += results[betaIdx][trial][i].getPathCost();
             }
           }
         }
-        expAdmittedCount /= (double) defaultParameters.numTrials;
+        expAdmittedCount /= (double) baseParameters.numTrials;
         count.append(expAdmittedCount).append(" ");
-        expPathCost /= (double) defaultParameters.numTrials;
+        expPathCost /= (double) baseParameters.numTrials;
         cost.append(expPathCost).append(" ");
         logger.info(count.toString());
         logger.info(cost.toString());
@@ -329,10 +329,10 @@ import org.slf4j.MDC;
    */
   private static void ThresholdEffectWithoutDelays() {
     prepareLogging();
-    Result[][] withThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
-    Result[][] withoutThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
+    Result[][] withThresholdResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
+    Result[][] withoutThresholdResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
 
-    for (int networkSize : defaultParameters.networkSizes) {
+    for (int networkSize : baseParameters.networkSizes) {
       Parameters parametersWithThreshold = new Parameters.Builder().networkSize(networkSize)
                                                                    .offline(false)
                                                                    .build();
@@ -341,14 +341,14 @@ import org.slf4j.MDC;
                                                                       .offline(false)
                                                                       .build();
 
-      for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
         Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequests);
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tw/ threshold\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
           withThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
@@ -356,20 +356,20 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
         logger.debug(String.format("Network size: %d\ttrial: %d finished", networkSize, trial));
       }
 
-      for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+      for (int i = 0; i < baseParameters.numRequests; ++i) {
         double withThresholdAdmissionCount = 0d;
         double withThresholdPathCost = 0d;
         double withoutThresholdAdmissionCount = 0d;
         double withoutThresholdPathCost = 0d;
 
-        for (int trial = 0; trial < parametersWithThreshold.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           if (withThresholdResults[trial][i].isAdmitted()) {
             ++withThresholdAdmissionCount;
             withThresholdPathCost += withThresholdResults[trial][i].getPathCost();
@@ -380,10 +380,10 @@ import org.slf4j.MDC;
           }
         }
 
-        withThresholdAdmissionCount /= (double) parametersWithThreshold.numTrials;
-        withThresholdPathCost /= (double) parametersWithThreshold.numTrials;
-        withoutThresholdAdmissionCount /= (double) parametersWithOutThreshold.numTrials;
-        withoutThresholdPathCost /= (double) parametersWithOutThreshold.numTrials;
+        withThresholdAdmissionCount /= (double) baseParameters.numTrials;
+        withThresholdPathCost /= (double) baseParameters.numTrials;
+        withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
+        withoutThresholdPathCost /= (double) baseParameters.numTrials;
         logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
         logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
       }
@@ -393,10 +393,10 @@ import org.slf4j.MDC;
   private static void ThresholdEffectWithDelays() {
     prepareLogging();
 
-    Result[][] withThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
-    Result[][] withoutThresholdResults = new Result[defaultParameters.numTrials][defaultParameters.numRequests];
+    Result[][] withThresholdResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
+    Result[][] withoutThresholdResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
 
-    for (int networkSize : defaultParameters.networkSizes) {
+    for (int networkSize : baseParameters.networkSizes) {
       Parameters parametersWithThreshold = new Parameters.Builder().networkSize(networkSize)
                                                                    .offline(false)
                                                                    .build();
@@ -405,14 +405,14 @@ import org.slf4j.MDC;
                                                                       .offline(false)
                                                                       .build();
 
-      for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithThreshold);
         Network networkAlt = Network.newNetwork(network);
         ArrayList<Request> requests = generateRequests(parametersWithThreshold, network, parametersWithThreshold.numRequests);
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tw/ threshold\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithThreshold);
           withThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
@@ -420,20 +420,20 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(networkAlt, requests.get(i), parametersWithOutThreshold);
           withoutThresholdResults[trial][i] = alg.maxThroughputWithDelay();
         }
         logger.debug(String.format("Network size: %d\ttrial: %d started", networkSize, trial));
       }
 
-      for (int i = 0; i < parametersWithThreshold.numRequests; ++i) {
+      for (int i = 0; i < baseParameters.numRequests; ++i) {
         double withThresholdAdmissionCount = 0d;
         double withThresholdPathCost = 0d;
         double withoutThresholdAdmissionCount = 0d;
         double withoutThresholdPathCost = 0d;
 
-        for (int trial = 0; trial < parametersWithThreshold.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           if (withThresholdResults[trial][i].isAdmitted()) {
             ++withThresholdAdmissionCount;
             withThresholdPathCost += withThresholdResults[trial][i].getPathCost();
@@ -444,10 +444,10 @@ import org.slf4j.MDC;
           }
         }
 
-        withThresholdAdmissionCount /= (double) parametersWithThreshold.numTrials;
-        withThresholdPathCost /= (double) parametersWithThreshold.numTrials;
-        withoutThresholdAdmissionCount /= (double) parametersWithOutThreshold.numTrials;
-        withoutThresholdPathCost /= (double) parametersWithOutThreshold.numTrials;
+        withThresholdAdmissionCount /= (double) baseParameters.numTrials;
+        withThresholdPathCost /= (double) baseParameters.numTrials;
+        withoutThresholdAdmissionCount /= (double) baseParameters.numTrials;
+        withoutThresholdPathCost /= (double) baseParameters.numTrials;
         logger.info(String.format("%d %f %f", networkSize, withThresholdAdmissionCount, withoutThresholdAdmissionCount));
         logger.info(String.format("%d %f %f", networkSize, withThresholdPathCost, withoutThresholdPathCost));
       }
@@ -461,10 +461,10 @@ import org.slf4j.MDC;
       //Parameters parameters = new Parameters.Builder().L(L).build();
 
       int expSum = 0; //sum of all exponential cost accepted requests
-      Result[] results = new Result[defaultParameters.numRequests];
-      Result[] resultsBenchmark = new Result[defaultParameters.numRequests];
+      Result[] results = new Result[baseParameters.numRequests];
+      Result[] resultsBenchmark = new Result[baseParameters.numRequests];
 
-      for (int networkSize : defaultParameters.networkSizes) {
+      for (int networkSize : baseParameters.networkSizes) {
         Parameters parameters = new Parameters.Builder().networkSize(networkSize)
                                                         .L(L)
                                                         .costFunc(new LinCostFunction())
@@ -475,7 +475,7 @@ import org.slf4j.MDC;
 
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
-        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           Network networkAlt = Network.newNetwork(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
@@ -492,7 +492,7 @@ import org.slf4j.MDC;
           }
 
           averageCostReq = averageCostReq / accepted;
-          averageCostNet += (averageCostReq / defaultParameters.numTrials);
+          averageCostNet += (averageCostReq / baseParameters.numTrials);
           expSum += accepted;
 
           network.wipeLinks();
@@ -508,7 +508,7 @@ import org.slf4j.MDC;
           }
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
-          averageCostNetBenchmark += (averageCostReqBenchmark / defaultParameters.numTrials);
+          averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
         }
         logger.info(String.format("%d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
       }
@@ -520,10 +520,10 @@ import org.slf4j.MDC;
       System.out.println("L: " + L);
 
       int expSum = 0; // sum of all exponential cost accepted requests
-      Result[] results = new Result[defaultParameters.numRequests];
-      Result[] resultsBenchmark = new Result[defaultParameters.numRequests];
+      Result[] results = new Result[baseParameters.numRequests];
+      Result[] resultsBenchmark = new Result[baseParameters.numRequests];
 
-      for (int networkSize : defaultParameters.networkSizes) {
+      for (int networkSize : baseParameters.networkSizes) {
         Parameters parameters = new Parameters.Builder().networkSize(networkSize)
                                                         .L(L)
                                                         .offline(true)
@@ -534,7 +534,7 @@ import org.slf4j.MDC;
 
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
-        for (int trial = 0; trial < defaultParameters.numTrials; ++trial) {
+        for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           Network networkAlt = Network.newNetwork(network);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
@@ -551,7 +551,7 @@ import org.slf4j.MDC;
           }
 
           averageCostReq = averageCostReq / accepted;
-          averageCostNet += (averageCostReq / defaultParameters.numTrials);
+          averageCostNet += (averageCostReq / baseParameters.numTrials);
           expSum += accepted;
 
           network.wipeLinks();
@@ -567,7 +567,7 @@ import org.slf4j.MDC;
           }
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
-          averageCostNetBenchmark += (averageCostReqBenchmark / defaultParameters.numTrials);
+          averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
         }
         logger.info(String.format("%d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
       }
