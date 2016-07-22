@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import Simulation.Simulation;
-
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkPositionIndex;
 
 public class Server {
   private final int id;
@@ -88,15 +88,12 @@ public class Server {
   }
 
   public ArrayList<Server> getAllNeighbours() {
-    ArrayList<Server> neighbours = links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
-    return neighbours;
+    return links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public ArrayList<Server> getReachableNeighbours(int b) {
     //get neighbours where link can carry additional bandwidth b
-    ArrayList<Server> neighbours =
-        links.stream().filter(l -> l.canSupportBandwidth(b)).map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
-    return neighbours;
+    return links.stream().filter(l -> l.canSupportBandwidth(b)).map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public double remainingCapacity() {
@@ -108,17 +105,18 @@ public class Server {
   }
 
   public boolean canReuseVM(int nfv) { //will need to check whether service rate of VM exceeds arrival rate of packets
+    checkPositionIndex(nfv, Simulation.baseParameters.nfvComputingReqs.length);
     return NFVs.containsKey(nfv);
   }
 
   public boolean canCreateVM(int nfv) { //has spare computingCapacity to create enough VMs to handle rate
-    double serviceReq = Simulation.baseParameters.nfvComputingReqs[nfv];
-    return serviceReq < remainingCapacity();
+    checkPositionIndex(nfv, Simulation.baseParameters.nfvComputingReqs.length);
+    return remainingCapacity() >= Simulation.baseParameters.nfvComputingReqs[nfv];
   }
 
   public boolean addVM(int nfv) { //add VM for nfv to server. Server can contain multiple VMs with same NFV to serve higher demand.
-    checkArgument(computingCapacity > 0 || canCreateVM(nfv));
-    if (computingCapacity == 0 || !canCreateVM(nfv)) {
+    checkArgument(computingCapacity > 0d || canCreateVM(nfv));
+    if (computingCapacity == 0d || !canCreateVM(nfv)) {
       return false;
     }
     if (!NFVs.containsKey(nfv)) {

@@ -98,18 +98,18 @@ import org.slf4j.MDC;
    */
   private static void CompareCostFnsWithoutDelays() {
     prepareLogging();
-    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction())
-                                                                 .offline(false)
-                                                                 .build();
-    Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction())
-                                                                    .offline(false)
-                                                                    .build();
-
     Result[][] expResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
     Result[][] linearResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
-
-    for (int nSizeIndex = 0; nSizeIndex < baseParameters.networkSizes.length; nSizeIndex++) {
-      int networkSize = baseParameters.networkSizes[nSizeIndex];
+    for (int networkSize : baseParameters.networkSizes) {
+      Parameters parametersWithExpCostFn = new Parameters.Builder().networkSize(networkSize)
+                                                                   .costFunc(new ExponentialCostFunction())
+                                                                   .offline(false)
+                                                                   .build();
+      Parameters parametersWithLinearCostFn = new Parameters.Builder().networkSize(networkSize)
+                                                                      .costFunc(new LinCostFunction())
+                                                                      .offline(false)
+                                                                      .threshold(Double.MAX_VALUE)
+                                                                      .build();
 
       for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
@@ -163,12 +163,18 @@ import org.slf4j.MDC;
 
   private static void CompareCostFnsWithDelays() {
     prepareLogging();
-    Parameters parametersWithExpCostFn = new Parameters.Builder().costFunc(new ExponentialCostFunction()).build();
-    Parameters parametersWithLinearCostFn = new Parameters.Builder().costFunc(new LinCostFunction()).build();
-
     Result[][] expResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
     Result[][] linearResults = new Result[baseParameters.numTrials][baseParameters.numRequests];
     for (int networkSize : baseParameters.networkSizes) {
+      Parameters parametersWithExpCostFn = new Parameters.Builder().networkSize(networkSize)
+                                                                   .costFunc(new ExponentialCostFunction())
+                                                                   .offline(false)
+                                                                   .build();
+      Parameters parametersWithLinearCostFn = new Parameters.Builder().networkSize(networkSize)
+                                                                      .costFunc(new LinCostFunction())
+                                                                      .offline(false)
+                                                                      .threshold(Double.MAX_VALUE)
+                                                                      .build();
       for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
         Network network = generateAndInitializeNetwork(networkSize, trial, parametersWithExpCostFn);
         ArrayList<Request> requests = generateRequests(parametersWithExpCostFn, network, parametersWithExpCostFn.numRequests);
@@ -490,7 +496,7 @@ import org.slf4j.MDC;
 
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm started", networkSize, L, trial));
           double averageCostReq = 0d;
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[i] = alg.minOpCostWithoutDelay();
             if (results[i].isAdmitted()) {
@@ -508,7 +514,7 @@ import org.slf4j.MDC;
 
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark started", networkSize, L, trial));
           double averageCostReqBenchmark = 0d;
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicast();
             if (resultsBenchmark[i].isAdmitted()) {
@@ -555,7 +561,7 @@ import org.slf4j.MDC;
 
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm started", networkSize, L, trial));
           double averageCostReq = 0d;
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[i] = alg.minOpCostWithDelay();
             if (results[i].isAdmitted()) {
@@ -573,7 +579,7 @@ import org.slf4j.MDC;
 
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark started", networkSize, L, trial));
           double averageCostReqBenchmark = 0d;
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicastDelay();
             if (resultsBenchmark[i].isAdmitted()) {
