@@ -11,11 +11,14 @@ import java.util.function.Function;
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
 import Simulation.Simulation;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -186,11 +189,9 @@ import static com.google.common.base.Preconditions.checkState;
     }
   }
 
-  private ShortestPathResult shortestPath(Server source, Server destination, Function<Link, Double> costFunction) {
+  private @Nullable ShortestPathResult shortestPath(@NotNull Server source, @NotNull Server destination, @NotNull Function<Link, Double> costFunction) {
+    checkArgument(source.getId() != destination.getId());
     HashMap<DefaultWeightedEdge, Link> map = new HashMap<>();
-    if (source.getId() == destination.getId()) {
-      return null;
-    }
 
     SimpleDirectedWeightedGraph<Server, DefaultWeightedEdge> graph = new SimpleDirectedWeightedGraph<>(DefaultWeightedEdge.class);
     for (Link link : auxLinks) {
@@ -200,17 +201,13 @@ import static com.google.common.base.Preconditions.checkState;
       graph.addVertex(s2);
       DefaultWeightedEdge edge = graph.addEdge(s1, s2);
       double weight = costFunction.apply(link);
-      /*
-       * TODO:
-       * Here is a rare bug. Sometimes the following check will fail. It only happens on the CSIT machine and never happened on my desktop at home...
-       */
       checkState(weight >= 0d);
-      weight = Math.min(0d, weight); // TODO: I know this is a problem.
       graph.setEdgeWeight(edge, weight);
       map.put(edge, link);
     }
 
     // Doing this is perfectly fine because auxServers only contain the source and the destination
+    checkState(auxServers.size() == 2);
     Optional<Server> sourceAlt = auxServers.stream().filter(server -> server.getId() == source.getId()).findAny();
     checkState(sourceAlt.isPresent());
     Optional<Server> destinationAlt = auxServers.stream().filter(server -> server.getId() == destination.getId()).findAny();
@@ -224,10 +221,11 @@ import static com.google.common.base.Preconditions.checkState;
   }
 
   private double calculatePathCost(ShortestPathResult result, Function<Link, Double> edgeWeightFunction) {
-    List<DefaultWeightedEdge> edgesList = result.dijkstraShortestPath.getPathEdgeList();
-    if (edgesList == null) {
+    if (result.dijkstraShortestPath.getPathLength() == Double.POSITIVE_INFINITY) {
       return Double.POSITIVE_INFINITY;
     }
+
+    List<DefaultWeightedEdge> edgesList = result.dijkstraShortestPath.getPathEdgeList();
     double ret = 0d;
     for (DefaultWeightedEdge edge : edgesList) {
       ret += edgeWeightFunction.apply(result.virtualEdgeToLinkMap.get(edge));
@@ -246,12 +244,13 @@ import static com.google.common.base.Preconditions.checkState;
     double pathCCost = this.calculatePathCost(pathC, l -> l.getWeight());
     double pathCDelay = this.calculatePathCost(pathC, l -> l.getDelay());
     if (pathCDelay <= request.getDelayReq()) {
+      checkState(pathC.dijkstraShortestPath.getPath() != null);
       Simulation.getLogger().trace("Found a shortest path based on the original cost");
       return new ArrayList<Server>(Graphs.getPathVertexList(pathC.dijkstraShortestPath.getPath())); // clearly no solution exists
     }
 
     ShortestPathResult pathD = shortestPath(source, destination, l -> l.getDelay());
-    if (pathD == null) {
+    if (pathD == null || pathD.dijkstraShortestPath.getPath() == null) {
       Simulation.getLogger().trace("Cannot find a shortest path based on delays");
       return null;
     }
@@ -264,32 +263,32 @@ import static com.google.common.base.Preconditions.checkState;
 
     int iterations = 0;
     while (true) {
-      if (iterations % 100 == 0) {
-        Simulation.getLogger().debug("iteration: " + iterations);
-      }
       iterations += 1;
+      checkState(iterations <= 10000);
+
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
+      checkState(lambda >= 0d);
       Function<Link, Double> modifiedCostFunction = l -> l.getWeight() + lambda * l.getDelay();
-      ShortestPathResult pathR = shortestPath(this.source, this.destination, l -> l.getWeight() + lambda * l.getDelay());
-      if (pathR == null) {
+      ShortestPathResult pathR = shortestPath(this.source, this.destination, modifiedCostFunction);
+      if (pathR == null || pathR.dijkstraShortestPath.getPath() == null) {
         return null;
       }
 
       double pathRCost = this.calculatePathCost(pathR, l -> l.getWeight());
       double pathRDelay = this.calculatePathCost(pathR, l -> l.getDelay());
 
-      if (pathRCost == pathCCost) {
+      if (Math.abs(this.calculatePathCost(pathR, modifiedCostFunction) - this.calculatePathCost(pathC, modifiedCostFunction)) < 0.0001) {
         return new ArrayList<>(Graphs.getPathVertexList(pathD.dijkstraShortestPath.getPath()));
-      }
-
-      if (this.calculatePathCost(pathR, modifiedCostFunction) == this.calculatePathCost(pathC, modifiedCostFunction)) {
-        pathD = pathR;
-        pathDCost = pathRCost;
-        pathDDelay = pathRDelay;
       } else {
-        pathC = pathR;
-        pathCCost = pathRCost;
-        pathCDelay = pathRDelay;
+        if (pathRDelay <= request.getDelayReq()) {
+          pathD = pathR;
+          pathDCost = pathRCost;
+          pathDDelay = pathRDelay;
+        } else {
+          pathC = pathR;
+          pathCCost = pathRCost;
+          pathCDelay = pathRDelay;
+        }
       }
     }
   }
