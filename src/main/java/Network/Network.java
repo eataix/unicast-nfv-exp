@@ -3,16 +3,19 @@ package Network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.jetbrains.annotations.NotNull;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 public class Network {
-  private final ArrayList<Server> servers;
-  private final HashMap<Integer, Server> serversById;
-  private ArrayList<Link> links;
+  @NotNull private final ArrayList<Server> servers;
+  @NotNull private final HashMap<Integer, Server> serversById;
+  @NotNull private ArrayList<Link> links;
 
-  public Network(ArrayList<Server> servers, ArrayList<Link> links) {
+  public Network(@NotNull ArrayList<Server> servers, @NotNull ArrayList<Link> links) {
     this.servers = servers;
     this.links = links;
 
@@ -22,7 +25,7 @@ public class Network {
     }
   }
 
-  public Network newNetwork(HashMap<Server, Server> serverMap) {
+  public Network newNetwork(@NotNull HashMap<Server, Server> serverMap) {
     ArrayList<Server> servers = new ArrayList<>();
 
     for (Server oldServer : this.getServers()) {
@@ -49,54 +52,39 @@ public class Network {
     return servers.size();
   }
 
-  public ArrayList<Server> getServers() {
+  @NotNull public ArrayList<Server> getServers() {
     return servers;
   }
 
-  public ArrayList<Link> getLinks() {
+  @NotNull public ArrayList<Link> getLinks() {
     return links;
   }
 
-  public void setLinks(ArrayList<Link> newLinks) {
+  public void setLinks(@NotNull ArrayList<Link> newLinks) {
     links = newLinks;
   }
 
   public Server getRandomServer() {
+    checkState(!servers.isEmpty());
     int i = (int) (Math.random() * (double) servers.size());
     return servers.get(i);
   }
 
   public HashSet<Server> getReusableServers(int nfv) {
-    HashSet<Server> serviceLayer = new HashSet<Server>();
-    for (Server s : servers) {
-      if (s.canReuseVM(nfv)) {
-        serviceLayer.add(s);
-      }
-    }
-    return serviceLayer;
+    return servers.stream().filter(s -> s.canReuseVM(nfv)).collect(Collectors.toCollection(HashSet::new));
   }
 
   public ArrayList<Server> getUnusedServers(int nfv) { //returns an arraylist in case you want to select random server
-    ArrayList<Server> usableServers = new ArrayList<Server>();
-    for (Server s : servers) {
-      if (s.canCreateVM(nfv)) {
-        usableServers.add(s);
-      }
-    }
-    return usableServers;
+    return servers.stream().filter(s -> s.canCreateVM(nfv)).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public boolean isConnected() {
-    HashSet<Server> searched = new HashSet<Server>();
-    ArrayList<Server> queue = new ArrayList<Server>();
+    HashSet<Server> searched = new HashSet<>();
+    ArrayList<Server> queue = new ArrayList<>();
     queue.add(servers.get(0));
     while (!queue.isEmpty()) {
       Server curr = queue.remove(0);
-      for (Server s : curr.getAllNeighbours()) {
-        if (!searched.contains(s)) {
-          queue.add(s);
-        }
-      }
+      queue.addAll(curr.getAllNeighbours().stream().filter(s -> !searched.contains(s)).collect(Collectors.toList()));
       searched.add(curr);
     }
     return searched.size() == servers.size();
@@ -108,10 +96,10 @@ public class Network {
     }
   }
 
-  void allocateBandwidthOnPath(ArrayList<Link> path, double b) {
-    checkNotNull(path);
+  void allocateBandwidthOnPath(@NotNull ArrayList<Link> path, double bandwidth) {
+    checkArgument(bandwidth >= 0d);
     for (Link l : path) {
-      l.allocateBandwidth(b);
+      l.allocateBandwidth(bandwidth);
     }
   }
 

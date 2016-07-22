@@ -6,17 +6,19 @@ import java.util.HashSet;
 
 import NetworkGenerator.NetworkValueSetter;
 import Simulation.Parameters;
+import org.jetbrains.annotations.NotNull;
+
 import static com.google.common.base.Preconditions.checkState;
 
 public class Request {
-  private final Server source;
-  private final Server destination;
+  @NotNull private final Server source;
+  @NotNull private final Server destination;
   private double bandwidth;
   private double delayReq; //delayReq bound requirement
-  private final Parameters parameters;
+  @NotNull private final Parameters parameters;
   private int[] SC; //each number points to index of nfv in Parameters
 
-  public Request(Server source, Server destination, Parameters parameters) {
+  public Request(@NotNull Server source, @NotNull Server destination, @NotNull Parameters parameters) {
     this.source = source;
     this.destination = destination;
     this.parameters = parameters;
@@ -25,7 +27,7 @@ public class Request {
     generateServiceChain();
   }
 
-  public Request newRequest(HashMap<Server, Server> serverMap) {
+  public Request newRequest(@NotNull HashMap<Server, Server> serverMap) {
     checkState(serverMap.containsKey(this.getSource()) && serverMap.containsKey(this.getDestination()));
     Request newRequest = new Request(serverMap.get(this.getSource()), serverMap.get(this.getDestination()), this.parameters);
     newRequest.setDelayReq(this.getDelayReq());
@@ -39,7 +41,7 @@ public class Request {
     this.bandwidth = bandwidth;
   }
 
-  public void setDelayReq(double delayReq) {
+  private void setDelayReq(double delayReq) {
     this.delayReq = delayReq;
   }
 
@@ -63,18 +65,17 @@ public class Request {
     System.arraycopy(nfvs, 0, SC, 0, l);
   }
 
-  public boolean setServiceChain(int[] sc) {
+  public void setServiceChain(int[] sc) {
     //make sure all elements are valid nfv ids, and there are no repeats.
     HashSet<Integer> nfvs = new HashSet<>();
     for (int aSc : sc) {
       if (aSc >= parameters.L || nfvs.contains(aSc)) {
-        return false;
+        return;
       } else {
         nfvs.add(aSc);
       }
     }
     SC = sc;
-    return true;
   }
 
   public int[] getSC() {
@@ -85,11 +86,11 @@ public class Request {
     return bandwidth;
   }
 
-  public Server getSource() {
+  @NotNull public Server getSource() {
     return source;
   }
 
-  public Server getDestination() {
+  @NotNull public Server getDestination() {
     return destination;
   }
 
@@ -97,7 +98,7 @@ public class Request {
     return delayReq;
   }
 
-  public Parameters getParameters() {
+  @NotNull public Parameters getParameters() {
     return parameters;
   }
 }

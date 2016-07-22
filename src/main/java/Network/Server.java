@@ -3,8 +3,10 @@ package Network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 import Simulation.Simulation;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Server {
@@ -55,10 +57,7 @@ public class Server {
   }
 
   public int getDegree() { //just in case there are duplicate links. There shouldn't be, but just in case...
-    HashSet<Server> neighbours = new HashSet<>();
-    for (Link l : links) {
-      neighbours.add(l.getLinkedServer(this));
-    }
+    HashSet<Server> neighbours = links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(HashSet::new));
     return neighbours.size();
   }
 
@@ -89,21 +88,14 @@ public class Server {
   }
 
   public ArrayList<Server> getAllNeighbours() {
-    ArrayList<Server> neighbours = new ArrayList<>();
-    for (Link l : links) {
-      neighbours.add(l.getLinkedServer(this));
-    }
+    ArrayList<Server> neighbours = links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
     return neighbours;
   }
 
   public ArrayList<Server> getReachableNeighbours(int b) {
     //get neighbours where link can carry additional bandwidth b
-    ArrayList<Server> neighbours = new ArrayList<>();
-    for (Link l : links) {
-      if (l.canSupportBandwidth(b)) {
-        neighbours.add(l.getLinkedServer(this));
-      }
-    }
+    ArrayList<Server> neighbours =
+        links.stream().filter(l -> l.canSupportBandwidth(b)).map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
     return neighbours;
   }
 

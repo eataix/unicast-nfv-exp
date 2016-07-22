@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import Algorithm.CostFunctions.CostFunction;
 import Simulation.Parameters;
@@ -30,26 +31,26 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @SuppressWarnings("Duplicates") public class AuxiliaryNetwork extends Network {
 
-  private final double[][] pathCosts;
-  private final double[][] pathDelays;
-  private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
-  private final CostFunction costFunction; // cost function for edges in the original graph
+  @NotNull private final double[][] pathCosts;
+  @NotNull private final double[][] pathDelays;
+  @NotNull private final HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths;
+  @NotNull private final CostFunction costFunction; // cost function for edges in the original graph
 
-  private final Request request;
-  private final Parameters parameters;
+  @NotNull private final Request request;
+  @NotNull private final Parameters parameters;
 
-  private final Server source;
-  private final Server destination;
+  @NotNull private final Server source;
+  @NotNull private final Server destination;
 
-  private final ArrayList<Server> auxServers = new ArrayList<>(); // TODO: Talk to Mike regarding what these variable does
-  private final ArrayList<Link> auxLinks = new ArrayList<>();
+  @NotNull private final ArrayList<Server> auxServers = new ArrayList<>(); // TODO: Talk to Mike regarding what these variable does
+  @NotNull private final ArrayList<Link> auxLinks = new ArrayList<>();
 
   // The graph is organized as "layers", where Layer 0 contains source only, each of Layers 1, ..., L contains V_S, and Layer L+1 contains the destination
-  public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<HashSet<Server>>();
+  @NotNull public final ArrayList<HashSet<Server>> serviceLayers = new ArrayList<>();
 
-  public AuxiliaryNetwork(ArrayList<Server> originalServers, ArrayList<Link> originalLinks, double[][] pathCosts, double[][] pathDelays,
-                          HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths, Request request, Parameters parameters,
-                          CostFunction costFunction) {
+  public AuxiliaryNetwork(@NotNull ArrayList<Server> originalServers, @NotNull ArrayList<Link> originalLinks, @NotNull double[][] pathCosts,
+                          @NotNull double[][] pathDelays, @NotNull HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allShortestPaths,
+                          @NotNull Request request, @NotNull Parameters parameters, @NotNull CostFunction costFunction) {
     super(originalServers, originalLinks);
     this.pathCosts = pathCosts;
     this.pathDelays = pathDelays;
@@ -104,6 +105,7 @@ import static com.google.common.base.Preconditions.checkState;
       serviceLayers.add(currLayer);
       prevLayer = currLayer;
     }
+    checkState(serviceLayers.size() == SC.length);
     // Now we have added Layer 0 and Layers 1, ..., L, we now need to add the last layer containing the destination only, and link all servers in Layer L to the
     // the destination
     for (Server prev : prevLayer) { //link this up to destination
@@ -123,21 +125,22 @@ import static com.google.common.base.Preconditions.checkState;
    *
    * @return a shortest path for the request, which was given to the constructor of this class.
    */
-  public ArrayList<Server> findShortestPath() {
+  public @NotNull ArrayList<Server> findShortestPath() {
     return findShortestPath(l -> l.getWeight());
   }
 
   /**
-   * @return A shortest path in this network with respect to @edgeWeightFunction <p> Notice: The auxiliary network is a DAG
+   * @return A shortest path in this network with respect to @edgeWeightFunction <p> Notice: The auxiliary network is a DAG If the shortest path does not exist,
+   * return an empty list.
    */
-  private ArrayList<Server> findShortestPath(Function<Link, Double> edgeWeightFunction) {
+  private @NotNull ArrayList<Server> findShortestPath(@NotNull Function<Link, Double> edgeWeightFunction) {
     HashMap<Server, Double> pathCost = new HashMap<>();
     HashMap<Server, Server> prevNode = new HashMap<>();
 
     HashSet<Server> prevLayer = new HashSet<>();
     Server src = this.getSource();
     prevLayer.add(src);
-    pathCost.put(this.getSource(), 0.0);
+    pathCost.put(this.getSource(), 0d);
 
     int L = request.getSC().length;
     for (int i = 0; i < L; i++) {
@@ -180,10 +183,11 @@ import static com.google.common.base.Preconditions.checkState;
   }
 
   private class ShortestPathResult {
-    DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath;
-    HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap;
+    @NotNull final DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath;
+    @NotNull final HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap;
 
-    ShortestPathResult(DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath, HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap) {
+    ShortestPathResult(@NotNull DijkstraShortestPath<Server, DefaultWeightedEdge> dijkstraShortestPath,
+                       @NotNull HashMap<DefaultWeightedEdge, Link> virtualEdgeToLinkMap) {
       this.dijkstraShortestPath = dijkstraShortestPath;
       this.virtualEdgeToLinkMap = virtualEdgeToLinkMap;
     }
@@ -220,7 +224,7 @@ import static com.google.common.base.Preconditions.checkState;
     return new ShortestPathResult(shortestPath, map);
   }
 
-  private double calculatePathCost(ShortestPathResult result, Function<Link, Double> edgeWeightFunction) {
+  private double calculatePathCost(@NotNull ShortestPathResult result, @NotNull Function<Link, Double> edgeWeightFunction) {
     if (result.dijkstraShortestPath.getPathLength() == Double.POSITIVE_INFINITY) {
       return Double.POSITIVE_INFINITY;
     }
@@ -233,7 +237,7 @@ import static com.google.common.base.Preconditions.checkState;
     return ret;
   }
 
-  public ArrayList<Server> findDelayAwareShortestPath() {
+  public @Nullable ArrayList<Server> findDelayAwareShortestPath() {
     // PC is the shortest path on the original cost c
     ShortestPathResult pathC = shortestPath(source, destination, l -> l.getWeight());
     if (pathC == null || pathC.dijkstraShortestPath.getPathLength() == Double.POSITIVE_INFINITY) {
@@ -264,7 +268,7 @@ import static com.google.common.base.Preconditions.checkState;
     int iterations = 0;
     while (true) {
       iterations += 1;
-      checkState(iterations <= 10000);
+      checkState(iterations <= 10000, "It seems that LARAC fails to terminate");
 
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
       checkState(lambda >= 0d);
@@ -278,6 +282,7 @@ import static com.google.common.base.Preconditions.checkState;
       double pathRDelay = this.calculatePathCost(pathR, l -> l.getDelay());
 
       if (Math.abs(this.calculatePathCost(pathR, modifiedCostFunction) - this.calculatePathCost(pathC, modifiedCostFunction)) < 0.0001) {
+        checkState(pathD.dijkstraShortestPath.getPath() != null);
         return new ArrayList<>(Graphs.getPathVertexList(pathD.dijkstraShortestPath.getPath()));
       } else {
         if (pathRDelay <= request.getDelayReq()) {
@@ -293,7 +298,10 @@ import static com.google.common.base.Preconditions.checkState;
     }
   }
 
-  private static ArrayList<Server> extractPath(Request request, HashMap<Server, Server> prevNode, Server destination) {
+  /**
+   * @return a path, or an empty list upon failure
+   */
+  private @NotNull ArrayList<Server> extractPath(@NotNull Request request, @NotNull HashMap<Server, Server> prevNode, @NotNull Server destination) {
     ArrayList<Server> path = new ArrayList<>();
     Server curr = destination;
     int i = request.getSC().length;
@@ -309,7 +317,7 @@ import static com.google.common.base.Preconditions.checkState;
     return serviceLayers.get(index);
   }
 
-  public Server getSource() {
+  @NotNull public Server getSource() {
     return source;
   }
 
@@ -368,16 +376,12 @@ import static com.google.common.base.Preconditions.checkState;
     return cost;
   }
 
-  public Server getDestination() {
+  @NotNull public Server getDestination() {
     return destination;
   }
 
   private HashSet<Server> cloneServers(Collection<Server> svrs) {
-    HashSet<Server> clones = new HashSet<Server>();
-    for (Server s : svrs) {
-      clones.add(new Server(s));
-    }
-    return clones;
+    return svrs.stream().map(s -> new Server(s)).collect(Collectors.toCollection(HashSet::new));
   }
 
   public ArrayList<Link> getLinkPath(Server s1, Server s2) {
