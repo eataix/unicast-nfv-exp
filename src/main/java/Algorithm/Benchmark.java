@@ -84,8 +84,10 @@ public class Benchmark {
         Server s1 = link.getS1();
         Server s2 = link.getS2();
         DefaultWeightedEdge edge = this.weightedGraph.addEdge(s1, s2);
-        this.weightedGraph.setEdgeWeight(edge, parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters));
-        linkEdgeMap.put(edge, link);
+        if (null != edge) {
+        	this.weightedGraph.setEdgeWeight(edge, parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters));
+        	linkEdgeMap.put(edge, link);
+        }
       }
     }
 

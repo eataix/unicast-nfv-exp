@@ -137,14 +137,14 @@ public class Server {
     return "Server: " + this.id + " Capacity: " + this.computingCapacity;
   }
   
-  @Override
-  public boolean equals(Object obj){
-	  Server another = (Server)obj;
-	  if (this.getId() == another.getId())
-		  return true;
-	  else 
-		  return false; 
-  }
+//  @Override
+//  public boolean equals(Object obj){
+//	  Server another = (Server)obj;
+//	  if (this.getId() == another.getId())
+//		  return true;
+//	  else 
+//		  return false; 
+//  }
 
   private static class VM {
     final int serviceType;
