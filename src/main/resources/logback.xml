@@ -98,6 +98,6 @@
     <!--<appender-ref ref="STDERR"/>-->
     <appender-ref ref="SIFT"/>
     <appender-ref ref="SIFT-DEBUG"/>
-    <!--<appender-ref ref="SIFT-TRACE"/>-->
+    <appender-ref ref="SIFT-TRACE"/>
   </root>
 </configuration>

@@ -15,6 +15,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -202,8 +203,8 @@ import static com.google.common.base.Preconditions.checkState;
       /*
        * TODO:
        * Here is a rare bug. Sometimes the following check will fail. It only happens on the CSIT machine and never happened on my desktop at home...
-       // checkState(weight >= 0d);
        */
+      checkState(weight >= 0d);
       weight = Math.min(0d, weight); // TODO: I know this is a problem.
       graph.setEdgeWeight(edge, weight);
       map.put(edge, link);
@@ -237,7 +238,7 @@ import static com.google.common.base.Preconditions.checkState;
   public ArrayList<Server> findDelayAwareShortestPath() {
     // PC is the shortest path on the original cost c
     ShortestPathResult pathC = shortestPath(source, destination, l -> l.getWeight());
-    if (pathC == null) {
+    if (pathC == null || pathC.dijkstraShortestPath.getPathLength() == Double.POSITIVE_INFINITY) {
       Simulation.getLogger().trace("Cannot find a shortest path based on the original cost");
       return null;
     }
@@ -245,7 +246,7 @@ import static com.google.common.base.Preconditions.checkState;
     double pathCCost = this.calculatePathCost(pathC, l -> l.getWeight());
     double pathCDelay = this.calculatePathCost(pathC, l -> l.getDelay());
     if (pathCDelay <= request.getDelayReq()) {
-      Simulation.getLogger().trace("Found a shortest path based on delays");
+      Simulation.getLogger().trace("Found a shortest path based on the original cost");
       return new ArrayList<Server>(Graphs.getPathVertexList(pathC.dijkstraShortestPath.getPath())); // clearly no solution exists
     }
 
@@ -261,7 +262,12 @@ import static com.google.common.base.Preconditions.checkState;
       return null;
     }
 
+    int iterations = 0;
     while (true) {
+      if (iterations % 100 == 0) {
+        Simulation.getLogger().debug("iteration: " + iterations);
+      }
+      iterations += 1;
       final double lambda = (pathCCost - pathDCost) / (pathDDelay - pathCDelay);
       Function<Link, Double> modifiedCostFunction = l -> l.getWeight() + lambda * l.getDelay();
       ShortestPathResult pathR = shortestPath(this.source, this.destination, l -> l.getWeight() + lambda * l.getDelay());

@@ -121,7 +121,7 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\texp cost\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
@@ -129,20 +129,19 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(networkAlt, requestsAlt.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithoutDelay();
         }
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d finished", networkSize, trial));
       }
 
-      for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
-        double expAdmittedCount = 0d;
-        double expPathCost = 0d;
-        double linearAdmittedCount = 0d;
-        double linearPathCost = 0d;
-
-        for (int trial = 0; trial < parametersWithExpCostFn.numTrials; ++trial) {
+      double expAdmittedCount = 0d;
+      double expPathCost = 0d;
+      double linearAdmittedCount = 0d;
+      double linearPathCost = 0d;
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           if (expResults[trial][i].isAdmitted()) {
             ++expAdmittedCount;
             expPathCost += expResults[trial][i].getPathCost();
@@ -152,14 +151,13 @@ import org.slf4j.MDC;
             linearPathCost += linearResults[trial][i].getPathCost();
           }
         }
-
-        expAdmittedCount /= (double) parametersWithExpCostFn.numTrials;
-        expPathCost /= (double) parametersWithExpCostFn.numTrials;
-        linearAdmittedCount /= (double) parametersWithExpCostFn.numTrials;
-        linearPathCost /= (double) parametersWithExpCostFn.numTrials;
-        logger.info(String.format("%d %f %f", networkSize, expAdmittedCount, linearAdmittedCount));
-        logger.info(String.format("%d %f %f", networkSize, expPathCost, linearPathCost));
       }
+      expAdmittedCount /= (double) baseParameters.numTrials;
+      expPathCost /= (double) baseParameters.numTrials;
+      linearAdmittedCount /= (double) baseParameters.numTrials;
+      linearPathCost /= (double) baseParameters.numTrials;
+      logger.info(String.format("%d %f %f", networkSize, expAdmittedCount, linearAdmittedCount));
+      logger.info(String.format("%d %f %f", networkSize, expPathCost, linearPathCost));
     }
   }
 
@@ -181,7 +179,7 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug(String.format("Network size: %d\texp cost\ttrial: %d started", networkSize, trial));
-        for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(network, requests.get(i), parametersWithExpCostFn);
           expResults[trial][i] = alg.maxThroughputWithDelay();
         }
@@ -189,20 +187,19 @@ import org.slf4j.MDC;
 
         network.wipeLinks();
         logger.debug("Network size: " + networkSize + "\tlinear cost" + "\ttrial: " + trial + " started");
-        for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           Algorithm alg = new Algorithm(networkAlt, requestsAlt.get(i), parametersWithLinearCostFn);
           linearResults[trial][i] = alg.maxThroughputWithDelay();
         }
         logger.debug(String.format("Network size: %d\tlinear cost\ttrial: %d finished", networkSize, trial));
       }
 
-      for (int i = 0; i < parametersWithExpCostFn.numRequests; ++i) {
-        double expAdmittedCount = 0d;
-        double expPathCost = 0d;
-        double linearAdmittedCount = 0d;
-        double linearPathCost = 0d;
-
-        for (int trial = 0; trial < parametersWithExpCostFn.numTrials; ++trial) {
+      double expAdmittedCount = 0d;
+      double expPathCost = 0d;
+      double linearAdmittedCount = 0d;
+      double linearPathCost = 0d;
+      for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
+        for (int i = 0; i < baseParameters.numRequests; ++i) {
           if (expResults[trial][i].isAdmitted()) {
             ++expAdmittedCount;
             expPathCost += expResults[trial][i].getPathCost();
@@ -212,14 +209,13 @@ import org.slf4j.MDC;
             linearPathCost += linearResults[trial][i].getPathCost();
           }
         }
-
-        expAdmittedCount /= (double) parametersWithExpCostFn.numTrials;
-        expPathCost /= (double) parametersWithExpCostFn.numTrials;
-        linearAdmittedCount /= (double) parametersWithExpCostFn.numTrials;
-        linearPathCost /= (double) parametersWithExpCostFn.numTrials;
-        logger.info(String.format("%d %f %f", networkSize, expAdmittedCount, linearAdmittedCount));
-        logger.info(String.format("%d %f %f", networkSize, expPathCost, linearPathCost));
       }
+      expAdmittedCount /= (double) baseParameters.numTrials;
+      expPathCost /= (double) baseParameters.numTrials;
+      linearAdmittedCount /= (double) baseParameters.numTrials;
+      linearPathCost /= (double) baseParameters.numTrials;
+      logger.info(String.format("%d %f %f", networkSize, expAdmittedCount, linearAdmittedCount));
+      logger.info(String.format("%d %f %f", networkSize, expPathCost, linearPathCost));
     }
   }
 
@@ -242,7 +238,7 @@ import org.slf4j.MDC;
 
           network.wipeLinks();
           logger.debug(String.format("Network size: %d\tbeta: %f\ttrial: %d started", networkSize, beta, trial));
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[betaIdx][trial][i] = alg.maxThroughputWithoutDelay();
           }
@@ -278,7 +274,7 @@ import org.slf4j.MDC;
 
   private static void betaImpactWithDelays() {
     prepareLogging();
-    double[] betas = new double[] {2d, 4d, 6d};
+    double[] betas = new double[] {2d, 4d, 6d, 8d};
     for (int networkSize : baseParameters.networkSizes) {
       Result[][][] results = new Result[betas.length][baseParameters.numTrials][baseParameters.numRequests];
 
@@ -295,7 +291,7 @@ import org.slf4j.MDC;
           network.wipeLinks();
 
           logger.debug(String.format("Network size: %d\tbeta: %f\ttrial: %d started", networkSize, beta, trial));
-          for (int i = 0; i < parameters.numRequests; i++) {
+          for (int i = 0; i < baseParameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
             results[betaIdx][trial][i] = alg.maxThroughputWithDelay();
           }
@@ -325,9 +321,9 @@ import org.slf4j.MDC;
         count.append(expAdmittedCount).append(" ");
         expPathCost /= (double) baseParameters.numTrials;
         cost.append(expPathCost).append(" ");
-        logger.info(count.toString());
-        logger.info(cost.toString());
       }
+      logger.info(count.toString());
+      logger.info(cost.toString());
     }
   }
 

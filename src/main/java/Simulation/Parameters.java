@@ -73,7 +73,8 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
      * Experiment parameters
      */
     private int networkSize = 50;
-    private int[] networkSizes = new int[] {50, 100, 200, 300, 400, 500, 600, 800, 1000};
+    private int[] networkSizes = new int[] {50, 100, 150, 200};
+    //private int[] networkSizes = new int[] {50, 100, 150, 200, 300, 400, 500, 600, 800, 1000};
     private boolean offline = true;
     private int numTrials = 10;
 
