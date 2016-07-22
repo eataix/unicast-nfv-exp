@@ -115,16 +115,19 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
      * NFV parameters
      */
     private double nfvProb = 0.1;   //probability of any given nfv instance already deployed on a given server. Guarantees each nfv is on at least one server.
+
+    // TODO find values for the following four
+    // Firewall, Proxy, NAT, IDS, LB, Gateway
+    private double[] nfvOperationalCosts = new double[] {3, 1, 1, 5, 2, 4};//operating cost of providing an vnf service
+    private double[] nfvInitCosts = new double[] {30, 10, 10, 50, 20, 40}; //initialization cost of vnf service
+    private double[] nfvInitDelays = new double[] {60, 60, 60, 90, 60, 40}; //initialization cost of vnf service
+    private double[] nfvProcessingDelays = new double[] {6, 6, 6, 9, 6, 4}; //initialization cost of vnf service
+
+    // The following two are insignificant
     // Computing resource requirement is irrelevant
     private double[] nfvComputingReqs = new double[] {2, 3, 5, 2, 6, 4}; //nfv vm resource requirements
     // I don't think rate is considered in this paper
     private double[] nfvRates = new double[] {3, 5, 6, 7, 8, 5};  //nfv vm service rate
-
-    // TODO find values for the following four
-    private double[] nfvOperationalCosts = new double[] {2, 3, 5, 2, 6, 4};//operating cost of providing an vnf service
-    private double[] nfvInitCosts = new double[] {5, 6, 7, 4, 8, 5}; //initialization cost of vnf service
-    private double[] nfvInitDelays = new double[] {5, 6, 7, 4, 8, 5}; //initialization cost of vnf service // TODO I just copy the code from nfvInitCosts
-    private double[] nfvProcessingDelays = new double[] {3, 5, 6, 7, 8, 5}; //initialization cost of vnf service // TODO I just copy the code from nfvRates
 
     Builder alpha(double alpha) {
       this.alpha = alpha;
@@ -259,8 +262,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     public Parameters build() {
       return new Parameters(networkSize, networkSizes, offline, numTrials, alpha, beta, threshold, costFunc, serverRatio, linkBWCapMin, linkBWCapMax,
                             linkDelayReqMin, linkDelayReqMax, numRequests, L, reqBWReqMin, reqBWReqMax, reqDelayMin, reqDelayMax, nfvProb, nfvComputingReqs,
-                            nfvRates,
-                            nfvOperationalCosts, nfvInitCosts, nfvInitDelays, nfvProcessingDelays
+                            nfvRates, nfvOperationalCosts, nfvInitCosts, nfvInitDelays, nfvProcessingDelays
       );
     }
   }
