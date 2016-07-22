@@ -565,8 +565,13 @@ import org.slf4j.MDC;
       int expSum = 0; //sum of all exponential cost accepted requests
       Result[] results = new Result[baseParameters.numRequests];
       Result[] resultsBenchmark = new Result[baseParameters.numRequests];
+      
+      double [][] averageCost = new double [baseParameters.networkSizes.length][2];
+      double [][] runningTime = new double [baseParameters.networkSizes.length][2];
 
-      for (int networkSize : baseParameters.networkSizes) {
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++) {
+    	 
+    	int networkSize = baseParameters.networkSizes[netSI];
         Parameters parameters = new Parameters.Builder().networkSize(networkSize)
                                                         .L(L)
                                                         .costFunc(new LinCostFunction())
@@ -574,9 +579,13 @@ import org.slf4j.MDC;
                                                         .build();
         int accepted = 0; //number of accepted requests
         int acceptedBenchmark = 0;
-
+        
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
+        
+        double averageRunningTime = 0d; 
+        double averageRunningTimeBenchmark = 0d; 
+        
         for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
@@ -589,17 +598,22 @@ import org.slf4j.MDC;
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm started", networkSize, L, trial));
           double averageCostReq = 0d;
           for (int i = 0; i < baseParameters.numRequests; i++) {
-            Algorithm alg = new Algorithm(network, requests.get(i), parameters);
-            results[i] = alg.minOpCostWithoutDelay();
-            if (results[i].isAdmitted()) {
+        	  
+           Algorithm alg = new Algorithm(network, requests.get(i), parameters);
+           Instant start = Instant.now();
+           results[i] = alg.minOpCostWithoutDelay();
+           Instant end = Instant.now();
+           if (results[i].isAdmitted()) {
               accepted++;
               averageCostReq += results[i].getPathCost();
-            }
+              averageRunningTime += ((double) Duration.between(start, end).toNanos());
+           }
           }
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm finished", networkSize, L, trial));
 
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostReq / baseParameters.numTrials);
+          averageRunningTime = averageRunningTime / accepted / baseParameters.numTrials;
           expSum += accepted;
 
           network.wipeLinks();
@@ -608,18 +622,42 @@ import org.slf4j.MDC;
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < baseParameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
+            Instant start = Instant.now();
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicast();
+            Instant end = Instant.now();
             if (resultsBenchmark[i].isAdmitted()) {
               acceptedBenchmark++;
               averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
+              averageRunningTimeBenchmark += ((double) Duration.between(start, end).toNanos());
             }
           }
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark finished", networkSize, L, trial));
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
           averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
+          averageRunningTimeBenchmark = averageRunningTimeBenchmark / acceptedBenchmark / baseParameters.numTrials;
+
         }
-        logger.info(String.format("%d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
+        
+        //logger.debug(String.format("Cost: %d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
+        //logger.debug(String.format("Runningtime: %d %s %s", networkSize, averageRunningTime, averageRunningTimeBenchmark));
+        
+        averageCost[netSI][0] = averageCostNet;
+        averageCost[netSI][1] = averageCostNetBenchmark;
+        
+        runningTime[netSI][0] = averageRunningTime;
+        runningTime[netSI][1] = averageRunningTimeBenchmark;
+        
+      }
+      
+      logger.info("L:" + L + " Cost");
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++){
+          logger.info(String.format("%d %s %s", baseParameters.networkSizes[netSI], averageCost[netSI][0], averageCost[netSI][1]));
+      }
+
+      logger.info("L:" + L + " Running time");
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++){
+          logger.info(String.format("%d %s %s", baseParameters.networkSizes[netSI], runningTime[netSI][0], runningTime[netSI][1]));
       }
     }
   }
@@ -630,18 +668,26 @@ import org.slf4j.MDC;
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[baseParameters.numRequests];
       Result[] resultsBenchmark = new Result[baseParameters.numRequests];
+      
+      double [][] averageCost = new double [baseParameters.networkSizes.length][2];
+      double [][] runningTime = new double [baseParameters.networkSizes.length][2];
 
-      for (int networkSize : baseParameters.networkSizes) {
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++) {
+     	 
+      	int networkSize = baseParameters.networkSizes[netSI];
         Parameters parameters = new Parameters.Builder().networkSize(networkSize)
                                                         .L(L)
                                                         .offline(true)
                                                         .build();
-
         int accepted = 0; // number of accepted requests
         int acceptedBenchmark = 0;
 
         double averageCostNet = 0d;
         double averageCostNetBenchmark = 0d;
+        
+        double averageRunningTime = 0d; 
+        double averageRunningTimeBenchmark = 0d; 
+        
         for (int trial = 0; trial < baseParameters.numTrials; ++trial) {
           Network network = generateAndInitializeNetwork(networkSize, trial, parameters);
           ArrayList<Request> requests = generateRequests(parameters, network, parameters.numRequests);
@@ -655,16 +701,21 @@ import org.slf4j.MDC;
           double averageCostReq = 0d;
           for (int i = 0; i < baseParameters.numRequests; i++) {
             Algorithm alg = new Algorithm(network, requests.get(i), parameters);
+            Instant start = Instant.now();
             results[i] = alg.minOpCostWithDelay();
+            Instant end = Instant.now();
+
             if (results[i].isAdmitted()) {
               accepted++;
               averageCostReq += results[i].getPathCost();
+              averageRunningTime += ((double) Duration.between(start, end).toNanos());
             }
           }
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Algorithm finished", networkSize, L, trial));
 
           averageCostReq = averageCostReq / accepted;
           averageCostNet += (averageCostReq / baseParameters.numTrials);
+          averageRunningTime = averageRunningTime / accepted / baseParameters.numTrials;
           expSum += accepted;
 
           network.wipeLinks();
@@ -673,19 +724,42 @@ import org.slf4j.MDC;
           double averageCostReqBenchmark = 0d;
           for (int i = 0; i < baseParameters.numRequests; i++) {
             Benchmark benchmark = new Benchmark(networkAlt, requestsAlt.get(i), parameters);
+            Instant start = Instant.now();
             resultsBenchmark[i] = benchmark.benchmarkNFVUnicastDelay();
+            Instant end = Instant.now();
             if (resultsBenchmark[i].isAdmitted()) {
               acceptedBenchmark++;
               averageCostReqBenchmark += resultsBenchmark[i].getPathCost();
+              averageRunningTimeBenchmark += ((double) Duration.between(start, end).toNanos());
             }
           }
           logger.debug(String.format("Network size: %d\tL: %d\ttrial: %d Benchmark finished", networkSize, L, trial));
 
           averageCostReqBenchmark = averageCostReqBenchmark / acceptedBenchmark;
           averageCostNetBenchmark += (averageCostReqBenchmark / baseParameters.numTrials);
+          averageRunningTimeBenchmark = averageRunningTimeBenchmark / acceptedBenchmark / baseParameters.numTrials;
+
         }
-        logger.info(String.format("%d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
+        //logger.debug(String.format("Cost: %d %s %s", networkSize, averageCostNet, averageCostNetBenchmark));
+        //logger.debug(String.format("Runningtime: %d %s %s", networkSize, averageRunningTime, averageRunningTimeBenchmark));
+        
+        averageCost[netSI][0] = averageCostNet;
+        averageCost[netSI][1] = averageCostNetBenchmark;
+        
+        runningTime[netSI][0] = averageRunningTime;
+        runningTime[netSI][1] = averageRunningTimeBenchmark;
       }
+
+      logger.info("L:" + L + " Cost");
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++){
+          logger.info(String.format("%d %s %s", baseParameters.networkSizes[netSI], averageCost[netSI][0], averageCost[netSI][1]));
+      }
+
+      logger.info("L:" + L + " Running time");
+      for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++){
+          logger.info(String.format("%d %s %s", baseParameters.networkSizes[netSI], runningTime[netSI][0], runningTime[netSI][1]));
+      }
+
     }
   }
 
