@@ -80,6 +80,10 @@ import static com.google.common.base.Preconditions.checkState;
       HashSet<Server> currLayer = cloneServers(origLayer); // we do not want to make changes on the original network
       for (Server curr : currLayer) {
         for (Server prev : prevLayer) { // Connect each server in the previous layer to an server in the current layer
+        
+          if (curr.equals(prev))// Meitan, please check this, as it triggers a bug in the usage of GraphT libiary. 
+        	  continue;
+          
           Link l = new Link(prev, curr);
           double delay = pathDelays[curr.getId()][prev.getId()] + parameters.nfvProcessingDelays[nfv];
           if (!curr.canReuseVM(nfv)) {
