@@ -10,6 +10,7 @@ import Network.Network;
 import Network.Request;
 import Network.Server;
 import Simulation.Parameters;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -32,10 +33,6 @@ public class AuxiliaryGraphBuilder {
     HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths = new HashMap<>();
     double[][] pathCosts = new double[network.size()][network.size()];
     double[][] pathDelays = new double[network.size()][network.size()];
-    ArrayList<Server> auxServers = new ArrayList<>(); // TODO: Ask Mike what this variable does. It is only written but never read. Is this a typo?
-    for (Server s : network.getServers()) {
-      auxServers.add(new Server(s));
-    }
 
     // The original code does not implement the Floyd–Warshall algorithm, so we simply find shortest path from @src to every other server in the network
     for (Server src : network.getServers()) {
@@ -93,11 +90,7 @@ public class AuxiliaryGraphBuilder {
         pathDelays[src.getId()][dest.getId()] = delay;
       }
     }
-    return new
-
-        AuxiliaryNetwork(network.getServers(), network.
-
-                                                          getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
+    return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
   }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {

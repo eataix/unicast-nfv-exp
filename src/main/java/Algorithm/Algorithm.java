@@ -12,14 +12,14 @@ import Network.Server;
 import NetworkGenerator.AuxiliaryGraphBuilder;
 import Simulation.Parameters;
 import Simulation.Simulation;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("Duplicates") public class Algorithm {
-  private final Network originalNetwork;
-  private final Request request;
-  private final Parameters parameters;
-  private AuxiliaryNetwork auxiliaryNetwork;
+  @NotNull private final Network originalNetwork;
+  @NotNull private final Request request;
+  @NotNull private final Parameters parameters;
 
-  public Algorithm(Network originalNetwork, Request request, Parameters parameters) {
+  public Algorithm(@NotNull Network originalNetwork, @NotNull Request request, @NotNull Parameters parameters) {
     this.originalNetwork = originalNetwork;
     this.request = request;
     this.parameters = parameters;
@@ -31,12 +31,12 @@ import Simulation.Simulation;
   public Result minOpCostWithoutDelay() {
     Result.Builder builder = new Result.Builder();
     CostFunction costFunction = new OperationalCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {
       ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
-      if (path == null) {
+      if (path.size() != request.getSC().length + 2) {
         builder.rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
       }
       double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
@@ -55,7 +55,7 @@ import Simulation.Simulation;
   public Result minOpCostWithDelay() {
     Result.Builder builder = new Result.Builder();
     CostFunction costFunction = new ExponentialCostFunction();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {
@@ -81,12 +81,12 @@ import Simulation.Simulation;
    */
   public Result maxThroughputWithoutDelay() { //s is source, t is sink
     Result.Builder builder = new Result.Builder();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters);
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {
       ArrayList<Server> path = auxiliaryNetwork.findShortestPath();
-      if (path == null) {
+      if (path.size() != request.getSC().length + 2) {
         builder.rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
       } else {
         double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
@@ -111,7 +111,7 @@ import Simulation.Simulation;
    */
   public Result maxThroughputWithDelay() { //s is source, t is sink
     Result.Builder builder = new Result.Builder();
-    auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters);
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, parameters.costFunc, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {
@@ -140,6 +140,6 @@ import Simulation.Simulation;
     if (pathCost == Double.MAX_VALUE || pathCost == Double.POSITIVE_INFINITY) {
       return false;
     }
-    return pathCost < (double) auxiliaryNetwork.size() * parameters.threshold - 1d;
+    return pathCost < (double) originalNetwork.size() * parameters.threshold - 1d;
   }
 }

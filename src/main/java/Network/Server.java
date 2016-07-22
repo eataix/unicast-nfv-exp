@@ -3,9 +3,11 @@ package Network;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 import Simulation.Simulation;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkPositionIndex;
 
 public class Server {
   private final int id;
@@ -55,10 +57,7 @@ public class Server {
   }
 
   public int getDegree() { //just in case there are duplicate links. There shouldn't be, but just in case...
-    HashSet<Server> neighbours = new HashSet<>();
-    for (Link l : links) {
-      neighbours.add(l.getLinkedServer(this));
-    }
+    HashSet<Server> neighbours = links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(HashSet::new));
     return neighbours.size();
   }
 
@@ -89,22 +88,12 @@ public class Server {
   }
 
   public ArrayList<Server> getAllNeighbours() {
-    ArrayList<Server> neighbours = new ArrayList<>();
-    for (Link l : links) {
-      neighbours.add(l.getLinkedServer(this));
-    }
-    return neighbours;
+    return links.stream().map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public ArrayList<Server> getReachableNeighbours(int b) {
     //get neighbours where link can carry additional bandwidth b
-    ArrayList<Server> neighbours = new ArrayList<>();
-    for (Link l : links) {
-      if (l.canSupportBandwidth(b)) {
-        neighbours.add(l.getLinkedServer(this));
-      }
-    }
-    return neighbours;
+    return links.stream().filter(l -> l.canSupportBandwidth(b)).map(l -> l.getLinkedServer(this)).collect(Collectors.toCollection(ArrayList::new));
   }
 
   public double remainingCapacity() {
@@ -116,17 +105,18 @@ public class Server {
   }
 
   public boolean canReuseVM(int nfv) { //will need to check whether service rate of VM exceeds arrival rate of packets
+    checkPositionIndex(nfv, Simulation.baseParameters.nfvComputingReqs.length);
     return NFVs.containsKey(nfv);
   }
 
   public boolean canCreateVM(int nfv) { //has spare computingCapacity to create enough VMs to handle rate
-    double serviceReq = Simulation.baseParameters.nfvComputingReqs[nfv];
-    return serviceReq < remainingCapacity();
+    checkPositionIndex(nfv, Simulation.baseParameters.nfvComputingReqs.length);
+    return remainingCapacity() >= Simulation.baseParameters.nfvComputingReqs[nfv];
   }
 
   public boolean addVM(int nfv) { //add VM for nfv to server. Server can contain multiple VMs with same NFV to serve higher demand.
-    checkArgument(computingCapacity > 0 || canCreateVM(nfv));
-    if (computingCapacity == 0 || !canCreateVM(nfv)) {
+    checkArgument(computingCapacity > 0d || canCreateVM(nfv));
+    if (computingCapacity == 0d || !canCreateVM(nfv)) {
       return false;
     }
     if (!NFVs.containsKey(nfv)) {

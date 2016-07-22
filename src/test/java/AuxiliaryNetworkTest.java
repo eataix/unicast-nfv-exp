@@ -38,16 +38,16 @@ public class AuxiliaryNetworkTest {
     servers.add(s3);
 
     Link l0_1 = new Link(s0, s1);
-    l0_1.setBandwidth(Double.MAX_VALUE);
+    l0_1.setBandwidthCapacity(Double.MAX_VALUE);
     links.add(l0_1);
     Link l0_2 = new Link(s0, s2);
-    l0_2.setBandwidth(Double.MAX_VALUE);
+    l0_2.setBandwidthCapacity(Double.MAX_VALUE);
     links.add(l0_2);
     Link l1_3 = new Link(s1, s3);
-    l1_3.setBandwidth(Double.MAX_VALUE);
+    l1_3.setBandwidthCapacity(Double.MAX_VALUE);
     links.add(l1_3);
     Link l2_3 = new Link(s2, s3);
-    l2_3.setBandwidth(Double.MAX_VALUE);
+    l2_3.setBandwidthCapacity(Double.MAX_VALUE);
     links.add(l2_3);
 
     l0_1.setOperationalCost(8);

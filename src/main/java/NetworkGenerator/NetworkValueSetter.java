@@ -85,19 +85,19 @@ public class NetworkValueSetter { //sets the parameters of a given network
 
   public void setConstantLinkCapacity(double cap) {
     for (Link l : network.getLinks()) {
-      l.setBandwidth(cap);
+      l.setBandwidthCapacity(cap);
     }
   }
 
   public void setNormalLinkCapacity(double mean, double weight) {
     for (Link l : network.getLinks()) {
-      l.setBandwidth(getNormal(mean, weight));
+      l.setBandwidthCapacity(getNormal(mean, weight));
     }
   }
 
   public void setRandomLinkCapacity(double low, double high) {
     for (Link l : network.getLinks()) {
-      l.setBandwidth(getUniform(low, high));
+      l.setBandwidthCapacity(getUniform(low, high));
     }
   }
 
