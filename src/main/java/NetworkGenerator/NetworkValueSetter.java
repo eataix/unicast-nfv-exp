@@ -41,8 +41,8 @@ public class NetworkValueSetter { //sets the parameters of a given network
       ArrayList<Server> servers = network.getUnusedServers(nfv);
       double maxPercentageServers = 0.5;
       int numOfServersWithThisNFV = (int) Math.floor(maxPercentageServers * Math.random() * (double) servers.size());
-      if (numOfServersWithThisNFV < 1)
-    	  numOfServersWithThisNFV = 1; 
+      if (numOfServersWithThisNFV <= 1)
+    	  numOfServersWithThisNFV = 2;
       ArrayList<Integer> indexServers = RanNum.getDistinctInts(servers.size(), 1, numOfServersWithThisNFV);
       for (int index : indexServers){
     	  Server s = servers.get(index);
