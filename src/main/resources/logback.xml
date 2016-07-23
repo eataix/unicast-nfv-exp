@@ -34,7 +34,7 @@
     </discriminator>
     <sift>
       <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/tmp/u4700480/nfv-unicast/log/${exp}-info.log</file>
+        <file>log/${exp}-info.log</file>
         <append>false</append>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
           <level>INFO</level>
@@ -56,14 +56,14 @@
     </discriminator>
     <sift>
       <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>/tmp/u4700480/nfv-unicast/log/${exp}-debug.log</file>
+        <file>log/${exp}-debug.log</file>
         <append>false</append>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
           <level>DEBUG</level>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
           <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
-          <pattern>%msg%n</pattern>
+          <pattern>%d{HH:mm:ss.SSS} %msg%n</pattern>
         </layout>
       </appender>
     </sift>
@@ -87,7 +87,7 @@
           <onMismatch>DENY</onMismatch>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
-          <pattern>%msg%n</pattern>
+          <pattern>%d{HH:mm:ss.SSS} %msg%n</pattern>
         </layout>
       </appender>
     </sift>

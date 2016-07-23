@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.Grgit
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'idea'
@@ -8,6 +10,23 @@ version = '0.1'
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
+
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'org.ajoberstar:grgit:1.7.0'
+  }
+}
+
+ext {
+  git = Grgit.open(file('.'))
+  revision = git.head().abbreviatedId
+}
+
 
 repositories {
   mavenCentral()
@@ -46,7 +65,7 @@ task fatJar(type: Jar) {
   manifest {
     attributes 'Main-Class': mainClassName
   }
-  baseName = project.name + '-all'
+  baseName = "${project.name}-${revision}-all"
   from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
   with jar
 }
