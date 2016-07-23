@@ -10,6 +10,8 @@ import Simulation.Parameters;
 import Simulation.Simulation;
 import Utils.RanNum;
 
+import static com.google.common.base.Preconditions.checkState;
+
 public class NetworkValueSetter { //sets the parameters of a given network
   private final Network network;
   private final Parameters parameters;
@@ -39,11 +41,12 @@ public class NetworkValueSetter { //sets the parameters of a given network
   public void placeNFVs(double nfvProb) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       ArrayList<Server> servers = network.getUnusedServers(nfv);
+      checkState(servers.size() >= 1);
       double maxPercentageServers = 0.5;
       int numOfServersWithThisNFV = (int) Math.floor(maxPercentageServers * Math.random() * (double) servers.size());
       if (numOfServersWithThisNFV <= 1)
-    	  numOfServersWithThisNFV = 2;
-      ArrayList<Integer> indexServers = RanNum.getDistinctInts(servers.size(), 1, numOfServersWithThisNFV);
+    	  numOfServersWithThisNFV = 1;
+      ArrayList<Integer> indexServers = RanNum.getDistinctInts(servers.size(), 0, numOfServersWithThisNFV);
       for (int index : indexServers){
     	  Server s = servers.get(index);
     	  if (Math.random() < nfvProb) {

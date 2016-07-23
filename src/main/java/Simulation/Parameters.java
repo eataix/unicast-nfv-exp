@@ -137,7 +137,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     private double linkDelayReqMax = 5; // maximum link delay
 
     private double linkCostMax = 0.001;
-    private double linkCostMin = 0.005;
+    private double linkCostMin = 0.1;
 
     /**
      * Request related parameters
