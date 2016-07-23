@@ -1,5 +1,7 @@
 package Simulation;
 
+import java.util.Arrays;
+
 import Algorithm.CostFunctions.CostFunction;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 
@@ -72,6 +74,37 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     this.offline = offline;
   }
 
+  @Override public String toString() {
+    return "Parameters{" +
+        "networkSize=" + networkSize +
+        ", networkSizes=" + Arrays.toString(networkSizes) +
+        ", offline=" + offline +
+        ", numTrials=" + numTrials +
+        ", alpha=" + alpha +
+        ", beta=" + beta +
+        ", threshold=" + threshold +
+        ", costFunc=" + costFunc +
+        ", serverRatio=" + serverRatio +
+        ", linkBWCapMin=" + linkBWCapMin +
+        ", linkBWCapMax=" + linkBWCapMax +
+        ", linkDelayMin=" + linkDelayMin +
+        ", linkDelayMax=" + linkDelayMax +
+        ", numRequests=" + numRequests +
+        ", L=" + L +
+        ", reqBWReqMin=" + reqBWReqMin +
+        ", reqBWReqMax=" + reqBWReqMax +
+        ", reqDelayReqMin=" + reqDelayReqMin +
+        ", reqDelayReqMax=" + reqDelayReqMax +
+        ", nfvProb=" + nfvProb +
+        ", nfvComputingReqs=" + Arrays.toString(nfvComputingReqs) +
+        ", nfvRates=" + Arrays.toString(nfvRates) +
+        ", nfvOperationalCosts=" + Arrays.toString(nfvOperationalCosts) +
+        ", nfvInitCosts=" + Arrays.toString(nfvInitCosts) +
+        ", nfvInitDelays=" + Arrays.toString(nfvInitDelays) +
+        ", nfvProcessingDelays=" + Arrays.toString(nfvProcessingDelays) +
+        '}';
+  }
+
   @SuppressWarnings("unused") public static class Builder {
     /**
      * Experiment parameters
@@ -109,7 +142,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     /**
      * Request related parameters
      */
-    private int numRequests = 1000; // number of requests
+    private int numRequests = 500; // number of requests
     private int L = 4; // the maximum service chain length
 
     // These following four are from our paper on consolidated middleboxes
