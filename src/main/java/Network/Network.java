@@ -14,6 +14,11 @@ public class Network {
   @NotNull private final ArrayList<Server> servers;
   @NotNull private final HashMap<Integer, Server> serversById;
   @NotNull private ArrayList<Link> links;
+  
+  // used in offline networks
+  private double[][] pathCosts;
+  private double[][] pathDelays;
+  private HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths;
 
   public Network(@NotNull ArrayList<Server> servers, @NotNull ArrayList<Link> links) {
     this.servers = servers;
@@ -113,5 +118,29 @@ public class Network {
   @Override public String toString() {
     return String.format("Network{servers=%s, links=%s}", servers, links);
   }
+
+public double[][] getPathCosts() {
+	return pathCosts;
+}
+
+public void setPathCosts(double[][] pathCosts) {
+	this.pathCosts = pathCosts;
+}
+
+public double[][] getPathDelays() {
+	return pathDelays;
+}
+
+public void setPathDelays(double[][] pathDelays) {
+	this.pathDelays = pathDelays;
+}
+
+public HashMap<Integer, HashMap<Integer, ArrayList<Link>>> getAllPairShortestPaths() {
+	return allPairShortestPaths;
+}
+
+public void setAllPairShortestPaths(HashMap<Integer, HashMap<Integer, ArrayList<Link>>> allPairShortestPaths) {
+	this.allPairShortestPaths = allPairShortestPaths;
+}
 }
 

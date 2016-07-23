@@ -30,8 +30,8 @@ import org.jetbrains.annotations.NotNull;
    */
   public Result minOpCostWithoutDelay() {
     Result.Builder builder = new Result.Builder();
-    CostFunction costFunction = new OperationalCostFunction();
-    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
+    //CostFunction costFunction = new OperationalCostFunction();
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraphOffline(originalNetwork, request, parameters.costFunc, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {
@@ -39,7 +39,7 @@ import org.jetbrains.annotations.NotNull;
       if (path.size() != request.getSC().length + 2) {
         builder.rejectionReason(Result.Reason.NO_PATH_AUX_GRAPH);
       }
-      double finalPathCost = auxiliaryNetwork.calculatePathCost(path, costFunction);
+      double finalPathCost = auxiliaryNetwork.calculatePathCost(path, parameters.costFunc);
       builder.path(path)
              .pathCost(finalPathCost)
              .admit(true);
@@ -55,7 +55,7 @@ import org.jetbrains.annotations.NotNull;
   public Result minOpCostWithDelay() {
     Result.Builder builder = new Result.Builder();
     CostFunction costFunction = new ExponentialCostFunction();
-    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraph(originalNetwork, request, costFunction, parameters);
+    AuxiliaryNetwork auxiliaryNetwork = AuxiliaryGraphBuilder.buildAuxiliaryGraphOffline(originalNetwork, request, costFunction, parameters);
     if (auxiliaryNetwork == null) { //this means that some servers cannot be reached due to insufficient bandwidth
       builder.rejectionReason(Result.Reason.FAILED_TO_CONSTRUCT_AUX_GRAPH); //this generates a no-admittance result
     } else {

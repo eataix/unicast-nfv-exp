@@ -323,6 +323,7 @@ import static com.google.common.base.Preconditions.checkState;
 
   /**
    * TODO: I don't know why we even need to re-calculate the cost of each edge and server. Haven't we done this during the construction of auxiliary graph?
+   * Meitian: I agree with you here. The logic of this class is really confusing...
    *
    * @param serversOnPath the list of servers on the path
    * @param costFunction cost function

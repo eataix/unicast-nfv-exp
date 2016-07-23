@@ -92,6 +92,87 @@ public class AuxiliaryGraphBuilder {
     }
     return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
   }
+  
+  public static AuxiliaryNetwork buildAuxiliaryGraphOffline(Network network, Request request, CostFunction costFunction, Parameters parameters) {
+		
+		if (null == network.getAllPairShortestPaths()) {
+			
+			network.setPathCosts(new double[network.size()][network.size()]);
+			network.setPathDelays(new double[network.size()][network.size()]);
+			network.setAllPairShortestPaths(new HashMap<>());
+
+			// The original code does not implement the Floyd–Warshall
+			// algorithm, so we simply find shortest path from @src to every
+			// other server in the network
+			for (Server src : network.getServers()) {
+				HashMap<Server, Double> pathCost = new HashMap<>();
+				HashMap<Server, Server> prevNode = new HashMap<>();
+				pathCost.put(src, 0d);
+				ArrayList<Server> queue = new ArrayList<>();
+				ArrayList<Server> searched = new ArrayList<>();
+				queue.add(src);
+				while (!queue.isEmpty()) {
+					// priority queue
+					Server curr = queue.remove(0);
+					for (Server neighbour : curr.getAllNeighbours()) {
+						Link l = curr.getLink(neighbour);
+						// searched nodes and links without enough bandwidth
+						if (searched.contains(neighbour) || l.getResidualBandwidth() < request.getBandwidth()
+								* (double) request.getSC().length) {
+							continue;
+						}
+						Double cost = pathCost.getOrDefault(neighbour, Double.MAX_VALUE);
+						double altCost = pathCost.get(curr)
+								+ costFunction.getCost(l, request.getBandwidth(), parameters);
+						if (altCost < cost) {
+							pathCost.put(neighbour, altCost);
+							prevNode.put(neighbour, curr);
+						}
+						// add to priority queue using insertion sort
+						insertSort(queue, neighbour, pathCost);
+					}
+					searched.add(curr);
+				}
+
+				// At this point, the queue is empty and we have calculated the
+				// shortest path from @src to every other server in the network.
+
+				// update shortest paths
+				for (Server dest : network.getServers()) {
+					if (dest == src) {
+						continue;
+					}
+					if (pathCost.get(dest) == null) {// Auxiliary graph could
+														// not be constructed
+														// (some destinations
+														// are not reachable
+														// with current residual
+														// bandwidth)
+						return null;
+					}
+					Server curr = dest;
+					double delay = 0d;
+					ArrayList<Link> shortestPath = new ArrayList<>();
+					while (prevNode.get(curr) != null) {
+						Link l = curr.getLink(prevNode.get(curr));
+						checkState(l != null);
+						shortestPath.add(0, l);
+						delay += l.getDelay();
+						curr = prevNode.get(curr);
+					}
+					HashMap<Integer, ArrayList<Link>> srcMap = network.getAllPairShortestPaths().getOrDefault(src.getId(),
+							new HashMap<>());
+					srcMap.put(dest.getId(), shortestPath);
+					network.getAllPairShortestPaths().put(src.getId(), srcMap);
+					network.getPathCosts()[src.getId()][dest.getId()] = pathCost.get(dest);
+					network.getPathDelays()[src.getId()][dest.getId()] = delay;
+				}
+			}
+		} 
+
+		return new AuxiliaryNetwork(network.getServers(), network.getLinks(), network.getPathCosts(), network.getPathDelays(),
+				network.getAllPairShortestPaths(), request, parameters, costFunction);
+	  }
 
   private static void insertSort(ArrayList<Server> queue, Server s, HashMap<Server, Double> pathCost) {
     //    if (queue.isEmpty()) {
