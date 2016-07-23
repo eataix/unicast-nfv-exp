@@ -8,6 +8,7 @@ import Network.Network;
 import Network.Server;
 import Simulation.Parameters;
 import Simulation.Simulation;
+import Utils.RanNum;
 
 public class NetworkValueSetter { //sets the parameters of a given network
   private final Network network;
@@ -38,11 +39,18 @@ public class NetworkValueSetter { //sets the parameters of a given network
   public void placeNFVs(double nfvProb) {
     for (int nfv = 0; nfv < parameters.L; nfv++) {
       ArrayList<Server> servers = network.getUnusedServers(nfv);
-      for (Server s : servers) {
-        if (Math.random() < nfvProb) {
-          s.addVM(nfv);
-        }
+      double maxPercentageServers = 0.5;
+      int numOfServersWithThisNFV = (int) Math.floor(maxPercentageServers * Math.random() * (double) servers.size());
+      if (numOfServersWithThisNFV < 1)
+    	  numOfServersWithThisNFV = 1; 
+      ArrayList<Integer> indexServers = RanNum.getDistinctInts(servers.size(), 1, numOfServersWithThisNFV);
+      for (int index : indexServers){
+    	  Server s = servers.get(index);
+    	  if (Math.random() < nfvProb) {
+              s.addVM(nfv);
+          }
       }
+      
       HashSet<Server> layer = network.getReusableServers(nfv);
       if (layer.isEmpty()) { //ensure there is at least one server with nfv
         Server s = servers.get((int) Math.floor(Math.random() * (double) servers.size()));
@@ -99,6 +107,12 @@ public class NetworkValueSetter { //sets the parameters of a given network
     for (Link l : network.getLinks()) {
       l.setBandwidthCapacity(getUniform(low, high));
     }
+  }
+  
+  public void setRandomLinkCost(double low, double high) {
+	    for (Link l : network.getLinks()) {
+	      l.setOperationalCost(getUniform(low, high));
+	    }
   }
 
   public void setConstantLinkDelay(double cap) {

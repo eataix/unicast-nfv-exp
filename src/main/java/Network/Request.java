@@ -64,6 +64,17 @@ public class Request {
     SC = new int[l];
     System.arraycopy(nfvs, 0, SC, 0, l);
   }
+  
+//  private void generateServiceChain() {
+//	 //create randomly ordered list of NFVs
+//	 int[] nfvs = new int[parameters.L];
+//	 for (int i = 0; i < parameters.L; i++) {
+//	   nfvs[i] = (int) Math.floor(Math.random() * (parameters.nfvOperationalCosts.length - 1));
+//	 }
+//	 
+//	 SC = new int[parameters.L];
+//	 System.arraycopy(nfvs, 0, SC, 0, parameters.L);
+//  }
 
   public void setServiceChain(int[] sc) {
     //make sure all elements are valid nfv ids, and there are no repeats.

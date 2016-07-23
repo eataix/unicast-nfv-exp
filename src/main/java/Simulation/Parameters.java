@@ -19,6 +19,8 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
   public final double linkBWCapMax; // maximum link bandwidth capacity
   public final double linkDelayMin;
   public final double linkDelayMax;
+  public final double linkCostMax;
+  public final double linkCostMin;
 
   public final int numRequests;
   public final int L;
@@ -36,7 +38,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
   public final double[] nfvProcessingDelays; //initialization cost of vnf service
 
   private Parameters(int networkSize, int[] networkSizes, boolean offline, int numTrials, double alpha, double beta, double threshold, CostFunction costFunc,
-                     double serverRatio, double linkBWCapMin, double linkBWCapMax, double linkDelayMin, double linkDelayMax, int numRequests, int L,
+                     double serverRatio, double linkBWCapMin, double linkBWCapMax, double linkDelayMin, double linkDelayMax, double linkCostMax, double linkCostMin, int numRequests, int L,
                      double reqBWReqMin, double reqBWReqMax, double reqDelayReqMin, double reqDelayReqMax, double nfvProb, double[] nfvComputingReqs,
                      double[] nfvRates, double[] nfvOperationalCosts, double[] nfvInitCosts, double[] nfvInitDelays, double[] nfvProcessingDelays) {
 
@@ -57,6 +59,8 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     this.numTrials = numTrials;
     this.linkDelayMin = linkDelayMin;
     this.linkDelayMax = linkDelayMax;
+    this.linkCostMax = linkCostMax;
+    this.linkCostMin = linkCostMin;
     this.threshold = threshold;
     this.serverRatio = serverRatio;
     this.nfvComputingReqs = nfvComputingReqs;
@@ -74,10 +78,9 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
      */
     private int networkSize = 50;
     private int[] networkSizes = new int[] {50, 100, 150, 200, 250};
-    //private int[] networkSizes = new int[] {250};
     //private int[] networkSizes = new int[] {50, 100, 150, 200, 300, 400, 500, 600, 800, 1000};
     private boolean offline = true;
-    private int numTrials = 10;
+    private int numTrials = 2;
 
     /**
      * Algorithm related parameters
@@ -99,6 +102,9 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     // The following two settings are from our paper on consolidated middleboxes
     private double linkDelayReqMin = 2; // minimum link delay
     private double linkDelayReqMax = 5; // maximum link delay
+    
+    private double linkCostMax = 0.001;
+    private double linkCostMin = 0.005;
 
     /**
      * Request related parameters
@@ -122,7 +128,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     private double[] nfvOperationalCosts = new double[] {3, 1, 1, 5, 2, 4};//operating cost of providing an vnf service
     private double[] nfvInitCosts = new double[] {30, 10, 10, 50, 20, 40}; //initialization cost of vnf service
     private double[] nfvInitDelays = new double[] {60, 60, 60, 90, 60, 40}; //initialization cost of vnf service
-    private double[] nfvProcessingDelays = new double[] {6, 6, 6, 9, 6, 4}; //initialization cost of vnf service
+    private double[] nfvProcessingDelays = new double[] {6, 6, 6, 9, 6, 4,}; //initialization cost of vnf service
 
     // The following two are insignificant
     // Computing resource requirement is irrelevant
@@ -262,7 +268,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
 
     public Parameters build() {
       return new Parameters(networkSize, networkSizes, offline, numTrials, alpha, beta, threshold, costFunc, serverRatio, linkBWCapMin, linkBWCapMax,
-                            linkDelayReqMin, linkDelayReqMax, numRequests, L, reqBWReqMin, reqBWReqMax, reqDelayMin, reqDelayMax, nfvProb, nfvComputingReqs,
+                            linkDelayReqMin, linkDelayReqMax, linkCostMax, linkCostMin, numRequests, L, reqBWReqMin, reqBWReqMax, reqDelayMin, reqDelayMax, nfvProb, nfvComputingReqs,
                             nfvRates, nfvOperationalCosts, nfvInitCosts, nfvInitDelays, nfvProcessingDelays
       );
     }

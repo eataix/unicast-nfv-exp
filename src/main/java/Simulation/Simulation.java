@@ -14,6 +14,7 @@ import Algorithm.Algorithm;
 import Algorithm.Benchmark;
 import Algorithm.CostFunctions.ExponentialCostFunction;
 import Algorithm.CostFunctions.LinCostFunction;
+import Algorithm.CostFunctions.OperationalCostFunction;
 import Algorithm.Result;
 import Network.Network;
 import Network.Request;
@@ -559,7 +560,7 @@ import org.slf4j.MDC;
 
   private static void LEffectWithoutDelays() {
     prepareLogging();
-    for (int L = 2; L <= 6; L += 2) {
+    for (int L = 3; L <= 6; L += 1) {
       //Parameters parameters = new Parameters.Builder().L(L).build();
 
       int expSum = 0; //sum of all exponential cost accepted requests
@@ -574,7 +575,7 @@ import org.slf4j.MDC;
     	int networkSize = baseParameters.networkSizes[netSI];
         Parameters parameters = new Parameters.Builder().networkSize(networkSize)
                                                         .L(L)
-                                                        .costFunc(new LinCostFunction())
+                                                        .costFunc(new OperationalCostFunction())
                                                         .offline(true)
                                                         .build();
         int accepted = 0; //number of accepted requests
@@ -664,7 +665,8 @@ import org.slf4j.MDC;
 
   private static void LEffectWithDelays() {
     prepareLogging();
-    for (int L = 2; L <= 6; L += 2) {
+    for (int L = 3; L <= 6; L+=1) {
+    
       int expSum = 0; // sum of all exponential cost accepted requests
       Result[] results = new Result[baseParameters.numRequests];
       Result[] resultsBenchmark = new Result[baseParameters.numRequests];
@@ -675,10 +677,12 @@ import org.slf4j.MDC;
       for (int netSI = 0; netSI < baseParameters.networkSizes.length; netSI ++) {
      	 
       	int networkSize = baseParameters.networkSizes[netSI];
-        Parameters parameters = new Parameters.Builder().networkSize(networkSize)
-                                                        .L(L)
-                                                        .offline(true)
-                                                        .build();
+      	 Parameters parameters = new Parameters.Builder().networkSize(networkSize)
+                 .L(L)
+                 .costFunc(new OperationalCostFunction())
+                 .offline(true)
+                 .build();
+      	 
         int accepted = 0; // number of accepted requests
         int acceptedBenchmark = 0;
 
@@ -793,6 +797,7 @@ import org.slf4j.MDC;
     networkValueSetter.setConstantServerCapacity(Double.MAX_VALUE, parameters.serverRatio);
     networkValueSetter.setRandomLinkCapacity(parameters.linkBWCapMin, parameters.linkBWCapMax);
     networkValueSetter.setRandomLinkDelay(parameters.linkDelayMin, parameters.linkDelayMax);
+    networkValueSetter.setRandomLinkCost(parameters.linkCostMax, parameters.linkCostMin);
     networkValueSetter.placeNFVs(parameters.nfvProb);
   }
 

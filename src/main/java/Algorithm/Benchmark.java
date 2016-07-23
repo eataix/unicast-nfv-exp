@@ -42,12 +42,12 @@ public class Benchmark {
       ArrayList<Link> linksSToD = this.shortestPath(potentialServer, destination);
       double path1Cost = 0d;
       for (Link link : linksSToS) {
-        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
+        path1Cost += this.request.getBandwidth() * parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
       }
 
       double path2Cost = 0d;
       for (Link link : linksSToD) {
-        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
+        path2Cost += this.request.getBandwidth() * parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
       }
 
       double serverCost = 0d;
@@ -124,14 +124,14 @@ public class Benchmark {
       double path1Cost = 0d;
       double path1Delay = 0d;
       for (Link link : linksSToS) {
-        path1Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
+        path1Cost += this.request.getBandwidth() * parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
         path1Delay += link.getDelay();
       }
 
       double path2Cost = 0d;
       double path2Delay = 0d;
       for (Link link : linksSToD) {
-        path2Cost += parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
+        path2Cost += this.request.getBandwidth() * parameters.costFunc.getCost(link, this.request.getBandwidth(), parameters);
         path2Delay += link.getDelay();
       }
 
