@@ -367,7 +367,11 @@ import static com.google.common.base.Preconditions.checkState;
       Server s2 = serversOnPath.get(i + 1);
       for (Link l : getLinkPath(s1, s2)) {
         Link cl = clonedLinks.get(l);
-        cost += request.getBandwidth() * costFunction.getCost(cl, request.getBandwidth(), this.parameters);
+        if (parameters.offline) {
+          cost += request.getBandwidth() * costFunction.getCost(cl, request.getBandwidth(), this.parameters);
+        } else {
+          cost += costFunction.getCost(cl, request.getBandwidth(), this.parameters);
+        }
         if (!cl.canSupportBandwidth(request.getBandwidth())) {//obviously a rejection
           return Double.MAX_VALUE;
         }
