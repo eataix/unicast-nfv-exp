@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
  * As we need the information of all-pair shortest paths (APSP) to construct an auxiliary graph and putting the APSP procedure in the AuxiliaryNetwork class
  * will make it too long, we put the code here.
  */
-public class AuxiliaryGraphBuilder {
+@SuppressWarnings("Duplicates") public class AuxiliaryGraphBuilder {
 
   /**
    * Use Dijkstra to get all-pair shortest paths with respect to cost function @costFn. New Link takes the minimum bandwidth in shortest path.
@@ -92,11 +92,11 @@ public class AuxiliaryGraphBuilder {
     }
     return new AuxiliaryNetwork(network.getServers(), network.getLinks(), pathCosts, pathDelays, allPairShortestPaths, request, parameters, costFunction);
   }
-  
+
   public static AuxiliaryNetwork buildAuxiliaryGraphOffline(Network network, Request request, CostFunction costFunction, Parameters parameters) {
-		
+
 		if (null == network.getAllPairShortestPaths()) {
-			
+
 			network.setPathCosts(new double[network.size()][network.size()]);
 			network.setPathDelays(new double[network.size()][network.size()]);
 			network.setAllPairShortestPaths(new HashMap<>());
@@ -168,7 +168,7 @@ public class AuxiliaryGraphBuilder {
 					network.getPathDelays()[src.getId()][dest.getId()] = delay;
 				}
 			}
-		} 
+		}
 
 		return new AuxiliaryNetwork(network.getServers(), network.getLinks(), network.getPathCosts(), network.getPathDelays(),
 				network.getAllPairShortestPaths(), request, parameters, costFunction);

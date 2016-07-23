@@ -110,10 +110,10 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
      * Experiment parameters
      */
     private int networkSize = 50;
-    private int[] networkSizes = new int[] {50, 100, 150, 200, 250};
+    private int[] networkSizes = new int[] {10, 50, 100, 150, 200};
     //private int[] networkSizes = new int[] {50, 100, 150, 200, 300, 400, 500, 600, 800, 1000};
     private boolean offline = true;
-    private int numTrials = 2;
+    private int numTrials = 10;
 
     /**
      * Algorithm related parameters
@@ -135,7 +135,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     // The following two settings are from our paper on consolidated middleboxes
     private double linkDelayReqMin = 2; // minimum link delay
     private double linkDelayReqMax = 5; // maximum link delay
-    
+
     private double linkCostMax = 0.001;
     private double linkCostMin = 0.005;
 
