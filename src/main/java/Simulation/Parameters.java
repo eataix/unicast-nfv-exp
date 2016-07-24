@@ -113,7 +113,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     private int[] networkSizes = new int[] {10, 50, 100, 150, 200};
     //private int[] networkSizes = new int[] {50, 100, 150, 200, 300, 400, 500, 600, 800, 1000};
     private boolean offline = true;
-    private int numTrials = 10;
+    private int numTrials = 20;
 
     /**
      * Algorithm related parameters
