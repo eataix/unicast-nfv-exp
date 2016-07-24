@@ -803,7 +803,7 @@ import org.slf4j.MDC;
   }
 
   private static Network generateAndInitializeNetwork(int networkSize, int trial, Parameters parameters) {
-    Network network = NetworkGenerator.generateRealNetworks(networkSize, String.valueOf(trial));
+    Network network = NetworkGenerator.generateRealNetworks(networkSize, String.valueOf(trial % 10)); //Since we only have 10 topology files and we do not have time for code elegance
     initializeNetwork(network, parameters);
     return network;
   }
