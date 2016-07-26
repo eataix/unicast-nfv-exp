@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Sun Jul 24 09:54:22 2016"
+@timestamp def "Mon Jul 25 11:48:15 2016"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -101,7 +101,7 @@
 @g0 fixedpoint format general general
 @g0 fixedpoint prec 6, 6
 @with g0
-@    world 0, 1, 200, 4
+@    world 10, 1, 200, 4
 @    stack world 0, 0, 0, 0
 @    znorm 1
 @    view 0.160000, 0.150000, 1.160000, 0.850000
@@ -124,10 +124,10 @@
 @    xaxis  bar color 1
 @    xaxis  bar linestyle 1
 @    xaxis  bar linewidth 1.0
-@    xaxis  label "network size"
+@    xaxis  label "network size \f{Times-Italic}n\f{}"
 @    xaxis  label layout para
 @    xaxis  label place auto
-@    xaxis  label char size 2.700000
+@    xaxis  label char size 3.000000
 @    xaxis  label font 0
 @    xaxis  label color 1
 @    xaxis  label place normal
@@ -163,11 +163,22 @@
 @    xaxis  ticklabel start 0.000000
 @    xaxis  ticklabel stop type auto
 @    xaxis  ticklabel stop 0.000000
-@    xaxis  ticklabel char size 2.000000
+@    xaxis  ticklabel char size 2.500000
 @    xaxis  ticklabel font 0
 @    xaxis  ticklabel color 1
 @    xaxis  tick place both
-@    xaxis  tick spec type none
+@    xaxis  tick spec type both
+@    xaxis  tick spec 5
+@    xaxis  tick major 0, 10
+@    xaxis  ticklabel 0, "10"
+@    xaxis  tick major 1, 50
+@    xaxis  ticklabel 1, "50"
+@    xaxis  tick major 2, 100
+@    xaxis  ticklabel 2, "100"
+@    xaxis  tick major 3, 150
+@    xaxis  ticklabel 3, "150"
+@    xaxis  tick major 4, 200
+@    xaxis  ticklabel 4, "200"
 @    yaxis  on
 @    yaxis  type zero false
 @    yaxis  offset 0.000000 , 0.000000
@@ -175,10 +186,10 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "operational cost"
+@    yaxis  label "implementation cost"
 @    yaxis  label layout para
 @    yaxis  label place auto
-@    yaxis  label char size 2.700000
+@    yaxis  label char size 3.000000
 @    yaxis  label font 0
 @    yaxis  label color 1
 @    yaxis  label place normal
@@ -214,7 +225,7 @@
 @    yaxis  ticklabel start 0.000000
 @    yaxis  ticklabel stop type auto
 @    yaxis  ticklabel stop 0.000000
-@    yaxis  ticklabel char size 2.000000
+@    yaxis  ticklabel char size 2.500000
 @    yaxis  ticklabel font 0
 @    yaxis  ticklabel color 1
 @    yaxis  tick place both

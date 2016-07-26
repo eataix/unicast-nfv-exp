@@ -127,7 +127,7 @@
 @    xaxis  label "L"
 @    xaxis  label layout para
 @    xaxis  label place auto
-@    xaxis  label char size 2.700000
+@    xaxis  label char size 3.000000
 @    xaxis  label font 0
 @    xaxis  label color 1
 @    xaxis  label place normal
@@ -163,7 +163,7 @@
 @    xaxis  ticklabel start 0.000000
 @    xaxis  ticklabel stop type auto
 @    xaxis  ticklabel stop 0.000000
-@    xaxis  ticklabel char size 2.000000
+@    xaxis  ticklabel char size 2.500000
 @    xaxis  ticklabel font 0
 @    xaxis  ticklabel color 1
 @    xaxis  tick place both
@@ -178,7 +178,7 @@
 @    yaxis  label "running time"
 @    yaxis  label layout para
 @    yaxis  label place auto
-@    yaxis  label char size 2.700000
+@    yaxis  label char size 3.000000
 @    yaxis  label font 0
 @    yaxis  label color 1
 @    yaxis  label place normal
@@ -214,7 +214,7 @@
 @    yaxis  ticklabel start 0.000000
 @    yaxis  ticklabel stop type auto
 @    yaxis  ticklabel stop 0.000000
-@    yaxis  ticklabel char size 2.000000
+@    yaxis  ticklabel char size 2.500000
 @    yaxis  ticklabel font 0
 @    yaxis  ticklabel color 1
 @    yaxis  tick place both

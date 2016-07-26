@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Sun Jul 24 14:31:33 2016"
+@timestamp def "Mon Jul 25 12:23:39 2016"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -101,8 +101,8 @@
 @g0 fixedpoint format general general
 @g0 fixedpoint prec 6, 6
 @with g0
-@    world 3, 0, 6, 50000
-@    stack world 0, 0, 0, 0
+@    world 10, 80, 200, 200
+@    stack world 10, 0, 0, 0
 @    znorm 1
 @    view 0.150000, 0.150000, 1.150000, 0.850000
 @    title ""
@@ -124,7 +124,7 @@
 @    xaxis  bar color 1
 @    xaxis  bar linestyle 1
 @    xaxis  bar linewidth 1.0
-@    xaxis  label "L"
+@    xaxis  label "network size \f{Times-Italic}n\f{}"
 @    xaxis  label layout para
 @    xaxis  label place auto
 @    xaxis  label char size 3.000000
@@ -132,7 +132,7 @@
 @    xaxis  label color 1
 @    xaxis  label place normal
 @    xaxis  tick on
-@    xaxis  tick major 1
+@    xaxis  tick major 50
 @    xaxis  tick minor ticks 0
 @    xaxis  tick default 6
 @    xaxis  tick place rounded true
@@ -167,7 +167,18 @@
 @    xaxis  ticklabel font 0
 @    xaxis  ticklabel color 1
 @    xaxis  tick place both
-@    xaxis  tick spec type none
+@    xaxis  tick spec type both
+@    xaxis  tick spec 5
+@    xaxis  tick major 0, 10
+@    xaxis  ticklabel 0, "10"
+@    xaxis  tick major 1, 50
+@    xaxis  ticklabel 1, "50"
+@    xaxis  tick major 2, 100
+@    xaxis  ticklabel 2, "100"
+@    xaxis  tick major 3, 150
+@    xaxis  ticklabel 3, "150"
+@    xaxis  tick major 4, 200
+@    xaxis  ticklabel 4, "200"
 @    yaxis  on
 @    yaxis  type zero false
 @    yaxis  offset 0.000000 , 0.000000
@@ -175,7 +186,7 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "running time"
+@    yaxis  label "# of admitted requests"
 @    yaxis  label layout para
 @    yaxis  label place auto
 @    yaxis  label char size 3.000000
@@ -183,7 +194,7 @@
 @    yaxis  label color 1
 @    yaxis  label place normal
 @    yaxis  tick on
-@    yaxis  tick major 10000
+@    yaxis  tick major 20
 @    yaxis  tick minor ticks 0
 @    yaxis  tick default 6
 @    yaxis  tick place rounded true
@@ -218,25 +229,12 @@
 @    yaxis  ticklabel font 0
 @    yaxis  ticklabel color 1
 @    yaxis  tick place both
-@    yaxis  tick spec type both
-@    yaxis  tick spec 6
-@    yaxis  tick major 0, 0
-@    yaxis  ticklabel 0, "0"
-@    yaxis  tick major 1, 10000
-@    yaxis  ticklabel 1, "10,000"
-@    yaxis  tick major 2, 20000
-@    yaxis  ticklabel 2, "20,000"
-@    yaxis  tick major 3, 30000
-@    yaxis  ticklabel 3, "30,000"
-@    yaxis  tick major 4, 40000
-@    yaxis  ticklabel 4, "40,000"
-@    yaxis  tick major 5, 50000
-@    yaxis  ticklabel 5, "50,000"
+@    yaxis  tick spec type none
 @    altxaxis  off
 @    altyaxis  off
 @    legend on
 @    legend loctype view
-@    legend 0.6, 0.8
+@    legend 0.52, 0.33
 @    legend box color 1
 @    legend box pattern 1
 @    legend box linewidth 1.0
@@ -304,8 +302,8 @@
 @    s0 errorbar riser linestyle 1
 @    s0 errorbar riser clip off
 @    s0 errorbar riser clip length 0.100000
-@    s0 comment "LEffectWithDelays-RunningTime.dat"
-@    s0 legend  "Benchmark 1"
+@    s0 comment "/home/eataix/Dropbox/work/mike/unicast_nfv/NFV/NFV/figures/online/ImpactThreshold-OnlineAdmission.dat"
+@    s0 legend  "with threshold"
 @    s1 hidden false
 @    s1 type xy
 @    s1 symbol 2
@@ -353,19 +351,21 @@
 @    s1 errorbar riser linestyle 1
 @    s1 errorbar riser clip off
 @    s1 errorbar riser clip length 0.100000
-@    s1 comment "LEffectWithDelays-RunningTime.dat"
-@    s1 legend  "Algorithm"
+@    s1 comment "/home/eataix/Dropbox/work/mike/unicast_nfv/NFV/NFV/figures/online/ImpactThreshold-OnlineAdmission.dat"
+@    s1 legend  "without threshold"
 @target G0.S0
 @type xy
-3 12811.159
-4 12848.18
-5 16358.044
-6 9604.8869
+10 125.8
+50 161.66667
+100 175.13333
+150 182.66667
+200 191.66667
 &
 @target G0.S1
 @type xy
-3 45153.466
-4 25640.327
-5 30641.26
-6 20878.851
+10 103.76667
+50 111.6
+100 116.23333
+150 121.66667
+200 130.9
 &
