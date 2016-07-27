@@ -89,6 +89,8 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
         ", linkBWCapMax=" + linkBWCapMax +
         ", linkDelayMin=" + linkDelayMin +
         ", linkDelayMax=" + linkDelayMax +
+        ", linkCostMax=" + linkCostMax +
+        ", linkCostMin=" + linkCostMin +
         ", numRequests=" + numRequests +
         ", L=" + L +
         ", reqBWReqMin=" + reqBWReqMin +
@@ -113,7 +115,7 @@ import Algorithm.CostFunctions.ExponentialCostFunction;
     private int[] networkSizes = new int[] {10, 50, 100, 150, 200};
     //private int[] networkSizes = new int[] {50, 100, 150, 200, 300, 400, 500, 600, 800, 1000};
     private boolean offline = true;
-    private int numTrials = 20;
+    private int numTrials = 30;
 
     /**
      * Algorithm related parameters

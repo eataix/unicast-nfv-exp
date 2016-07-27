@@ -352,7 +352,7 @@
 @    s1 errorbar riser clip off
 @    s1 errorbar riser clip length 0.100000
 @    s1 comment "/Users/zichuanxu/Documents/work/drafts/mike_jia/unicast_NFV_SDN/Simulation/GitLabCode/unicast-nfv-exp/figures/OfflineDelayCost.txt"
-@    s1 legend  "ONE\_SERVER\_DELAY"
+@    s1 legend  "ONE\_DC\_DELAY"
 @target G0.S0
 @type xy
 10 1.0141165

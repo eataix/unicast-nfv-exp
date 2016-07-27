@@ -2,6 +2,7 @@ package Simulation;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -31,6 +32,7 @@ import org.slf4j.MDC;
   private static final ExecutorService threadPool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors());
   private static final ArrayList<TopologyFile> topologyFiles = new ArrayList<>();
   private static final Logger logger = LoggerFactory.getLogger(Simulation.class);
+  private static String startTime = LocalDateTime.now().toString();
 
   public static void main(String[] args) {
     ArrayList<Runnable> listOfTasks = new ArrayList<>();
@@ -787,7 +789,7 @@ import org.slf4j.MDC;
 
   private static void prepareLogging() {
     String functionName = Thread.currentThread().getStackTrace()[2].getMethodName();
-    MDC.put("exp", functionName);
+    MDC.put("exp", String.format("%s/%s", startTime, functionName));
     Thread.currentThread().setName(functionName);
     logger.debug(String.format("%s started", functionName));
     logger.info("Parameters: " + baseParameters); // dump the parameters to the output file for our reference.
