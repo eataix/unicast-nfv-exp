@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Mon Jul 25 12:30:50 2016"
+@timestamp def "Wed Jul 27 13:32:52 2016"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -186,7 +186,7 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "# of admitted requests"
+@    yaxis  label "running time"
 @    yaxis  label layout para
 @    yaxis  label place auto
 @    yaxis  label char size 3.000000
